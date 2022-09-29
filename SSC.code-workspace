@@ -1,0 +1,53 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.linting.mypyEnabled": true,
+		"python.linting.enabled": true,
+		"editor.minimap.enabled": false
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Python: Main",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/main.py",
+				"console": "integratedTerminal",
+				"justMyCode": true
+			},
+			{
+				"name": "Python: Cliente Queue",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/client_queue.py",
+				"console": "integratedTerminal",
+				"justMyCode": true
+			},
+
+			{
+				"name": "Python: Flask",
+				"type": "python",
+				"request": "launch",
+				"module": "flask",
+				"env": {
+					"FLASK_APP": "main.py",
+					"FLASK_DEBUG": "1",
+				},
+				"args": [
+					"run",
+					"--no-debugger",
+					"--no-reload",
+					"-p 5151"
+				],
+				"jinja": true,
+				"justMyCode": true
+			}			
+		],
+		"compounds": []
+	}
+}
