@@ -16,8 +16,8 @@ def main():
         log = logging.getLogger('Client')
 
         client = ClientQueue('http://127.0.0.1:5151')
-        producer = client.create_producer('my-topic')
-        consumer = client.subscribe('my-topic')
+        producer = client.create_producer('queue01')
+        consumer = client.subscribe('queue01')
 
         msg_1 = json.dumps({'id': 0,
                             'create': datetime.now(tz=timezone.utc).timestamp(),
@@ -26,7 +26,9 @@ def main():
 
         producer.send(msg_1)
 
-        msg = consumer.receive(100)
+        msg = consumer.receive()
+
+        msg2 = consumer.receive(5)
 
         log.debug(msg)
         # producer.send(str.encode(json.dumps({'id': id, 
@@ -40,7 +42,7 @@ def main():
 
         # client = pulsar.Client('pulsar://localhost:6650')
 
-        # producer = client.create_producer('my-topic')
+        # producer = client.create_producer('queue01')
 
         # for i in range(10):
         #     producer.send(('Hello-%d' % i).encode('utf-8'))
@@ -52,7 +54,7 @@ def main():
 
         # client = pulsar.Client('pulsar://localhost:6650')
 
-        # consumer = client.subscribe('my-topic', 'my-subscription')
+        # consumer = client.subscribe('queue01', 'my-subscription')
 
         # while True:
         #     msg = consumer.receive()

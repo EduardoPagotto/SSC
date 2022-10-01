@@ -39,7 +39,7 @@ class Subscribe(object):
     def close(self):
         self.__rpc().close()
 
-    def receive(self, timeOut : int): # se 0 bloqueia, maior raise quando estoura 
+    def receive(self, timeOut : int = 0): # se 0 bloqueia, maior raise quando estoura 
         return self.__rpc().subscribe_receive(self.id, timeOut)
 
 

@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../SSF"
 		}
 	],
 	"settings": {
@@ -28,7 +31,19 @@
 				"console": "integratedTerminal",
 				"justMyCode": true
 			},
-
+			{
+				"name": "Python: Admin Teste",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/ssc-admin.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"topics",
+					"create",
+					"queue01"
+				]
+			},
 			{
 				"name": "Python: Flask",
 				"type": "python",

@@ -1,19 +1,51 @@
 
 import importlib
 import logging
+from operator import truediv
 import pathlib
 import time
 
 from threading import Lock, Thread
-from typing import Any
+from typing import Any, Dict
 
 from tinydb import TinyDB, Query
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
 
-from SSC.server.NamedQueue import NamedQueue
+
 from .__init__ import __version__ as VERSION
 from .__init__ import __date_deploy__ as DEPLOY
+
+from queue import Queue, Empty
+from typing import Any, Optional
+
+class Topic(object):
+    def __init__(self, id : int, name: str) -> None:
+        self.name = name
+        self.id = id
+        self.queue : Queue = Queue()
+
+    def push(self, value : Any) -> None:
+         self.queue.put(value)
+
+    def pop(self, timeout: int) -> Optional[Any]:
+        try:
+            if timeout == 0:
+                return self.queue.get_nowait()
+            else:
+                return self.queue.get(block=True, timeout=timeout)
+        except Empty:
+            pass
+
+        return None
+
+    def qsize(self) -> int:
+        return self.queue.qsize()
+
+    def empty(self) -> bool:
+        return self.queue.empty()
+
+
 
 class DRegistry(RPC_Responser):
     def __init__(self, path_db : str, path_storage : str) -> None:
@@ -43,19 +75,10 @@ class DRegistry(RPC_Responser):
         self.log.info(f'>>>>>> SSC v-{VERSION} ({DEPLOY}), DB: {str(path1)} Storage: {str(self.storage)}')
 
         self.registered_plugin = None
-
-        self.named_queues = NamedQueue()
-
-        with self.lock_db:
-            table = self.db.table('topics')
-            lista = table.all()
-            for item in lista:
-                self.named_queues.create(str(item.doc_id))         
+        self.map_topics : Dict[int, Topic] = {}
 
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
         self.t_cleanner.start()
-
-
 
     def cleanner(self) ->None:
         """[Garbage collector of files]
@@ -121,45 +144,101 @@ class DRegistry(RPC_Responser):
                 self.log.error("Could not enable at least one plugin")
                 raise Exception("Could not enable at least one plugin") 
 
+    # ClientQueue
+    def create_producer(self, topic : str) -> int:
 
-    def create_producer(self, topic):
+        for k, v in self.map_topics.items():
+            if v.name == topic:
+                return v.id
 
         with self.lock_db:
             table = self.db.table('topics')
             q = Query()
             itens = table.search(q.topic == topic)
-            if len(itens) == 0:
-                raise Exception('Topico nao existe: ' + topic)
-                #return table.insert({'topic': topic, 'name_app':'', 'user_config':''})
 
-            name = str(itens[0].doc_id)
-            if self.named_queues.exist(name) is False: 
-                self.named_queues.create(name)
+        if len(itens) == 1:
+            id = itens[0].doc_id
+            self.map_topics[id] = Topic(id, topic)
+            return id
 
-            return itens[0].doc_id
+        raise Exception(f'topic {topic} does not exist')
                                                
-
+    # ClientQueue
     def subscribe(self, topic):
 
+        for k, v in self.map_topics.items():
+            if v.name == topic:
+                return v.id
+
+        with self.lock_db:
+            table = self.db.table('topics')
+            q = Query()
+            itens = table.search(q.topic == topic)
+
+        if len(itens) == 1:
+            id = itens[0].doc_id
+            self.map_topics[id] = Topic(id, topic)
+            return id
+
+        raise Exception(f'topic {topic} does not exist')
+
+    # Producer
+    def send_producer(self, id : int, msg : str):
+        self.map_topics[id].push(msg)
+
+    # Subscribe
+    def subscribe_receive(self, id: int, timeOut: int) -> Optional[Any]:
+        return self.map_topics[id].pop(timeOut)
+
+    # Admin
+    def topics_create(self, topic : str) -> str:
+
+        for k, v in self.map_topics.items():
+            if v.name == topic:
+                return f'topic {topic} already exists'
+
         with self.lock_db:
             table = self.db.table('topics')
             q = Query()
             itens = table.search(q.topic == topic)
             if len(itens) == 0:
-                raise Exception('Topico nao existe: ' + topic)
-                #return table.insert({'topic': topic, 'name_app':'', 'user_config':''})
 
-            name = str(itens[0].doc_id)
-            if self.named_queues.exist(name) is False: 
-                self.named_queues.create(name)
+                id = table.insert({'topic': topic, 'name_app':'', 'user_config':''})
 
-            return itens[0].doc_id
+                self.map_topics[id] = Topic(id, topic)
+                return 'Sucess ' + topic
 
-    def send_producer(self, id : int, msg : str):
-        self.named_queues.push(str(id), msg)
+            return f'topic {topic} already exists'
 
-    def subscribe_receive(self, id: int, timeOut: int) -> Any:
-        return self.named_queues.pop(str(id))
+    # Admin
+    def topics_delete(self, topic : str, force : bool) -> str:
+
+        for k, v in self.map_topics.items():
+            if v.name == topic:
+                if force is False:
+                    return f'topic {topic} is in use'
+                else:
+                    del self.map_topics[k]
+                    with self.lock_db:
+                        table = self.db.table('topics')
+                        table.remove(doc_ids=[k])
+
+                    return f'topic {topic} deleted in use'
+
+        with self.lock_db:
+            table = self.db.table('topics')
+            q = Query()
+            itens = table.search(q.topic == topic)
+            if len(itens) == 0:
+                return f'topic {topic} does not exist'
+
+            id = itens[0].doc_id
+            table.remove(doc_ids=[id])
+            return f'Topico {topic} removido'
+
+
+
+
 
 
         # classname: funcoes.externo.FuncAdd

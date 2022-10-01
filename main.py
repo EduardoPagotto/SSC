@@ -71,6 +71,23 @@ def client_subscribe():
 		resp.status_code = 400
 		return resp
 
+@app.route('/admin', methods=['POST'])
+def client_admin():
+
+	try :
+		input_rpc : dict = json.loads(request.headers.get('rpc-Json'))
+		output_rpc = rpc_registry.call(input_rpc)
+		resp = jsonify(output_rpc)
+		resp.status_code = 201
+		return resp
+
+	except Exception as exp:
+		msg = exp.args[0]
+		rpc_registry.log.error(msg)
+		resp = jsonify({'message' : msg})
+		resp.status_code = 400
+		return resp
+
 # @app.route('/rpc-call-upload', methods=['POST'])
 # def rpc_call_upload():
 
