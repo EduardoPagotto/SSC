@@ -51,11 +51,11 @@
 				"args": [
 					"functions",
 					"create",
-					"name01",
-					"./funcs/externo.py",
-					"externo/FuncAdd",
-					"queueInput",
-					"queueOutput"
+					"--name", "name01",
+					"--py", "./funcs/externo.py",
+					"--classname", "externo/FuncAdd",
+					"--inputs", "queue01",
+					"--output", "queue02"
 				]
 			},
 
@@ -68,9 +68,11 @@
 				"justMyCode": true,
 				"args": [
 					"produce",
-					"queueInput",
+					"queue01",
 					"-m",
-					"teste 123....."
+					"teste 123.....",
+					"-n",
+					"10"
 				]
 			},
 

@@ -8,6 +8,7 @@ Update on 20220927
 
 import argparse
 import logging
+import numbers
 import time
 
 from SSC.client.ClientQueue import ClientQueue
@@ -30,40 +31,45 @@ def main():
     client = ClientQueue('http://127.0.0.1:5151')
 
     try:
-        parser_val = argparse.ArgumentParser(description='Admin command')
-        zz_args = parser_val.parse_known_args()
-        args = zz_args[1]
+        parser_val = argparse.ArgumentParser(description='client command')
 
-        if args[0] == 'produce':
-            queue_name  = args[1] 
-            # args[2] = '-m'
-            msg = args[3]
-            producer = client.create_producer(queue_name)
-            producer.send(msg)
-            producer.close()
+        parser_val.add_argument('comando', type=str, help='comando tipo (produce|consume)')
+        parser_val.add_argument('queue_name', type=str, help='Queue to process')
+        parser_val.add_argument('-m', '--message', type=str, help='message a enviar', required=False)
+        parser_val.add_argument('-n', '--number', type=int, help='numero repeticoes', required=False, default=1)
+        args = parser_val.parse_args()
 
-        elif args[0] == 'consume':
+        if args.comando == "produce":
+            producer = client.create_producer(args.queue_name)
+            for i in range(0, args.number):
+                producer.send(args.message)
 
-            queue_name = args[1]
+            #producer.close()
 
-            consume = client.subscribe(queue_name)
+        elif args.comando == "consume":
 
+            consume = client.subscribe(args.queue_name)
+            c = 0
             while killer.kill_now is False:
                 val = consume.receive()
                 if val != None:
                     log.info(str(val))
+                    c += 1
+                    if c == args.number:
+                        break
+
                     continue
                 else:
                     time.sleep(5)
-                
-            consume.close()
+            
+            #consume.close()            
 
+        else:
+            log.error('Comando invalido')
 
     except Exception as exp:
         log.error(str(exp))
         exit(-1)
         
-
-
 if __name__ == '__main__':
     main()

@@ -72,31 +72,45 @@ def main():
     admin = Admin('http://127.0.0.1:5151')
 
     try:
-        parser_val = argparse.ArgumentParser(description='Admin command')
-        zz_args = parser_val.parse_known_args()
-        args = zz_args[1]
+        parser = argparse.ArgumentParser(description='Admin command')
+        subparser = parser.add_subparsers(dest='command')
 
-        if args[0] == 'topics':
-            if args[1] == 'create':
-                log.info(admin.topics_create(args[2]))
-            elif args[1] == 'delete':
-                log.info(admin.topics_delete(args[2]))
+        topic = subparser.add_parser('topics')
+        topic.add_argument('opp', type=str, help='Comando tipo (create|delete)')
+        topic.add_argument('queue', type=str, help='nome da queue')
+
+        funcions = subparser.add_parser('functions')
+        funcions.add_argument('opp', type=str, help='Comando tipo (create|delete)')
+        funcions.add_argument('--name', type=str, help='nome da thread', required=True)
+        funcions.add_argument('--py', type=str, help='python script pathfile')
+        funcions.add_argument('--classname', type=str, help='Nome da classe')
+        funcions.add_argument('--inputs', type=str, help='queue input')
+        funcions.add_argument('--output', type=str, help='queue output')
+
+        args = parser.parse_args()
+
+        if args.command == 'topics':
+            if args.opp == 'create':
+                log.info(admin.topics_create(args.queue))
+            elif args.opp == 'delete':
+                log.info(admin.topics_delete(args.queue))
             else:
-                log.error(f'Comando invalido: {args[2]}')
-        elif args[0] == 'functions':
-            if args[1] == 'create':
+                log.error(f'Opp invalida: {args.opp}')
+        elif args.command == 'functions':
+            if args.opp == 'create':
 
-                parm = {'name': args[2], 'pgm':args[3], 'class':args[4], 'input':args[5], 'output':args[6]}
+                parm = {'name': args.name, 
+                        'pgm':args.py,
+                        'class':args.classname,
+                        'input':args.inputs,
+                        'output':args.output}
+
                 log.info(admin.function_create(parm))
 
-
-            elif args[1] == 'delete':
-                log.info(admin.function_delete(args[2]))
-
+            elif args.opp == 'delete':
+                log.info(admin.function_delete(args.name)) # TODO: implementar
             else:
-                log.error(f'Comando invalido: {args[2]}')
-
-
+                log.error(f'Opp invalida: {args.opp}')
 
     except Exception as exp:
         log.error(str(exp))
