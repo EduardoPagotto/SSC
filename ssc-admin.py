@@ -52,9 +52,12 @@ class Admin(object):
         msg : str = self.__rpc().topics_delete(topic, True)
         return msg
 
-
     def function_create(self, params) -> str:
         msg : str = self.__rpc().function_create(params)
+        return msg
+
+    def function_delete(self, name : str) -> str:
+        msg : str = self.__rpc().function_delete(name)
         return msg
 
 def main():
@@ -108,7 +111,7 @@ def main():
                 log.info(admin.function_create(parm))
 
             elif args.opp == 'delete':
-                log.info(admin.function_delete(args.name)) # TODO: implementar
+                log.info(admin.function_delete(args.name)) 
             else:
                 log.error(f'Opp invalida: {args.opp}')
 

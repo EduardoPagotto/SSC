@@ -53,6 +53,7 @@ class DRegistry(RPC_Responser):
         super().__init__(self)
 
         self.lock_db = Lock()
+        self.lock_func = Lock()
 
         path1 = pathlib.Path(path_db)
         path1.mkdir(parents=True, exist_ok=True)
@@ -94,20 +95,21 @@ class DRegistry(RPC_Responser):
             inputs = 0
             outputs = 0
 
-            for obj in self.func_list:
-                if obj.qIn > 0:
-                    res = self.subscribe_receive(obj.qIn, 0)
-                    if res != None:
-                        self.log.debug(f'In Func exec {obj.name}..')
-                        inputs += 1
-                        ret = obj.process(res, {})
-                        if (obj.qOut != -1) and (ret != None):
-                            self.log.debug(f'Out Func exec {obj.name}..')
-                            self.send_producer(obj.qOut, ret)
-                            outputs += 1
+            with self.lock_func:
+                for obj in self.func_list:
+                    if obj.qIn > 0:
+                        res = self.subscribe_receive(obj.qIn, 0)
+                        if res != None:
+                            self.log.debug(f'In Func exec {obj.name}..')
+                            inputs += 1
+                            ret = obj.process(res, {})
+                            if (obj.qOut != -1) and (ret != None):
+                                self.log.debug(f'Out Func exec {obj.name}..')
+                                self.send_producer(obj.qOut, ret)
+                                outputs += 1
 
-            if (inputs > 0) or (outputs > 0):
-                continue                
+                if (inputs > 0) or (outputs > 0):
+                    continue                
 
             self.log.debug(f'Tick-Tack... ')
             self.ticktack += 1
@@ -133,9 +135,6 @@ class DRegistry(RPC_Responser):
                     raise Exception()
                 mod = importlib.import_module(module)
                 klass = getattr(mod, classname)
-                # self.func_list = klass()
-                #self.nova_func = klass()
-                #self.nova_func.
 
             except Exception as ex:
                 self.log.error("Could not enable class %s - %s" % (plugin, str(ex)))
@@ -282,14 +281,35 @@ class DRegistry(RPC_Responser):
                 doc_id = table.insert(params)
                 klass.id = doc_id
 
-            self.func_list.append(klass)
+            with self.lock_func:
+                self.func_list.append(klass)
 
             return f"function {params['name']} created success"
 
         except Exception as exp:
             return str(exp.args[0])
 
+    # Admin
+    def function_delete(self, name: str):
 
+        with self.lock_func:
+            for obj in self.func_list:
+                if obj.name == name:
+                    self.func_list.remove(obj)
+
+        with self.lock_db:
+            table = self.db.table('funcs')
+
+            q = Query()
+            itens = table.search(q.name == name)
+            if len(itens) == 1:
+                table.remove(doc_ids=[itens[0].doc_id])
+                ss = pathlib.Path(itens[0]['final'])
+                ss.unlink()
+                return f"functions {name} deleted"
+
+        return f'funciton {name} not exist'
+        
     def load_funcs_db(self):
         with self.lock_db:
             table = self.db.table('funcs')
@@ -316,13 +336,8 @@ class DRegistry(RPC_Responser):
             self.func_list.append(klass)
 
 
-        # classname: funcoes.externo.FuncAdd
-        # input: qname
-        # output: qname
-        # --py /var/app/src/ConvertTxt2Dic.py ??? copiar ???
         #--user-config '{"FileCfg":"aaaaa"}'
         #--user-config-file "/pulsar/host/etc/func1.yaml"
-
 
         # /pulsar/bin/pulsar-admin functions create \
         #   --name ConvertTxt2Dic \

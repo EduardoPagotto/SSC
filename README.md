@@ -1,6 +1,37 @@
 # SSC
 Simple Stream Control
 
+## Comandos 
+```bash
+# Cria fila 
+./ssc-admin.py topics create queue01
+./ssc-admin.py topics create queue02
+#./ssc-admin.py topics create fila1
+#./ssc-admin.py topics delete fila1
+
+# cria funcs
+./ssc-admin.py functions \
+                create \
+                --name name01 \
+                --py ./funcs/FuncAdd.py \
+                --classname externo.FuncAdd.FuncAdd \
+                --inputs queue01 \
+                --output queue02
+
+# envai dados de teste a filas 1
+./ssc-client.py produce queue01 -m "entrando em 1" -n 10
+
+# FuncAdd le queue01 e envia a queue02!!
+# receber dados em queue02
+./ssc-client.py consume -s appteste queue02 -n 10
+
+# remove a func named01
+./ssc-admin.py functions delete --name name01
+
+```
+
+
+
 ## Running and debug local
 1. Set VENV:
     ```bash
@@ -16,14 +47,6 @@ Simple Stream Control
     cd ..
     ./main.py
     ```
-
-3. Start test client
-    ```bash
-    # In other terminal im projet directory
-    ./client_rpc.py
-    ```
-    obs: No browser: http://127.0.0.1:5151 
-
 
 ## Service build, deply and test
 1. Set VENV:
