@@ -1,4 +1,8 @@
-
+'''
+Created on 20220924
+Update on 20221003
+@author: Eduardo Pagotto
+'''
 
 import importlib
 import logging
@@ -6,21 +10,17 @@ import pathlib
 import shutil
 import time
 
+from queue import Queue, Empty
+from typing import Any, Optional
 from threading import Lock, Thread
 from typing import Any, Dict, List
 
 from tinydb import TinyDB, Query
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
-
 from SSC.Function import Function
-
-
 from .__init__ import __version__ as VERSION
 from .__init__ import __date_deploy__ as DEPLOY
-
-from queue import Queue, Empty
-from typing import Any, Optional
 
 class Topic(object):
     def __init__(self, id : int, name: str) -> None:
@@ -47,8 +47,6 @@ class Topic(object):
 
     def empty(self) -> bool:
         return self.queue.empty()
-
-
 
 class DRegistry(RPC_Responser):
     def __init__(self, path_db : str, path_storage : str) -> None:
@@ -80,6 +78,8 @@ class DRegistry(RPC_Responser):
         self.func_list : List[Function] = []
         self.map_topics : Dict[int, Topic] = {}
 
+        self.load_funcs_db()
+
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
         self.t_cleanner.start()
 
@@ -91,38 +91,23 @@ class DRegistry(RPC_Responser):
         self.log.info('thread cleanner_files start')
         while self.done is False:
 
+            inputs = 0
+            outputs = 0
+
             for obj in self.func_list:
                 if obj.qIn > 0:
                     res = self.subscribe_receive(obj.qIn, 0)
                     if res != None:
+                        inputs += 1
                         ret = obj.process(res, {})
                         if (obj.qOut != -1) and (ret != None):
                             self.send_producer(obj.qOut, ret)
+                            outputs += 1
 
-            # if (self.ticktack % 12) == 0:
-
-            #     now = datetime.now(tz=timezone.utc)
-            #     limit = (now - self.delta).timestamp()
-
-            #     with self.lock_db:
-            #         q = Query()
-            #         itens = self.db.search(q.last < limit)
-
-            #     ll = []
-            #     for val in itens:
-            #         ll.append(val.doc_id)
-            #         file = pathlib.Path(val['internal'])
-            #         file.unlink(missing_ok=True)
-
-            #         self.log.debug(f"Remove Id:{val.doc_id}, {val['internal']}")
-            #         self.tot_out += 1
-
-            #     if len(ll) > 0:
-            #         with self.lock_db:
-            #             self.db.remove(doc_ids=ll)
+            if (inputs > 0) or (outputs > 0):
+                continue                
 
             self.log.debug(f'Tick-Tack... ')
-
             self.ticktack += 1
             time.sleep(5)
 
@@ -292,7 +277,8 @@ class DRegistry(RPC_Responser):
 
             with self.lock_db:
                 table = self.db.table('funcs')
-                table.insert(params)
+                doc_id = table.insert(params)
+                klass.id = doc_id
 
             self.func_list.append(klass)
 
@@ -301,9 +287,31 @@ class DRegistry(RPC_Responser):
         except Exception as exp:
             return str(exp.args[0])
 
-        return 'Nao implementado'
 
+    def load_funcs_db(self):
+        with self.lock_db:
+            table = self.db.table('funcs')
+            funcs = table.all()
 
+        for item in funcs:
+
+            idQueueIn = -1
+            idQueueOut = -1
+            if 'input' in item:
+                idQueueIn = self.subscribe(item['input'])
+
+            if 'output' in item:
+                idQueueOut = self.create_producer(item['output'])
+
+            base = str(self.storage).replace('/','.') + '.' + item['class']
+            klass : Function = self.function_load(base)
+            klass.name = item['name']
+            klass.qIn = idQueueIn
+            klass.qOut = idQueueOut
+            klass.useConfig = {} 
+            klass.id = item.doc_id      
+
+            self.func_list.append(klass)
 
 
         # classname: funcoes.externo.FuncAdd

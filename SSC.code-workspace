@@ -58,6 +58,35 @@
 					"queueOutput"
 				]
 			},
+
+			{
+				"name": "Python: Client producer",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/ssc-client.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"produce",
+					"queueInput",
+					"-m",
+					"teste 123....."
+				]
+			},
+
+			{
+				"name": "Python: Client consume",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/ssc-client.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"consume",
+					"queueOutput"
+				]
+			},
+
 			{
 				"name": "Python: Flask",
 				"type": "python",
