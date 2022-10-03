@@ -70,12 +70,11 @@
 					"produce",
 					"queue01",
 					"-m",
-					"teste 123.....",
+					"\"teste 123..... \"",
 					"-n",
 					"10"
 				]
 			},
-
 			{
 				"name": "Python: Client consume",
 				"type": "python",
@@ -85,10 +84,10 @@
 				"justMyCode": true,
 				"args": [
 					"consume",
-					"queueOutput"
+					"-s", "appteste",
+					"queue02"
 				]
 			},
-
 			{
 				"name": "Python: Flask",
 				"type": "python",

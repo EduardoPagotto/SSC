@@ -98,9 +98,11 @@ class DRegistry(RPC_Responser):
                 if obj.qIn > 0:
                     res = self.subscribe_receive(obj.qIn, 0)
                     if res != None:
+                        self.log.debug(f'In Func exec {obj.name}..')
                         inputs += 1
                         ret = obj.process(res, {})
                         if (obj.qOut != -1) and (ret != None):
+                            self.log.debug(f'Out Func exec {obj.name}..')
                             self.send_producer(obj.qOut, ret)
                             outputs += 1
 

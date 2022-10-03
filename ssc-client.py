@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20220927
+Update on 20221003
 @author: Eduardo Pagotto
 '''
 
-
 import argparse
 import logging
-import numbers
 import time
 
 from SSC.client.ClientQueue import ClientQueue
@@ -31,22 +29,28 @@ def main():
     client = ClientQueue('http://127.0.0.1:5151')
 
     try:
-        parser_val = argparse.ArgumentParser(description='client command')
+        parser = argparse.ArgumentParser(description='client commands')
+        subparser = parser.add_subparsers(dest='command')
 
-        parser_val.add_argument('comando', type=str, help='comando tipo (produce|consume)')
-        parser_val.add_argument('queue_name', type=str, help='Queue to process')
-        parser_val.add_argument('-m', '--message', type=str, help='message a enviar', required=False)
-        parser_val.add_argument('-n', '--number', type=int, help='numero repeticoes', required=False, default=1)
-        args = parser_val.parse_args()
+        produce = subparser.add_parser('produce')
+        produce.add_argument('queue_name', type=str, help='Queue to process')
+        produce.add_argument('--message', '-m', type=str, help='message a enviar', required=True)
+        produce.add_argument('--number', '-n', type=int, help='numero repeticoes', required=False, default=1)
+        
+        consume = subparser.add_parser('consume')
+        consume.add_argument('--name_app', '-s',type=str, help='message a enviar', required=True)
+        consume.add_argument('--number', '-n', type=int, help='num receber', required=False, default=0)
+        consume.add_argument('queue_name', type=str, help='Queue to process')
+        args = parser.parse_args()
 
-        if args.comando == "produce":
+        if args.command == "produce":
             producer = client.create_producer(args.queue_name)
             for i in range(0, args.number):
                 producer.send(args.message)
 
             #producer.close()
 
-        elif args.comando == "consume":
+        elif args.command == "consume":
 
             consume = client.subscribe(args.queue_name)
             c = 0
