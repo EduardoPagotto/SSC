@@ -2,9 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../SSF"
 		}
 	],
 	"settings": {
@@ -42,6 +39,23 @@
 					"topics",
 					"create",
 					"queue01"
+				]
+			},
+			{
+				"name": "Python: Admin Function1",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/ssc-admin.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"functions",
+					"create",
+					"name01",
+					"./funcs/externo.py",
+					"externo/FuncAdd",
+					"queueInput",
+					"queueOutput"
 				]
 			},
 			{

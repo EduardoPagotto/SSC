@@ -1,16 +1,19 @@
 
+
 import importlib
 import logging
-from operator import truediv
 import pathlib
+import shutil
 import time
 
 from threading import Lock, Thread
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from tinydb import TinyDB, Query
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
+
+from SSC.Function import Function
 
 
 from .__init__ import __version__ as VERSION
@@ -74,7 +77,7 @@ class DRegistry(RPC_Responser):
         self.log = logging.getLogger('SSC')
         self.log.info(f'>>>>>> SSC v-{VERSION} ({DEPLOY}), DB: {str(path1)} Storage: {str(self.storage)}')
 
-        self.registered_plugin = None
+        self.func_list : List[Function] = []
         self.map_topics : Dict[int, Topic] = {}
 
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
@@ -87,6 +90,14 @@ class DRegistry(RPC_Responser):
         time.sleep(10)
         self.log.info('thread cleanner_files start')
         while self.done is False:
+
+            for obj in self.func_list:
+                if obj.qIn > 0:
+                    res = self.subscribe_receive(obj.qIn, 0)
+                    if res != None:
+                        ret = obj.process(res, {})
+                        if (obj.qOut != -1) and (ret != None):
+                            self.send_producer(obj.qOut, ret)
 
             # if (self.ticktack % 12) == 0:
 
@@ -118,11 +129,12 @@ class DRegistry(RPC_Responser):
         self.log.info('thread cleanner_files stop')
 
 
-    def enable_plugin(self, plugin : str):
+    def function_load(self, plugin : str) -> Any:
             """Enable a ingester plugin for use parsing design documents.
 
             :params plugin: - A string naming a class object denoting the ingester plugin to be enabled
             """
+            klass = None
 
             if plugin is None or plugin == '':
                 self.log.error("Cannot have an empty plugin string.")
@@ -134,15 +146,19 @@ class DRegistry(RPC_Responser):
                     raise Exception()
                 mod = importlib.import_module(module)
                 klass = getattr(mod, classname)
-                self.registered_plugin = klass(1)
+                # self.func_list = klass()
+                #self.nova_func = klass()
+                #self.nova_func.
 
             except Exception as ex:
-                self.log.error(
-                    "Could not enable plugin %s - %s" % (plugin, str(ex)))
+                self.log.error("Could not enable class %s - %s" % (plugin, str(ex)))
+                raise ex
 
-            if self.registered_plugin is None:
-                self.log.error("Could not enable at least one plugin")
-                raise Exception("Could not enable at least one plugin") 
+            if klass is None:
+                self.log.error(f"Could not enable at least one class: {plugin}")
+                raise Exception(f"Could not enable at least one class: {plugin}") 
+
+            return klass()
 
     # ClientQueue
     def create_producer(self, topic : str) -> int:
@@ -236,7 +252,56 @@ class DRegistry(RPC_Responser):
             table.remove(doc_ids=[id])
             return f'Topico {topic} removido'
 
+    # Admin
+    def function_create(self, params: dict):
+        self.log.debug('Create ')
 
+        idQueueIn : int = -1
+        idQueueOut : int = -1
+        
+        try:
+            if 'input' in params:
+                idQueueIn = self.subscribe(params['input'])
+                params['idQueueIn'] = idQueueIn
+
+            if 'output' in params:
+                idQueueOut = self.create_producer(params['output'])
+                params['idQueueOut'] = idQueueOut
+            
+
+            # copicar pgm para area interna
+            path_file_src = pathlib.Path(params['pgm'])
+
+            names = params['class'].split('.')
+
+            path_dest = pathlib.Path(str(self.storage) + '/' + names[0])
+
+            path_dest.mkdir(parents=True, exist_ok=True)
+            final = str(path_dest) + '/' + path_file_src.name
+
+            params['final'] = final
+            shutil.copy(str(path_file_src), final)
+
+
+            base = str(self.storage).replace('/','.') + '.' + params['class']
+            klass : Function = self.function_load(base)
+            klass.name = params['name']
+            klass.qIn = idQueueIn
+            klass.qOut = idQueueOut
+            klass.useConfig = {}
+
+            with self.lock_db:
+                table = self.db.table('funcs')
+                table.insert(params)
+
+            self.func_list.append(klass)
+
+            return f"function {params['name']} created success"
+
+        except Exception as exp:
+            return str(exp.args[0])
+
+        return 'Nao implementado'
 
 
 
@@ -250,8 +315,6 @@ class DRegistry(RPC_Responser):
 
 
         # /pulsar/bin/pulsar-admin functions create \
-        #   --tenant rpa \
-        #   --namespace manifest \
         #   --name ConvertTxt2Dic \
         #   --py /var/app/src/ConvertTxt2Dic.py \
         #   --classname ConvertTxt2Dic.ConvertTxt2Dic \

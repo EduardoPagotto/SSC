@@ -133,7 +133,7 @@ def main():
 
 
         # imp = DRegistry()
-        # imp.enable_plugin('funcoes.externo.FuncAdd')
+        # imp.function_load('funcoes.externo.FuncAdd')
 
         # val = imp.registered_plugin.metodo1('Locutus vive!!!!')
         # val2 = val

@@ -53,6 +53,10 @@ class Admin(object):
         return msg
 
 
+    def function_create(self, params) -> str:
+        msg : str = self.__rpc().function_create(params)
+        return msg
+
 def main():
 
     logging.basicConfig(
@@ -77,6 +81,18 @@ def main():
                 log.info(admin.topics_create(args[2]))
             elif args[1] == 'delete':
                 log.info(admin.topics_delete(args[2]))
+            else:
+                log.error(f'Comando invalido: {args[2]}')
+        elif args[0] == 'functions':
+            if args[1] == 'create':
+
+                parm = {'name': args[2], 'pgm':args[3], 'class':args[4], 'input':args[5], 'output':args[6]}
+                log.info(admin.function_create(parm))
+
+
+            elif args[1] == 'delete':
+                log.info(admin.function_delete(args[2]))
+
             else:
                 log.error(f'Comando invalido: {args[2]}')
 
