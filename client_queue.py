@@ -15,7 +15,7 @@ def main():
     try:
         log = logging.getLogger('Client')
 
-        client = ClientQueue('http://127.0.0.1:5151')
+        client = ClientQueue('http://127.0.0.1:5152')
         producer = client.create_producer('queue01')
         consumer = client.subscribe('queue01')
 

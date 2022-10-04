@@ -4,9 +4,9 @@ services:
     container_name: server_SSC_dev
     build:
       context: ..
-    image: SSC_server_img
+    image: ssc_server_img
     hostname: "SSC01"
     ports:
-    - 5151:5151
+    - 5152:5152
     volumes:
-    - ./data:/opt
+    - ./data/ssc:/opt

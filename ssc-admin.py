@@ -81,7 +81,7 @@ def main():
 
     log = logging.getLogger('ssc-admin')
 
-    admin = Admin('http://127.0.0.1:5151')
+    admin = Admin('http://127.0.0.1:5152')
 
     try:
         parser = argparse.ArgumentParser(description='Admin command')

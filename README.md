@@ -75,7 +75,7 @@ Simple Stream Control
     cd ..
     ./client_rpc.py
     ```
-    obs: No browser: http://127.0.0.1:5151 
+    obs: No browser: http://127.0.0.1:5152 
 
 ## Maintenance of container
 ```bash

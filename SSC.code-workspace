@@ -101,7 +101,7 @@
 					"run",
 					"--no-debugger",
 					"--no-reload",
-					"-p 5151"
+					"-p 5152"
 				],
 				"jinja": true,
 				"justMyCode": true

@@ -26,7 +26,7 @@ def main():
 
     log = logging.getLogger('ssc-client')
 
-    client = ClientQueue('http://127.0.0.1:5151')
+    client = ClientQueue('http://127.0.0.1:5152')
 
     try:
         parser = argparse.ArgumentParser(description='client commands')
