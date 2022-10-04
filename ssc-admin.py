@@ -8,6 +8,7 @@ Update on 20220927
 import argparse
 import json
 import logging
+from typing import List
 import requests
 
 from sJsonRpc.ConnectionControl import ConnectionControl
@@ -52,12 +53,20 @@ class Admin(object):
         msg : str = self.__rpc().topics_delete(topic, True)
         return msg
 
+    def topics_list(self) -> List[str]:
+        msg : List[str] = self.__rpc().topics_list()
+        return msg
+
     def function_create(self, params) -> str:
         msg : str = self.__rpc().function_create(params)
         return msg
 
     def function_delete(self, name : str) -> str:
         msg : str = self.__rpc().function_delete(name)
+        return msg
+
+    def functions_list(self) -> List[str]:
+        msg : List[str] = self.__rpc().functions_list()
         return msg
 
 def main():
@@ -79,12 +88,12 @@ def main():
         subparser = parser.add_subparsers(dest='command')
 
         topic = subparser.add_parser('topics')
-        topic.add_argument('opp', type=str, help='Comando tipo (create|delete)')
-        topic.add_argument('queue', type=str, help='nome da queue')
+        topic.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        topic.add_argument('queue', type=str, help='nome da queue', default='')
 
         funcions = subparser.add_parser('functions')
-        funcions.add_argument('opp', type=str, help='Comando tipo (create|delete)')
-        funcions.add_argument('--name', type=str, help='nome da thread', required=True)
+        funcions.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        funcions.add_argument('--name', type=str, help='nome da thread')
         funcions.add_argument('--py', type=str, help='python script pathfile')
         funcions.add_argument('--classname', type=str, help='Nome da classe')
         funcions.add_argument('--inputs', type=str, help='queue input')
@@ -97,6 +106,8 @@ def main():
                 log.info(admin.topics_create(args.queue))
             elif args.opp == 'delete':
                 log.info(admin.topics_delete(args.queue))
+            elif args.opp == 'list':
+                log.info(admin.topics_list())
             else:
                 log.error(f'Opp invalida: {args.opp}')
         elif args.command == 'functions':
@@ -112,6 +123,8 @@ def main():
 
             elif args.opp == 'delete':
                 log.info(admin.function_delete(args.name)) 
+            elif args.opp == 'list':
+                log.info(admin.functions_list()) 
             else:
                 log.error(f'Opp invalida: {args.opp}')
 

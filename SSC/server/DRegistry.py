@@ -239,8 +239,25 @@ class DRegistry(RPC_Responser):
             return f'Topico {topic} removido'
 
     # Admin
+    def topics_list(self) -> List[str]:
+        with self.lock_db:
+            table = self.db.table('topics')
+            itens = table.all()
+
+        lista : List[str] = []
+        for item in itens:
+            lista.append(item['topic'])
+
+        return lista
+
+    # Admin
     def function_create(self, params: dict):
         self.log.debug('Create ')
+
+        with self.lock_func:
+            for obj in self.func_list:
+                if obj.name == params['name']:
+                    return f"function {params['name']} already exists"
 
         idQueueIn : int = -1
         idQueueOut : int = -1
@@ -310,6 +327,19 @@ class DRegistry(RPC_Responser):
 
         return f'funciton {name} not exist'
         
+    def functions_list(self) -> List[str]:
+
+        with self.lock_db:
+            table = self.db.table('funcs')
+            itens = table.all()
+
+        lista : List[str] = []
+        for item in itens:
+            lista.append(item['name'])
+
+        return lista
+
+
     def load_funcs_db(self):
         with self.lock_db:
             table = self.db.table('funcs')
