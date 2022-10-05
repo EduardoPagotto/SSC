@@ -3,10 +3,12 @@
 ./ssc-admin.py functions \
                 create \
                 --name name01 \
+                --tenant rpa \
+                --namespace manifesto \
                 --py ./funcs/FuncAdd.py \
-                --classname externo.FuncAdd.FuncAdd \
-                --inputs queue01 \
-                --output queue02 
+                --classname FuncAdd.FuncAdd \
+                --inputs rpa/manifesto/queue01 \
+                --output rpa/manifesto/queue02 
 
 
 

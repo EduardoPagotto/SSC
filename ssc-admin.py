@@ -106,6 +106,8 @@ def main():
 
         funcions = subparser.add_parser('functions')
         funcions.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        funcions.add_argument('--tenant', type=str, help='Tenant')
+        funcions.add_argument('--namespace', type=str, help='Namespace')
         funcions.add_argument('--name', type=str, help='nome da thread')
         funcions.add_argument('--py', type=str, help='python script pathfile')
         funcions.add_argument('--classname', type=str, help='Nome da classe')
@@ -135,6 +137,8 @@ def main():
             if args.opp == 'create':
 
                 parm = {'name': args.name, 
+                        'tenant': args.tenant,
+                        'namespace' : args.namespace,
                         'pgm':args.py,
                         'class':args.classname,
                         'input':args.inputs,

@@ -196,6 +196,10 @@ class DRegistry(RPC_Responser):
     # Admin
     def topics_create(self, topic : str) -> str:
 
+        lista = topic.split('/')
+        if len(lista) != 3:
+            return f'topic {topic} is invalid'
+
         for k, v in self.map_topics.items():
             if v.name == topic:
                 return f'topic {topic} already exists'
@@ -255,6 +259,10 @@ class DRegistry(RPC_Responser):
     def function_create(self, params: dict):
         self.log.debug('Create ')
 
+        tst = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace']))
+        if not tst.is_dir():
+            return f'tenant or namespace invalid' 
+
         with self.lock_func:
             for obj in self.func_list:
                 if obj.name == params['name']:
@@ -278,7 +286,7 @@ class DRegistry(RPC_Responser):
 
             names = params['class'].split('.')
 
-            path_dest = pathlib.Path(str(self.storage) + '/' + names[0])
+            path_dest = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace'], names[0]))
 
             path_dest.mkdir(parents=True, exist_ok=True)
             final = str(path_dest) + '/' + path_file_src.name
@@ -287,7 +295,7 @@ class DRegistry(RPC_Responser):
             shutil.copy(str(path_file_src), final)
 
 
-            base = str(self.storage).replace('/','.') + '.' + params['class']
+            base = str(path_dest).replace('/','.') + '.' + params['class']
             klass : Function = self.function_load(base)
             klass.name = params['name']
             klass.qIn = idQueueIn
@@ -428,23 +436,26 @@ class DRegistry(RPC_Responser):
             table = self.db.table('funcs')
             funcs = table.all()
 
-        for item in funcs:
+        for params in funcs:
 
             idQueueIn = -1
             idQueueOut = -1
-            if 'input' in item:
-                idQueueIn = self.subscribe(item['input'])
+            if 'input' in params:
+                idQueueIn = self.subscribe(params['input'])
 
-            if 'output' in item:
-                idQueueOut = self.create_producer(item['output'])
+            if 'output' in params:
+                idQueueOut = self.create_producer(params['output'])
 
-            base = str(self.storage).replace('/','.') + '.' + item['class']
+            names = params['class'].split('.')
+            path_dest = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace'], names[0]))
+
+            base = str(path_dest).replace('/','.') + '.' + params['class']
             klass : Function = self.function_load(base)
-            klass.name = item['name']
+            klass.name = params['name']
             klass.qIn = idQueueIn
             klass.qOut = idQueueOut
-            klass.useConfig = {} 
-            klass.id = item.doc_id      
+            klass.useConfig = {}
+            klass.id = params.doc_id
 
             self.func_list.append(klass)
 
