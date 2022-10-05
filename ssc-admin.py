@@ -46,28 +46,41 @@ class Admin(object):
         return ProxyObject(self.restAPI)
 
     def topics_create(self, topic : str) -> str:
-        msg : str = self.__rpc().topics_create(topic)
-        return msg
+        return self.__rpc().topics_create(topic)
 
     def topics_delete(self, topic : str) -> str:
-        msg : str = self.__rpc().topics_delete(topic, True)
-        return msg
+        return self.__rpc().topics_delete(topic, True)
 
     def topics_list(self) -> List[str]:
-        msg : List[str] = self.__rpc().topics_list()
-        return msg
+        return self.__rpc().topics_list()
 
     def function_create(self, params) -> str:
-        msg : str = self.__rpc().function_create(params)
-        return msg
+        return self.__rpc().function_create(params)
 
     def function_delete(self, name : str) -> str:
-        msg : str = self.__rpc().function_delete(name)
-        return msg
+        return self.__rpc().function_delete(name)
 
     def functions_list(self) -> List[str]:
-        msg : List[str] = self.__rpc().functions_list()
-        return msg
+        return self.__rpc().functions_list()
+
+    def tenants_create(self, name : str) -> str:
+        return self.__rpc().tenants_create(name)
+
+    def tenants_delete(self, name : str) -> str:
+        return self.__rpc().tenants_delete(name)
+
+    def tenants_list(self) -> List[str]:
+        return self.__rpc().tenants_list()
+
+    def namespaces_create(self, name : str) -> str:
+        return self.__rpc().namespaces_create(name)
+
+    def namespaces_delete(self, name : str) -> str:
+        return self.__rpc().namespaces_delete(name)
+
+    def namespaces_list(self, name : str) -> List[str]:
+        return self.__rpc().namespaces_list(name)
+
 
 def main():
 
@@ -99,6 +112,14 @@ def main():
         funcions.add_argument('--inputs', type=str, help='queue input')
         funcions.add_argument('--output', type=str, help='queue output')
 
+        tenants = subparser.add_parser('tenants')
+        tenants.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        tenants.add_argument('name', type=str, help='Nome do tenant')
+
+        namespaces = subparser.add_parser('namespaces')
+        namespaces.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        namespaces.add_argument('name', type=str, help='Nome do namespace')
+
         args = parser.parse_args()
 
         if args.command == 'topics':
@@ -127,6 +148,28 @@ def main():
                 log.info(admin.functions_list()) 
             else:
                 log.error(f'Opp invalida: {args.opp}')
+
+        elif args.command == 'tenants':
+            if args.opp == 'create':
+                log.info(admin.tenants_create(args.name))
+            elif args.opp == 'delete':
+                log.info(admin.tenants_delete(args.name))
+            elif args.opp == 'list':
+                log.info(admin.tenants_list())
+            else:
+                pass
+
+        elif args.command == 'namespaces':
+            if args.opp == 'create':
+                log.info(admin.namespaces_create(args.name))
+            elif args.opp == 'delete':
+                log.info(admin.namespaces_delete(args.name))
+            elif args.opp == 'list':
+                log.info(admin.namespaces_list(args.name))
+            else:
+                pass
+        else:
+            log.error(f'Comando invalido')
 
     except Exception as exp:
         log.error(str(exp))

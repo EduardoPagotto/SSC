@@ -6,6 +6,7 @@ Update on 20221003
 
 import importlib
 import logging
+import os
 import pathlib
 import shutil
 import time
@@ -338,6 +339,88 @@ class DRegistry(RPC_Responser):
             lista.append(item['name'])
 
         return lista
+
+
+    def tenants_create(self, name : str) -> str:
+
+        for val in self.storage.iterdir():
+            if val.name == name:
+                return f'tenant {name} already exists'
+
+        novo = pathlib.Path(os.path.join(str(self.storage),name))
+        novo.mkdir()
+
+        return f'Sucess {name}'
+
+    def tenants_delete(self, name : str) -> str:
+        for val in self.storage.iterdir():
+            if val.name == name:
+                target = pathlib.Path(os.path.join(str(self.storage),name))
+                shutil.rmtree(str(target))
+                return f'tenant {name} deleted'
+
+        return f'tenant {name} does not exist'
+
+    def tenants_list(self) -> List[str]:
+        lista = []
+        for val in self.storage.iterdir():
+            lista.append(val.name)
+
+        return lista
+
+    def namespaces_create(self, name : str) -> str:
+
+        lista = name.split('/')
+        if len(lista) != 2:
+            return f'namespace {name} is invalid'
+
+        tenant = lista[0]
+        ns = lista[1]
+
+        for val in self.storage.iterdir():
+            if val.name == tenant:
+                novo = pathlib.Path(os.path.join(str(self.storage),name))
+
+                zzz = novo.is_dir()
+                if not zzz:
+                    novo.mkdir()
+                    return f'Success {ns}'
+
+                return f'namespace {ns} already exists'
+
+
+        return f'tenant {tenant} does not exist'
+
+    def namespaces_delete(self, name : str) -> str:
+
+        lista = name.split('/')
+        if len(lista) != 2:
+            return f'namespace {name} is invalid'
+
+        tenant = lista[0]
+        ns = lista[1]
+
+        for val in self.storage.iterdir():
+            if val.name == tenant:
+
+                target = pathlib.Path(os.path.join(str(self.storage),name))
+                shutil.rmtree(str(target))
+                return f'namespace {name} deleted'
+
+        return f'tenant {name} does not exist'
+
+    def namespaces_list(self, name : str) -> List[str]:
+
+        for val in self.storage.iterdir():
+            if val.name == name:
+
+                lista = []
+                for nn in val.iterdir():
+                    lista.append(nn.name)                
+
+                return lista
+
+        raise Exception(f'tenant {name} does not exist')
 
 
     def load_funcs_db(self):
