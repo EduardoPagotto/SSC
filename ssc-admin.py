@@ -49,10 +49,10 @@ class Admin(object):
         return self.__rpc().topics_create(topic)
 
     def topics_delete(self, topic : str) -> str:
-        return self.__rpc().topics_delete(topic, True)
+        return self.__rpc().topics_delete(topic)
 
-    def topics_list(self) -> List[str]:
-        return self.__rpc().topics_list()
+    def topics_list(self, ns : str) -> List[str]:
+        return self.__rpc().topics_list(ns)
 
     def function_create(self, params) -> str:
         return self.__rpc().function_create(params)
@@ -130,7 +130,7 @@ def main():
             elif args.opp == 'delete':
                 log.info(admin.topics_delete(args.queue))
             elif args.opp == 'list':
-                log.info(admin.topics_list())
+                log.info(admin.topics_list(args.queue))
             else:
                 log.error(f'Opp invalida: {args.opp}')
         elif args.command == 'functions':
@@ -139,9 +139,9 @@ def main():
                 parm = {'name': args.name, 
                         'tenant': args.tenant,
                         'namespace' : args.namespace,
-                        'pgm':args.py,
-                        'class':args.classname,
-                        'input':args.inputs,
+                        'py':args.py,
+                        'classname':args.classname,
+                        'inputs':args.inputs,
                         'output':args.output}
 
                 log.info(admin.function_create(parm))

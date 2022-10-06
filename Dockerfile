@@ -3,6 +3,7 @@ LABEL MAINTAINER="Eduardo Pagotto <eduardo.pagotto@newspace.com.br>"
 
 RUN apk update
 RUN apk add git
+
 RUN pip3 install --upgrade pip
 
 WORKDIR /var/app
@@ -14,6 +15,16 @@ RUN pip3 install -r requirements.txt && \
     pip3 install .
 WORKDIR /var/app
 RUN rm -rf sJsonRpc
+
+#extra SSF 
+RUN git clone https://github.com/EduardoPagotto/SSF.git
+WORKDIR /var/app/SSF/
+RUN pip3 install -r requirements.txt && \
+    pip3 install .
+WORKDIR /var/app
+RUN rm -rf SSF
+RUN apk add poppler-utils
+
 
 COPY ./requirements.txt .
 COPY ./app.py .

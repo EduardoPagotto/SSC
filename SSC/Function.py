@@ -6,22 +6,32 @@ Update on 20221003
 
 
 from abc import ABC, abstractmethod
-import logging
-import pathlib
+from logging import Logger, getLogger
+from typing import Optional
+from tinydb.table import Document
+
+from SSC.server.Topic import Topic
+
+class Context(object):
+    def __init__(self) -> None:
+        self.log = getLogger('SSC.Conext')
+
+    def get_logger(self) -> Logger:
+        return self.log
+
+    def publish(self, topic : str, data : str):
+        pass
 
 class Function(ABC):
     def __init__(self) -> None:
-        self.id = -1
+        self.log = getLogger('SSC.function')
+        self.topic_in : Optional[Topic] = None
+        self.topic_out : Optional[Topic] = None
         self.name : str = ''
-        #self.path : pathlib.Path = None
-        self.qIn : int = -1
-        self.qOut : int = -1
-        self.useConfig : dict = {}
-        self.log = logging.getLogger('SSC.function')
-
+        self.document : Optional[Document] = None
 
     @abstractmethod
-    def process(self, input : str, context : dict):
+    def process(self, input : str, context : Context):
         pass
 
     

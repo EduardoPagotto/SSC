@@ -1,67 +1,36 @@
 '''
 Created on 20220924
-Update on 20221003
+Update on 20221006
 @author: Eduardo Pagotto
 '''
 
-import importlib
 import logging
-import os
-import pathlib
-import shutil
 import time
 
-from queue import Queue, Empty
 from typing import Any, Optional
-from threading import Lock, Thread
-from typing import Any, Dict, List
-
-from tinydb import TinyDB, Query
+from threading import  Thread
+from typing import Any, List
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
-from SSC.Function import Function
+
+from SSC.server.NameSpace import NameSpace
+from SSC.server.Tenant import Tenant
+from SSC.server.FunctionCrt import FunctionCrt
+from SSC.server.TopicCrt import TopicsCrt
+
+from .Topic import Topic
+
 from .__init__ import __version__ as VERSION
 from .__init__ import __date_deploy__ as DEPLOY
 
-class Topic(object):
-    def __init__(self, id : int, name: str) -> None:
-        self.name = name
-        self.id = id
-        self.queue : Queue = Queue()
-
-    def push(self, value : Any) -> None:
-         self.queue.put(value)
-
-    def pop(self, timeout: int) -> Optional[Any]:
-        try:
-            if timeout == 0:
-                return self.queue.get_nowait()
-            else:
-                return self.queue.get(block=True, timeout=timeout)
-        except Empty:
-            pass
-
-        return None
-
-    def qsize(self) -> int:
-        return self.queue.qsize()
-
-    def empty(self) -> bool:
-        return self.queue.empty()
-
 class DRegistry(RPC_Responser):
-    def __init__(self, path_db : str, path_storage : str) -> None:
+    def __init__(self, topic_crt : TopicsCrt, function_crt : FunctionCrt, tenant : Tenant, namespace : NameSpace) -> None:
         super().__init__(self)
 
-        self.lock_db = Lock()
-        self.lock_func = Lock()
-
-        path1 = pathlib.Path(path_db)
-        path1.mkdir(parents=True, exist_ok=True)
-        self.db = TinyDB(str(path1) + '/master.json')
-
-        self.storage = pathlib.Path(path_storage)
-        self.storage.mkdir(parents=True, exist_ok=True)
+        self.topic_crt = topic_crt
+        self.function_crt = function_crt
+        self.tenant = tenant
+        self.namespace = namespace
 
         logging.basicConfig(
             level=logging.DEBUG,
@@ -75,12 +44,9 @@ class DRegistry(RPC_Responser):
         logging.getLogger('werkzeug').setLevel(logging.CRITICAL)
 
         self.log = logging.getLogger('SSC')
-        self.log.info(f'>>>>>> SSC v-{VERSION} ({DEPLOY}), DB: {str(path1)} Storage: {str(self.storage)}')
+        self.log.info(f'>>>>>> SSC v-{VERSION} ({DEPLOY})')
 
-        self.func_list : List[Function] = []
-        self.map_topics : Dict[int, Topic] = {}
-
-        self.load_funcs_db()
+        #self.load_funcs_db()
 
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
         self.t_cleanner.start()
@@ -93,24 +59,24 @@ class DRegistry(RPC_Responser):
         self.log.info('thread cleanner_files start')
         while self.done is False:
 
-            inputs = 0
-            outputs = 0
+            # inputs = 0
+            # outputs = 0
 
-            with self.lock_func:
-                for obj in self.func_list:
-                    if obj.qIn > 0:
-                        res = self.subscribe_receive(obj.qIn, 0)
-                        if res != None:
-                            self.log.debug(f'In Func exec {obj.name}..')
-                            inputs += 1
-                            ret = obj.process(res, {})
-                            if (obj.qOut != -1) and (ret != None):
-                                self.log.debug(f'Out Func exec {obj.name}..')
-                                self.send_producer(obj.qOut, ret)
-                                outputs += 1
+            # with self.lock_func:
+            #     for obj in self.func_list:
+            #         if obj.qIn > 0:
+            #             res = self.subscribe_receive(obj.qIn, 0)
+            #             if res != None:
+            #                 self.log.debug(f'In Func exec {obj.name}..')
+            #                 inputs += 1
+            #                 ret = obj.process(res, None)
+            #                 if (obj.qOut != -1) and (ret != None):
+            #                     self.log.debug(f'Out Func exec {obj.name}..')
+            #                     self.send_producer(obj.qOut, ret)
+            #                     outputs += 1
 
-                if (inputs > 0) or (outputs > 0):
-                    continue                
+            #     if (inputs > 0) or (outputs > 0):
+            #         continue                
 
             self.log.debug(f'Tick-Tack... ')
             self.ticktack += 1
@@ -118,347 +84,77 @@ class DRegistry(RPC_Responser):
 
         self.log.info('thread cleanner_files stop')
 
-
-    def function_load(self, plugin : str) -> Any:
-            """Enable a ingester plugin for use parsing design documents.
-
-            :params plugin: - A string naming a class object denoting the ingester plugin to be enabled
-            """
-            klass = None
-
-            if plugin is None or plugin == '':
-                self.log.error("Cannot have an empty plugin string.")
-
-            try:
-                (module, x, classname) = plugin.rpartition('.')
-
-                if module == '':
-                    raise Exception()
-                mod = importlib.import_module(module)
-                klass = getattr(mod, classname)
-
-            except Exception as ex:
-                self.log.error("Could not enable class %s - %s" % (plugin, str(ex)))
-                raise ex
-
-            if klass is None:
-                self.log.error(f"Could not enable at least one class: {plugin}")
-                raise Exception(f"Could not enable at least one class: {plugin}") 
-
-            return klass()
-
     # ClientQueue
-    def create_producer(self, topic : str) -> int:
-
-        for k, v in self.map_topics.items():
-            if v.name == topic:
-                return v.id
-
-        with self.lock_db:
-            table = self.db.table('topics')
-            q = Query()
-            itens = table.search(q.topic == topic)
-
-        if len(itens) == 1:
-            id = itens[0].doc_id
-            self.map_topics[id] = Topic(id, topic)
-            return id
-
-        raise Exception(f'topic {topic} does not exist')
-                                               
+    def create_producer(self, topic_name : str) -> int:
+        return self.topic_crt.find_and_load(topic_name).id
+        
     # ClientQueue
-    def subscribe(self, topic):
-
-        for k, v in self.map_topics.items():
-            if v.name == topic:
-                return v.id
-
-        with self.lock_db:
-            table = self.db.table('topics')
-            q = Query()
-            itens = table.search(q.topic == topic)
-
-        if len(itens) == 1:
-            id = itens[0].doc_id
-            self.map_topics[id] = Topic(id, topic)
-            return id
-
-        raise Exception(f'topic {topic} does not exist')
+    def subscribe(self, topic_name) -> int:
+        return self.topic_crt.find_and_load(topic_name).id
 
     # Producer
     def send_producer(self, id : int, msg : str):
-        self.map_topics[id].push(msg)
+        self.topic_crt.push_id(id, msg)
 
     # Subscribe
     def subscribe_receive(self, id: int, timeOut: int) -> Optional[Any]:
-        return self.map_topics[id].pop(timeOut)
+        return self.topic_crt.pop_id(id, timeOut)
 
     # Admin
-    def topics_create(self, topic : str) -> str:
+    def topics_create(self, topic_name : str) -> str:
 
-        lista = topic.split('/')
+        lista = topic_name.split('/')
         if len(lista) != 3:
-            return f'topic {topic} is invalid'
+            raise Exception(f'topic {topic_name} is invalid')
 
-        for k, v in self.map_topics.items():
-            if v.name == topic:
-                return f'topic {topic} already exists'
-
-        with self.lock_db:
-            table = self.db.table('topics')
-            q = Query()
-            itens = table.search(q.topic == topic)
-            if len(itens) == 0:
-
-                id = table.insert({'topic': topic, 'name_app':'', 'user_config':''})
-
-                self.map_topics[id] = Topic(id, topic)
-                return 'Sucess ' + topic
-
-            return f'topic {topic} already exists'
+        topic  = self.topic_crt.create(topic_name)
+        return f'success create {topic_name} id {topic.id}'
 
     # Admin
-    def topics_delete(self, topic : str, force : bool) -> str:
-
-        for k, v in self.map_topics.items():
-            if v.name == topic:
-                if force is False:
-                    return f'topic {topic} is in use'
-                else:
-                    del self.map_topics[k]
-                    with self.lock_db:
-                        table = self.db.table('topics')
-                        table.remove(doc_ids=[k])
-
-                    return f'topic {topic} deleted in use'
-
-        with self.lock_db:
-            table = self.db.table('topics')
-            q = Query()
-            itens = table.search(q.topic == topic)
-            if len(itens) == 0:
-                return f'topic {topic} does not exist'
-
-            id = itens[0].doc_id
-            table.remove(doc_ids=[id])
-            return f'Topico {topic} removido'
+    def topics_delete(self, topic_name : str) -> str:
+        self.topic_crt.delete(topic_name)
+        return f'success delete {topic_name}'
 
     # Admin
-    def topics_list(self) -> List[str]:
-        with self.lock_db:
-            table = self.db.table('topics')
-            itens = table.all()
-
-        lista : List[str] = []
-        for item in itens:
-            lista.append(item['topic'])
-
-        return lista
+    def topics_list(self, ns : str) -> List[str]:
+        return self.topic_crt.list_all(ns)
 
     # Admin
-    def function_create(self, params: dict):
-        self.log.debug('Create ')
-
-        tst = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace']))
-        if not tst.is_dir():
-            return f'tenant or namespace invalid' 
-
-        with self.lock_func:
-            for obj in self.func_list:
-                if obj.name == params['name']:
-                    return f"function {params['name']} already exists"
-
-        idQueueIn : int = -1
-        idQueueOut : int = -1
+    def function_create(self, params: dict) -> str:
+        return self.function_crt.create(params)
         
-        try:
-            if 'input' in params:
-                idQueueIn = self.subscribe(params['input'])
-                params['idQueueIn'] = idQueueIn
-
-            if 'output' in params:
-                idQueueOut = self.create_producer(params['output'])
-                params['idQueueOut'] = idQueueOut
-            
-
-            # copicar pgm para area interna
-            path_file_src = pathlib.Path(params['pgm'])
-
-            names = params['class'].split('.')
-
-            path_dest = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace'], names[0]))
-
-            path_dest.mkdir(parents=True, exist_ok=True)
-            final = str(path_dest) + '/' + path_file_src.name
-
-            params['final'] = final
-            shutil.copy(str(path_file_src), final)
-
-
-            base = str(path_dest).replace('/','.') + '.' + params['class']
-            klass : Function = self.function_load(base)
-            klass.name = params['name']
-            klass.qIn = idQueueIn
-            klass.qOut = idQueueOut
-            klass.useConfig = {}
-
-            with self.lock_db:
-                table = self.db.table('funcs')
-                doc_id = table.insert(params)
-                klass.id = doc_id
-
-            with self.lock_func:
-                self.func_list.append(klass)
-
-            return f"function {params['name']} created success"
-
-        except Exception as exp:
-            return str(exp.args[0])
-
     # Admin
     def function_delete(self, name: str):
-
-        with self.lock_func:
-            for obj in self.func_list:
-                if obj.name == name:
-                    self.func_list.remove(obj)
-
-        with self.lock_db:
-            table = self.db.table('funcs')
-
-            q = Query()
-            itens = table.search(q.name == name)
-            if len(itens) == 1:
-                table.remove(doc_ids=[itens[0].doc_id])
-                ss = pathlib.Path(itens[0]['final'])
-                ss.unlink()
-                return f"functions {name} deleted"
-
-        return f'funciton {name} not exist'
-        
+        self.function_crt.delete(name)
+        return f'success delete {name}'
+    
+    # Admin
     def functions_list(self) -> List[str]:
+        return self.function_crt.list_all()
 
-        with self.lock_db:
-            table = self.db.table('funcs')
-            itens = table.all()
-
-        lista : List[str] = []
-        for item in itens:
-            lista.append(item['name'])
-
-        return lista
-
-
+    # Admin
     def tenants_create(self, name : str) -> str:
+        return self.tenant.create(name)
 
-        for val in self.storage.iterdir():
-            if val.name == name:
-                return f'tenant {name} already exists'
-
-        novo = pathlib.Path(os.path.join(str(self.storage),name))
-        novo.mkdir()
-
-        return f'Sucess {name}'
-
+    # Admin
     def tenants_delete(self, name : str) -> str:
-        for val in self.storage.iterdir():
-            if val.name == name:
-                target = pathlib.Path(os.path.join(str(self.storage),name))
-                shutil.rmtree(str(target))
-                return f'tenant {name} deleted'
+        return self.tenant.delete(name)
 
-        return f'tenant {name} does not exist'
-
+    # Admin
     def tenants_list(self) -> List[str]:
-        lista = []
-        for val in self.storage.iterdir():
-            lista.append(val.name)
+        return self.tenant.list_all()
 
-        return lista
-
+    # Admin
     def namespaces_create(self, name : str) -> str:
+        return self.namespace.create(name)
 
-        lista = name.split('/')
-        if len(lista) != 2:
-            return f'namespace {name} is invalid'
-
-        tenant = lista[0]
-        ns = lista[1]
-
-        for val in self.storage.iterdir():
-            if val.name == tenant:
-                novo = pathlib.Path(os.path.join(str(self.storage),name))
-
-                zzz = novo.is_dir()
-                if not zzz:
-                    novo.mkdir()
-                    return f'Success {ns}'
-
-                return f'namespace {ns} already exists'
-
-
-        return f'tenant {tenant} does not exist'
-
+    # Admin
     def namespaces_delete(self, name : str) -> str:
+        return self.namespace.delete(name)
 
-        lista = name.split('/')
-        if len(lista) != 2:
-            return f'namespace {name} is invalid'
-
-        tenant = lista[0]
-        ns = lista[1]
-
-        for val in self.storage.iterdir():
-            if val.name == tenant:
-
-                target = pathlib.Path(os.path.join(str(self.storage),name))
-                shutil.rmtree(str(target))
-                return f'namespace {name} deleted'
-
-        return f'tenant {name} does not exist'
-
+    # Admin
     def namespaces_list(self, name : str) -> List[str]:
-
-        for val in self.storage.iterdir():
-            if val.name == name:
-
-                lista = []
-                for nn in val.iterdir():
-                    lista.append(nn.name)                
-
-                return lista
-
-        raise Exception(f'tenant {name} does not exist')
-
-
-    def load_funcs_db(self):
-        with self.lock_db:
-            table = self.db.table('funcs')
-            funcs = table.all()
-
-        for params in funcs:
-
-            idQueueIn = -1
-            idQueueOut = -1
-            if 'input' in params:
-                idQueueIn = self.subscribe(params['input'])
-
-            if 'output' in params:
-                idQueueOut = self.create_producer(params['output'])
-
-            names = params['class'].split('.')
-            path_dest = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace'], names[0]))
-
-            base = str(path_dest).replace('/','.') + '.' + params['class']
-            klass : Function = self.function_load(base)
-            klass.name = params['name']
-            klass.qIn = idQueueIn
-            klass.qOut = idQueueOut
-            klass.useConfig = {}
-            klass.id = params.doc_id
-
-            self.func_list.append(klass)
-
+        return self.namespace.list_all(name)
 
         #--user-config '{"FileCfg":"aaaaa"}'
         #--user-config-file "/pulsar/host/etc/func1.yaml"
