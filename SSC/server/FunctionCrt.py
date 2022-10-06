@@ -9,9 +9,9 @@ import os
 import pathlib
 import shutil
 from threading import Lock
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from SSC.Function import Function
+from SSC.Function import Context, Function
 from SSC.server.FunctionDB import FunctionDB
 
 class FunctionCrt(object):
@@ -92,31 +92,37 @@ class FunctionCrt(object):
         return self.database.list_all()
 
     def load_funcs_db(self):
-        pass
+        lista : List[Function] = self.database.get_all()
+        for item in lista:
+            self.map_functions[item.document.doc_id] = item
 
-        # with self.lock_db:
-        #     table = self.db.table('funcs')
-        #     funcs = table.all()
+    def execute(self) -> Tuple[int, int]:
 
-        # for params in funcs:
+        inputs = 0
+        outputs = 0
 
-        #     idQueueIn = -1
-        #     idQueueOut = -1
-        #     if 'input' in params:
-        #         idQueueIn = self.subscribe(params['input'])
+        context : Context = Context()
 
-        #     if 'output' in params:
-        #         idQueueOut = self.create_producer(params['output'])
+        with self.lock_func:
 
-        #     names = params['class'].split('.')
-        #     path_dest = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace'], names[0]))
+            for k, obj in self.map_functions.items():
+                
+                if (obj.topic_in) and (obj.topic_in.qsize() > 0):
 
-        #     base = str(path_dest).replace('/','.') + '.' + params['class']
-        #     klass : Function = self.function_load(base)
-        #     klass.name = params['name']
-        #     klass.qIn = idQueueIn
-        #     klass.qOut = idQueueOut
-        #     klass.useConfig = {}
-        #     klass.id = params.doc_id
+                    res = obj.topic_in.pop(0)
+                    if res:
 
-        #     self.func_list.append(klass)
+                        self.log.debug(f'In Func exec {obj.name} topic {obj.topic_in.name} ..')
+                        inputs += 1
+                        obj.tot_input += 1
+
+                        ret = obj.process(res, context)
+                        if (obj.topic_out) and (ret != None):
+
+                            self.log.debug(f'Out Func exec {obj.name} topic {obj.topic_out.name} ..')
+                            obj.topic_out.push(ret)
+                            obj.tot_output += 1
+
+                            outputs += 1
+
+        return inputs, outputs

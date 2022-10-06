@@ -29,6 +29,9 @@ class Function(ABC):
         self.topic_out : Optional[Topic] = None
         self.name : str = ''
         self.document : Optional[Document] = None
+        self.tot_input : int = 0
+        self.tot_output : int = 0
+        self.tot_erro : int = 0
 
     @abstractmethod
     def process(self, input : str, context : Context):

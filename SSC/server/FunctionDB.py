@@ -105,17 +105,46 @@ class FunctionDB(object):
 
     def delete(self, func_name : str) -> None:
         with self.database.lock_db:
-            table = self.database.db.table('topics')
+            table = self.database.db.table('funcs')
             q = Query()
             table.remove(q.topic == func_name)
 
     def list_all(self) -> List[str]:
         with self.database.lock_db:
-            table = self.database.db.table('topics')
+            table = self.database.db.table('funcs')
             itens = table.all()
 
         lista : List[str] = []
         for item in itens:
             lista.append(item['topic'])
+
+        return lista
+
+    def get_all(self) -> List[Function]:
+
+        lista : List[Function] = []
+
+        with self.database.lock_db:
+            table = self.database.db.table('funcs')
+            itens = table.all()
+            
+        for params in itens:
+
+            topic_in : Optional[Topic] = None
+            topic_out : Optional[Topic] = None
+
+            if 'inputs' in params and params['inputs'] != None:
+                topic_in = self.topic_ctr.find_and_load(params['inputs'])
+
+            if 'output' in params and params['output'] != None:
+                topic_out = self.topic_ctr.find_and_load(params['output']) 
+
+            klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
+            klass.document = params
+            klass.name = params['name']
+            klass.topic_in = topic_in
+            klass.topic_out = topic_out
+
+            lista.append(klass)
 
         return lista

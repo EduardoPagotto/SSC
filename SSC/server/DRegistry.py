@@ -18,8 +18,6 @@ from SSC.server.Tenant import Tenant
 from SSC.server.FunctionCrt import FunctionCrt
 from SSC.server.TopicCrt import TopicsCrt
 
-from .Topic import Topic
-
 from .__init__ import __version__ as VERSION
 from .__init__ import __date_deploy__ as DEPLOY
 
@@ -46,8 +44,6 @@ class DRegistry(RPC_Responser):
         self.log = logging.getLogger('SSC')
         self.log.info(f'>>>>>> SSC v-{VERSION} ({DEPLOY})')
 
-        #self.load_funcs_db()
-
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
         self.t_cleanner.start()
 
@@ -59,24 +55,13 @@ class DRegistry(RPC_Responser):
         self.log.info('thread cleanner_files start')
         while self.done is False:
 
-            # inputs = 0
-            # outputs = 0
+            inputs = 0
+            outputs = 0
 
-            # with self.lock_func:
-            #     for obj in self.func_list:
-            #         if obj.qIn > 0:
-            #             res = self.subscribe_receive(obj.qIn, 0)
-            #             if res != None:
-            #                 self.log.debug(f'In Func exec {obj.name}..')
-            #                 inputs += 1
-            #                 ret = obj.process(res, None)
-            #                 if (obj.qOut != -1) and (ret != None):
-            #                     self.log.debug(f'Out Func exec {obj.name}..')
-            #                     self.send_producer(obj.qOut, ret)
-            #                     outputs += 1
+            inputs, outputs = self.function_crt.execute()
 
-            #     if (inputs > 0) or (outputs > 0):
-            #         continue                
+            if (inputs > 0) or (outputs > 0):
+                continue                
 
             self.log.debug(f'Tick-Tack... ')
             self.ticktack += 1
