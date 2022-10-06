@@ -47,6 +47,16 @@ class DRegistry(RPC_Responser):
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
         self.t_cleanner.start()
 
+    def sumario(self) -> str:
+
+        lista = self.topic_crt.summario()
+        res = ''
+        for i in lista:
+            res += str(i) + '<p>'
+
+        return f'>>>>>> SSC v-{VERSION} ({DEPLOY})<p> Topics: <p> {res}'
+
+
     def cleanner(self) ->None:
         """[Garbage collector of files]
         """

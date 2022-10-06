@@ -14,6 +14,15 @@ class TopicsCrt(object):
         self.database = database
         self.map_topics : Dict[int, Topic] = {}
 
+    def summario(self) -> List[dict]:
+
+        lista : List[dict] = []
+        for k, topic in self.map_topics.items():
+            lista.append({'topic': topic.name, 'size':topic.qsize()})
+
+        return lista    
+
+
     def create(self, topic_name : str) -> Topic:
 
         topic : Optional[Topic] = None

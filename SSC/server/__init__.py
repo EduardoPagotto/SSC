@@ -1,4 +1,4 @@
 
 
-__version__ : str = '0.0.1'
-__date_deploy__ : str = '20220929'
+__version__ : str = '0.1.0'
+__date_deploy__ : str = '20221006'
