@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221006
+Update on 20221007
 @author: Eduardo Pagotto
 '''
 
@@ -19,6 +19,8 @@ class NameSpace(object):
         self.log = logging.getLogger('SSC.NameSpace')
 
     def create(self, name : str) -> str:
+
+        self.log.debug(f'namesapce create {name}')
 
         lista = name.split('/')
         if len(lista) != 2:
@@ -41,6 +43,8 @@ class NameSpace(object):
         raise Exception(f'tenant {tenant} does not exist')
 
     def delete(self, name : str) -> str:
+
+        self.log.debug(f'namespace delete {name}')
 
         lista = name.split('/')
         if len(lista) != 2:

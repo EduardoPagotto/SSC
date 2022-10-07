@@ -1,12 +1,13 @@
 '''
 Created on 20221006
-Update on 20221006
+Update on 20221007
 @author: Eduardo Pagotto
 '''
 
 import logging
 import pathlib
 from threading import Lock
+import threading
 from tinydb import TinyDB
 
 class DataBaseCrt(object):
@@ -20,38 +21,58 @@ class DataBaseCrt(object):
 
         self.log = logging.getLogger('SSC.DataBaseCrt')
 
-# class ZeroDbLock(object):
 
-#     serial = 0
-#     mutex_serial = threading.Lock()
+class AbortSignal(Exception):
+    pass
 
-#     def __init__(self, session : SessionDB, table_name: str):
+def abort():
+    raise AbortSignal
 
-#         with ZeroDbLock.mutex_serial:
+class LockDB(object):
 
-#             self.count = ZeroDbLock.serial
-#             ZeroDbLock.serial += 1
+    serial = 0
+    write_count : int = 0
+    mutex_serial = threading.Lock()
+    mutex_db = threading.Lock()
 
-#             self.session : SessionDB = session
-#             self.table_name : str = table_name
-#             self.log = logging.getLogger('ZeroDB')
-#             self.log.debug('Transaction %d', self.count)
+    def __init__(self, db : TinyDB, table_name: str, rw : bool = False):
 
-#     def __enter__(self):
-#         self.log.debug('acquire %d', self.count)
-#         self.session.lock()
-#         self.session.table(self.table_name)
-#         self.log.debug('acquired %d', self.count)
-#         return self
+        with LockDB.mutex_serial:
 
-#     def __exit__(self, type, value, traceback):
+            self.count = LockDB.serial
+            LockDB.serial += 1
+                    
+            self.rw = rw    
+            self.db : TinyDB = db
+            self.table_name : str = table_name
 
-#         #if not traceback: # FIXME: ver como se comporta no crash
-#         self.session.unlock()
-#         self.log.debug('release %d', self.count)
-#         return isinstance(value, AbortSignal)
+            self.log = logging.getLogger('SSC.DBLOCK')
+            self.log.debug('Transaction %d', self.count)
 
-#     def __getattr__(self, funcion_name : str):
+    def __enter__(self):
+        self.log.debug('acquire %d', self.count)
 
-#         if funcion_name == '__iter__':
-#             return None
+        if self.rw:
+            LockDB.write_count += 1
+
+        if LockDB.write_count > 0:
+            LockDB.mutex_db.lock()
+            self.log.debug('acquired %d', self.count)
+
+        return self.db.table(self.table_name)
+
+    def __exit__(self, type, value, traceback):
+
+        if LockDB.write_count > 0:
+            LockDB.mutex_db.unlock()
+            self.log.debug('release %d', self.count)
+
+        if self.rw:
+            LockDB.write_count -= 1
+
+        return isinstance(value, AbortSignal)
+
+    def __getattr__(self, funcion_name : str):
+
+        if funcion_name == '__iter__':
+            return None

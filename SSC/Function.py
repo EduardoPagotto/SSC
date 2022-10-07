@@ -1,26 +1,18 @@
 '''
 Created on 20220924
-Update on 20221003
+Update on 20221007
 @author: Eduardo Pagotto
 '''
 
 
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
+from logging import getLogger
 from typing import Optional
 from tinydb.table import Document
 
 from SSC.server.Topic import Topic
+from SSC.Context import Context
 
-class Context(object):
-    def __init__(self) -> None:
-        self.log = getLogger('SSC.Conext')
-
-    def get_logger(self) -> Logger:
-        return self.log
-
-    def publish(self, topic : str, data : str):
-        pass
 
 class Function(ABC):
     def __init__(self) -> None:

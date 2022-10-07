@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221006
+Update on 20221007
 @author: Eduardo Pagotto
 '''
 
@@ -9,6 +9,7 @@ import os
 import pathlib
 import shutil
 from threading import Lock
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 from SSC.Function import Context, Function
@@ -31,6 +32,8 @@ class FunctionCrt(object):
 
     def create(self, params) -> str:
 
+        self.log.debug(f"function create {params['name']}")
+
         function : Optional[Function] = None
         try:
             function = self.find_and_load(params['name'])
@@ -41,9 +44,9 @@ class FunctionCrt(object):
             raise Exception(f'topic {params["name"]} already exists')
         
         tst = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace']))
-        # if not tst.is_dir():
-        #     return f'tenant or namespace invalid' 
-        tst.mkdir(parents=True, exist_ok=True) # remover depois
+        if not tst.is_dir():
+            raise Exception(f'tenant or namespace invalid: {str(tst)}') 
+        #tst.mkdir(parents=True, exist_ok=True) # remover depois
 
         # copicar pgm para area interna
         path_file_src = pathlib.Path(params['py'])
@@ -70,15 +73,19 @@ class FunctionCrt(object):
 
         for k, v in self.map_functions.items():
             if v.name == func_name:
+                self.log.debug(f'function find in cache {func_name}')
                 return v
 
         function : Function = self.database.find(func_name)
         if function.document:
             self.map_functions[function.document.doc_id] = function
+            self.log.debug(f'function find in db {func_name}')
 
         return function
 
     def delete(self, func_name : str):
+
+        self.log.debug(f'Function delete {func_name}')
 
         for k, v in self.map_functions.items():
             if v.name == func_name:
@@ -95,13 +102,14 @@ class FunctionCrt(object):
         lista : List[Function] = self.database.get_all()
         for item in lista:
             self.map_functions[item.document.doc_id] = item
+            self.log.debug(f'function load from db: {item.name}')
 
     def execute(self) -> Tuple[int, int]:
 
         inputs = 0
         outputs = 0
 
-        context : Context = Context()
+        context : Context = Context(self.database.topic_crt)
 
         with self.lock_func:
 
@@ -112,14 +120,26 @@ class FunctionCrt(object):
                     res = obj.topic_in.pop(0)
                     if res:
 
-                        self.log.debug(f'In Func exec {obj.name} topic {obj.topic_in.name} ..')
+                        self.log.debug(f'Function exec {obj.name} topic in: {obj.topic_in.name} ..')
                         inputs += 1
                         obj.tot_input += 1
 
-                        ret = obj.process(res, context)
+                        try:
+
+                            ret = obj.process(res, context)
+
+                        except Exception as exp:
+                            
+                            # auto nack
+                            obj.topic_in.push(res)
+
+                            obj.tot_erro += 1
+                            self.log.error(f'Function exec {obj.name} erro: ' + exp.args[0])
+                            time.sleep(1)
+
                         if (obj.topic_out) and (ret != None):
 
-                            self.log.debug(f'Out Func exec {obj.name} topic {obj.topic_out.name} ..')
+                            self.log.debug(f'Function exec {obj.name} topic out: {obj.topic_out.name} ..')
                             obj.topic_out.push(ret)
                             obj.tot_output += 1
 

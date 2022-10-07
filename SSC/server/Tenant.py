@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221006
+Update on 20221007
 @author: Eduardo Pagotto
 '''
 
@@ -19,6 +19,8 @@ class Tenant(object):
 
     def create(self, name : str) -> str:
 
+        self.log.debug(f'tenant create {name}')
+
         for val in self.storage.iterdir():
             if val.name == name:
                 raise Exception(f'tenant {name} already exists') 
@@ -29,6 +31,9 @@ class Tenant(object):
         return f'Sucess {name}'
 
     def delete(self, name : str) -> str:
+
+        self.log.debug(f'tenant delete {name}')
+
         for val in self.storage.iterdir():
             if val.name == name:
                 target = pathlib.Path(os.path.join(str(self.storage),name))

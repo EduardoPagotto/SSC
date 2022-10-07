@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221006
+Update on 20221007
 @author: Eduardo Pagotto
 '''
 
@@ -17,9 +17,9 @@ from SSC.server.Topic import Topic
 from SSC.server.TopicCrt import TopicsCrt
 
 class FunctionDB(object):
-    def __init__(self, database : DataBaseCrt, topic_ctr : TopicsCrt) -> None:
+    def __init__(self, database : DataBaseCrt, topic_crt : TopicsCrt) -> None:
         self.database = database
-        self.topic_ctr = topic_ctr
+        self.topic_crt = topic_crt
         self.log = logging.getLogger('SSC.TopicDB')
 
     def load(self, path_file : pathlib.Path, class_name : str) -> Any:
@@ -27,6 +27,7 @@ class FunctionDB(object):
 
             plugin = str(path_file.parent).replace('/','.') + '.' + class_name
 
+            self.log.debug(f'function import {plugin}')
 
             if plugin is None or plugin == '':
                 self.log.error("Cannot have an empty plugin string.")
@@ -56,10 +57,10 @@ class FunctionDB(object):
         topic_out : Optional[Topic] = None
 
         if 'inputs' in params and params['inputs'] != None:
-            topic_in = self.topic_ctr.find_and_load(params['inputs'])
+            topic_in = self.topic_crt.find_and_load(params['inputs'])
 
         if 'output' in params and params['output'] != None:
-            topic_out = self.topic_ctr.find_and_load(params['output']) 
+            topic_out = self.topic_crt.find_and_load(params['output']) 
 
         klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
         with self.database.lock_db:
@@ -87,10 +88,10 @@ class FunctionDB(object):
             topic_out : Optional[Topic] = None
 
             if 'inputs' in params and params['inputs'] != None:
-                topic_in = self.topic_ctr.find_and_load(params['inputs'])
+                topic_in = self.topic_crt.find_and_load(params['inputs'])
 
             if 'output' in params and params['output'] != None:
-                topic_out = self.topic_ctr.find_and_load(params['output']) 
+                topic_out = self.topic_crt.find_and_load(params['output']) 
 
             klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
             klass.document = params
@@ -134,10 +135,10 @@ class FunctionDB(object):
             topic_out : Optional[Topic] = None
 
             if 'inputs' in params and params['inputs'] != None:
-                topic_in = self.topic_ctr.find_and_load(params['inputs'])
+                topic_in = self.topic_crt.find_and_load(params['inputs'])
 
             if 'output' in params and params['output'] != None:
-                topic_out = self.topic_ctr.find_and_load(params['output']) 
+                topic_out = self.topic_crt.find_and_load(params['output']) 
 
             klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
             klass.document = params

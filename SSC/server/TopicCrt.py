@@ -1,9 +1,10 @@
 '''
 Created on 20221006
-Update on 20221006
+Update on 20221007
 @author: Eduardo Pagotto
 '''
 
+import logging
 from typing import Any, Dict, List, Optional
 
 from SSC.server.TopicDB import TopicDB
@@ -13,6 +14,7 @@ class TopicsCrt(object):
     def __init__(self, database : TopicDB) -> None:
         self.database = database
         self.map_topics : Dict[int, Topic] = {}
+        self.log = logging.getLogger('SSC.TopicsCrt')
 
     def summario(self) -> List[dict]:
 
@@ -24,6 +26,8 @@ class TopicsCrt(object):
 
 
     def create(self, topic_name : str) -> Topic:
+
+        self.log.debug(f'topic create {topic_name}')
 
         topic : Optional[Topic] = None
         try:
@@ -42,12 +46,15 @@ class TopicsCrt(object):
 
     def delete(self, topic_name : str):
 
+        self.log.debug(f'topic delete {topic_name}')
+
         for k, v in self.map_topics.items():
             if v.name == topic_name:
                 del self.map_topics[v.id]
                 break
 
         self.database.delete(topic_name)
+
 
     def list_all(self, ns : str) -> List[str]:
         return self.database.list_all(ns)
@@ -56,9 +63,11 @@ class TopicsCrt(object):
 
         for k, v in self.map_topics.items():
             if v.name == topic_name:
+                self.log.debug(f'topic find in cashe {topic_name}')
                 return v
 
         topic : Topic = self.database.find(topic_name)
+        self.log.debug(f'topic find in db {topic_name}')
 
         self.map_topics[topic.id] = topic
 
