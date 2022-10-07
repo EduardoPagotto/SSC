@@ -60,8 +60,8 @@ class Admin(object):
     def function_delete(self, name : str) -> str:
         return self.__rpc().function_delete(name)
 
-    def functions_list(self) -> List[str]:
-        return self.__rpc().functions_list()
+    def functions_list(self, tenant_ns : str) -> List[str]:
+        return self.__rpc().functions_list(tenant_ns)
 
     def tenants_create(self, name : str) -> str:
         return self.__rpc().tenants_create(name)
@@ -147,9 +147,9 @@ def main():
                 log.info(admin.function_create(parm))
 
             elif args.opp == 'delete':
-                log.info(admin.function_delete(args.name)) 
+                log.info(admin.function_delete(args.tenant + '/' + args.namespace + '/' +args.name)) 
             elif args.opp == 'list':
-                log.info(admin.functions_list()) 
+                log.info(admin.functions_list(args.tenant + '/' + args.namespace)) 
             else:
                 log.error(f'Opp invalida: {args.opp}')
 

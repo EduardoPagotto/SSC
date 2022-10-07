@@ -87,16 +87,27 @@ class FunctionCrt(object):
 
         self.log.debug(f'Function delete {func_name}')
 
+        val = func_name.split('/')
+
         for k, v in self.map_functions.items():
-            if v.name == func_name:
-                if v.document:
-                    del self.map_functions[v.document.doc_id]
+            
+            if v.document:
+                params = v.document
+                doc_id = v.document.doc_id
+                if ((val[0] == params['tenant']) and 
+                    (val[1] == params['namespace']) and 
+                    (val[2] == v.name) and 
+                    (doc_id == k)):
+                    del self.map_functions[doc_id]
+                    self.database.delete_id(doc_id)
+                    return
 
-        self.database.delete(func_name)
+
+        self.database.delete(val[0], val[1], val[2])
 
 
-    def list_all(self) -> List[str]:
-        return self.database.list_all()
+    def list_all(self, tenant_ns : str) -> List[str]:
+        return self.database.list_all(tenant_ns)
 
     def load_funcs_db(self):
         lista : List[Function] = self.database.get_all()

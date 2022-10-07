@@ -26,8 +26,10 @@ Simple Stream Control
 ./ssc-client.py consume -s appteste queue02 -n 10
 
 # remove a func named01
-./ssc-admin.py functions delete --name name01
+./ssc-admin.py functions delete --tenant rpa --namespace manifesto --name name01
 
+
+./ssc-admin.py functions list --tenant rpa --namespace manifesto
 ```
 
 

@@ -42,7 +42,7 @@
 				]
 			},
 			{
-				"name": "Python: Admin Function1",
+				"name": "Admin Function List",
 				"type": "python",
 				"request": "launch",
 				"program": "${workspaceFolder:SSC}/ssc-admin.py",
@@ -50,12 +50,11 @@
 				"justMyCode": true,
 				"args": [
 					"functions",
-					"create",
-					"--name", "name01",
-					"--py", "./funcs/externo.py",
-					"--classname", "externo/FuncAdd",
-					"--inputs", "queue01",
-					"--output", "queue02"
+					"list",
+					"--tenant",
+					"rpa",
+					"--namespace",
+					"manifesto"
 				]
 			},
 

@@ -113,8 +113,8 @@ class DRegistry(RPC_Responser):
         return f'success delete {name}'
     
     # Admin
-    def functions_list(self) -> List[str]:
-        return self.function_crt.list_all()
+    def functions_list(self, tenant_ns : str) -> List[str]:
+        return self.function_crt.list_all(tenant_ns)
 
     # Admin
     def tenants_create(self, name : str) -> str:

@@ -102,21 +102,33 @@ class FunctionDB(object):
 
         raise Exception(f'function {function_name} does not exist')
 
+    def delete_id(self, doc_id : int) -> None:
+        with LockDB(self.database, 'funcs', True) as table:
+            table.remove(doc_ids=[doc_id])
 
-    def delete(self, func_name : str) -> None:
+    def delete(self, tenant :str, namespace : str,  name : str) -> None:
 
+        tot : List[int] = []
         with LockDB(self.database, 'funcs', True) as table:
             q = Query()
-            table.remove(q.topic == func_name)
+            tot = table.remove((q.tenant == tenant) & (q.namespace == namespace) & (q.name == name))
 
-    def list_all(self) -> List[str]:
+        if len(tot) == 0:
+            raise Exception(f'function {name} does not exist')
+
+
+    def list_all(self, tenant_ns : str) -> List[str]:
 
         with LockDB(self.database, 'funcs', False) as table:
             itens = table.all()
 
         lista : List[str] = []
         for item in itens:
-            lista.append(item['topic'])
+            val = tenant_ns.split('/')
+            te = item['tenant']
+            ns = item['namespace']
+            if (val[0] == te) and (val[1] == ns): 
+                lista.append(item['name'])
 
         return lista
 
