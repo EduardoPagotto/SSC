@@ -8,7 +8,7 @@ import logging
 import os
 import pathlib
 import shutil
-from threading import Lock
+from threading import Lock, Thread
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -25,6 +25,7 @@ class FunctionCrt(object):
 
         self.lock_func = Lock()
         self.map_functions : Dict[int, Function] = {}
+        self.t_functions : Dict[int, Thread] = {}
 
         self.log = logging.getLogger('SSC.FunctionCrt')
 
@@ -66,9 +67,45 @@ class FunctionCrt(object):
             if function.document:
                 with self.lock_func:
                     self.map_functions[function.document.doc_id] = function 
+                    self.start_func(function, function.document.doc_id)
 
         return f"success create {params['name']}"
 
+    def stop_func_all(self):
+        for k, v in self.t_functions.items():
+            self.map_functions[k].alive = False
+
+        for k, v in self.t_functions.items():
+            self.stop_func(self.map_functions[k],k)
+
+        
+
+    def start_func(self, func : Function, doc_id : int):
+
+        t_function : Thread = Thread(target=func.execute(self.database.topic_crt, 5), name=f't_func_{func.name}')
+        t_function.start()
+        self.t_functions[doc_id] = t_function
+
+    def stop_func(self, func : Function, doc_id : int):
+        func.alive = False
+        count : int = 0
+
+        self.log.debug(f'func {func.name} signed to stop')
+
+        while self.t_functions[doc_id].is_alive():
+            time.sleep(1)
+            count += 1
+            if count > 15:
+                self.log.debug(f'func {func.name} overtime')
+                break
+
+            self.log.debug(f'func {func.name} waiting ....')
+
+        self.t_functions[doc_id].join()
+        del self.t_functions[doc_id]
+
+        self.log.debug(f'func {func.name} is dead')
+        
 
     def find_and_load(self, func_name : str) ->  Function:
 
@@ -106,7 +143,12 @@ class FunctionCrt(object):
                         (doc_id == k)):
                             try:
                                 path_delete = pathlib.Path(params['path'])
-                                del self.map_functions[k] # sinal ??
+                        
+                                # stop thread and wait
+                                self.stop_func(self.map_functions[k], k)
+
+                                del self.map_functions[k] 
+                        
                                 self.database.delete_id(k)
                                 shutil.rmtree(path_delete.parent)   
                                 return
@@ -128,46 +170,17 @@ class FunctionCrt(object):
             for item in lista:
                 self.map_functions[item.document.doc_id] = item
                 self.log.debug(f'function load from db: {item.name}')
+                self.start_func(item, item.document.doc_id)
+
 
     def execute(self) -> Tuple[int, int]:
 
         inputs = 0
         outputs = 0
 
-        context : Context = Context(self.database.topic_crt)
-
         with self.lock_func:
-
             for k, obj in self.map_functions.items():
+                inputs += obj.tot_input
+                outputs += obj.tot_output
                 
-                if (obj.topic_in) and (obj.topic_in.qsize() > 0):
-
-                    res = obj.topic_in.pop(0)
-                    if res:
-
-                        self.log.debug(f'Function exec {obj.name} topic in: {obj.topic_in.name} ..')
-                        inputs += 1
-                        obj.tot_input += 1
-
-                        try:
-
-                            ret = obj.process(res, context)
-
-                        except Exception as exp:
-                            
-                            # auto nack
-                            obj.topic_in.push(res)
-
-                            obj.tot_erro += 1
-                            self.log.error(f'Function exec {obj.name} erro: ' + exp.args[0])
-                            time.sleep(1)
-
-                        if (obj.topic_out) and (ret != None):
-
-                            self.log.debug(f'Function exec {obj.name} topic out: {obj.topic_out.name} ..')
-                            obj.topic_out.push(ret)
-                            obj.tot_output += 1
-
-                            outputs += 1
-
         return inputs, outputs

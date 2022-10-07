@@ -52,20 +52,21 @@ class DRegistry(RPC_Responser):
 
         time.sleep(10)
         self.log.info('thread cleanner_files start')
-        while self.done is False:
+        last_inputs = 0
+        last_outputs = 0
 
-            inputs = 0
-            outputs = 0
+        while self.done is False:
 
             inputs, outputs = self.function_crt.execute()
 
-            if (inputs > 0) or (outputs > 0):
-                continue                
+            last_inputs += inputs
+            last_outputs += outputs
 
-            self.log.debug(f'Tick-Tack... ')
+            self.log.debug(f'Tick-Tack [{last_inputs}  / {last_outputs}]... ')
             self.ticktack += 1
             time.sleep(5)
 
+        self.function_crt.stop_func_all()
         self.log.info('thread cleanner_files stop')
 
     # ClientQueue
