@@ -7,20 +7,18 @@ Update on 20221006
 import logging
 from typing import List
 
-from tinydb import Query
-
-from SSC.server.DataBaseCrt import DataBaseCrt
+from tinydb import TinyDB, Query
 from SSC.server.Topic import Topic
+from SSC.subsys.LockDB import LockDB
 
 class TopicDB(object):
-    def __init__(self, database : DataBaseCrt) -> None:
+    def __init__(self, database : TinyDB) -> None:
         self.database = database
         self.log = logging.getLogger('SSC.TopicDB')
 
     def find(self, topic_name : str) -> Topic:
 
-        with self.database.lock_db:
-            table = self.database.db.table('topics')
+        with LockDB(self.database, 'topics') as table:
             q = Query()
             itens = table.search(q.topic == topic_name)
         
@@ -30,20 +28,19 @@ class TopicDB(object):
         raise Exception(f'topic {topic_name} does not exist')
 
     def create(self, topic_name : str) -> Topic:
-        with self.database.lock_db:
-            table = self.database.db.table('topics')
+
+        with LockDB(self.database, 'topics', True) as table:
             id = table.insert({'topic': topic_name, 'name_app':'', 'user_config':''})
             return Topic(id, topic_name)
         
     def delete(self, topic_name : str) -> None:
-        with self.database.lock_db:
-            table = self.database.db.table('topics')
+
+        with LockDB(self.database, 'topics', True) as table:
             q = Query()
             table.remove(q.topic == topic_name)
 
     def list_all(self, ns : str) -> List[str]:
-        with self.database.lock_db:
-            table = self.database.db.table('topics')
+        with LockDB(self.database, 'topics') as table:
             itens = table.all()
 
         lista : List[str] = []

@@ -9,15 +9,15 @@ import logging
 import pathlib
 from typing import Any, List, Optional
 
-from tinydb import Query
+from tinydb import TinyDB, Query
 
 from SSC.Function import Function
-from SSC.server.DataBaseCrt import DataBaseCrt
 from SSC.server.Topic import Topic
 from SSC.server.TopicCrt import TopicsCrt
+from SSC.subsys.LockDB import LockDB
 
 class FunctionDB(object):
-    def __init__(self, database : DataBaseCrt, topic_crt : TopicsCrt) -> None:
+    def __init__(self, database : TinyDB, topic_crt : TopicsCrt) -> None:
         self.database = database
         self.topic_crt = topic_crt
         self.log = logging.getLogger('SSC.TopicDB')
@@ -63,8 +63,8 @@ class FunctionDB(object):
             topic_out = self.topic_crt.find_and_load(params['output']) 
 
         klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
-        with self.database.lock_db:
-            table = self.database.db.table('funcs')
+
+        with LockDB(self.database, 'funcs', True) as table:
             klass.document = table.get(doc_id=table.insert(params))
 
         klass.name = params['name']
@@ -76,8 +76,7 @@ class FunctionDB(object):
 
     def find(self, function_name : str) -> Function:
 
-        with self.database.lock_db:
-            table = self.database.db.table('funcs')
+        with LockDB(self.database, 'funcs', False) as table:
             q = Query()
             itens = table.search(q.name == function_name)
         
@@ -105,14 +104,14 @@ class FunctionDB(object):
 
 
     def delete(self, func_name : str) -> None:
-        with self.database.lock_db:
-            table = self.database.db.table('funcs')
+
+        with LockDB(self.database, 'funcs', True) as table:
             q = Query()
             table.remove(q.topic == func_name)
 
     def list_all(self) -> List[str]:
-        with self.database.lock_db:
-            table = self.database.db.table('funcs')
+
+        with LockDB(self.database, 'funcs', False) as table:
             itens = table.all()
 
         lista : List[str] = []
@@ -125,8 +124,7 @@ class FunctionDB(object):
 
         lista : List[Function] = []
 
-        with self.database.lock_db:
-            table = self.database.db.table('funcs')
+        with LockDB(self.database, 'funcs', False) as table:
             itens = table.all()
             
         for params in itens:

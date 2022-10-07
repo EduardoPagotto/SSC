@@ -18,8 +18,8 @@ from SSC.server.Tenant import Tenant
 from SSC.server.FunctionCrt import FunctionCrt
 from SSC.server.TopicCrt import TopicsCrt
 
-from .__init__ import __version__ as VERSION
-from .__init__ import __date_deploy__ as DEPLOY
+from SSC.__init__ import __version__ as VERSION
+from SSC.__init__ import __date_deploy__ as DEPLOY
 
 class DRegistry(RPC_Responser):
     def __init__(self, topic_crt : TopicsCrt, function_crt : FunctionCrt, tenant : Tenant, namespace : NameSpace) -> None:
@@ -29,20 +29,9 @@ class DRegistry(RPC_Responser):
         self.function_crt = function_crt
         self.tenant = tenant
         self.namespace = namespace
-
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format='%(asctime)s %(name)-12s %(levelname)-8s %(threadName)-16s %(funcName)-20s %(message)s',
-            datefmt='%H:%M:%S',
-        )
-
         self.done : bool = False
         self.ticktack = 0
-
-        logging.getLogger('werkzeug').setLevel(logging.CRITICAL)
-
-        self.log = logging.getLogger('SSC')
-        self.log.info(f'>>>>>> SSC v-{VERSION} ({DEPLOY})')
+        self.log = logging.getLogger('SSC.DRegistry')
 
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
         self.t_cleanner.start()

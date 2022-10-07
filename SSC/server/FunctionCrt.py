@@ -20,7 +20,7 @@ class FunctionCrt(object):
 
         self.database = database
 
-        self.storage = pathlib.Path(path_storage)
+        self.storage = pathlib.Path(path_storage, 'tenant')
         self.storage.mkdir(parents=True, exist_ok=True)
 
         self.lock_func = Lock()

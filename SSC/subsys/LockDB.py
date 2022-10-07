@@ -1,26 +1,12 @@
 '''
-Created on 20221006
+Created on 20221007
 Update on 20221007
 @author: Eduardo Pagotto
 '''
 
 import logging
-import pathlib
-from threading import Lock
 import threading
 from tinydb import TinyDB
-
-class DataBaseCrt(object):
-    def __init__(self, path_db : str) -> None:
-
-        path1 = pathlib.Path(path_db)
-        path1.mkdir(parents=True, exist_ok=True)
-
-        self.db = TinyDB(str(path1) + '/master.json')
-        self.lock_db = Lock()
-
-        self.log = logging.getLogger('SSC.DataBaseCrt')
-
 
 class AbortSignal(Exception):
     pass
@@ -50,25 +36,27 @@ class LockDB(object):
             self.log.debug('Transaction %d', self.count)
 
     def __enter__(self):
-        self.log.debug('acquire %d', self.count)
-
+        
         if self.rw:
             LockDB.write_count += 1
 
         if LockDB.write_count > 0:
-            LockDB.mutex_db.lock()
-            self.log.debug('acquired %d', self.count)
+            LockDB.mutex_db.acquire()
+            self.log.debug('acquire %d', self.count)
 
         return self.db.table(self.table_name)
 
     def __exit__(self, type, value, traceback):
 
         if LockDB.write_count > 0:
-            LockDB.mutex_db.unlock()
+            LockDB.mutex_db.release()
             self.log.debug('release %d', self.count)
 
         if self.rw:
             LockDB.write_count -= 1
+            if LockDB.write_count < 0:
+                LockDB.write_count = 0
+                self.log.critical('Falha critica no unlock')
 
         return isinstance(value, AbortSignal)
 

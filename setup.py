@@ -7,7 +7,7 @@ Update on 20220926
 
 from setuptools import setup, find_packages
 
-from SSC.server.__init__ import __version__ as VERSION
+from SSC.__init__ import __version__ as VERSION
 
 PACKAGE = "SSC"
 
