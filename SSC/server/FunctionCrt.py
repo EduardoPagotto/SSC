@@ -64,22 +64,25 @@ class FunctionCrt(object):
         function = self.database.create(params)
         with self.lock_func:
             if function.document:
-                self.map_functions[function.document.doc_id] = function 
+                with self.lock_func:
+                    self.map_functions[function.document.doc_id] = function 
 
         return f"success create {params['name']}"
 
 
     def find_and_load(self, func_name : str) ->  Function:
 
-        for k, v in self.map_functions.items():
-            if v.name == func_name:
-                self.log.debug(f'function find in cache {func_name}')
-                return v
+        with self.lock_func:
+            for k, v in self.map_functions.items():
+                if v.name == func_name:
+                    self.log.debug(f'function find in cache {func_name}')
+                    return v
 
         function : Function = self.database.find(func_name)
         if function.document:
-            self.map_functions[function.document.doc_id] = function
-            self.log.debug(f'function find in db {func_name}')
+            with self.lock_func:
+                self.map_functions[function.document.doc_id] = function
+                self.log.debug(f'function find in db {func_name}')
 
         return function
 
@@ -89,31 +92,42 @@ class FunctionCrt(object):
 
         val = func_name.split('/')
 
-        for k, v in self.map_functions.items():
-            
-            if v.document:
-                params = v.document
-                doc_id = v.document.doc_id
-                if ((val[0] == params['tenant']) and 
-                    (val[1] == params['namespace']) and 
-                    (val[2] == v.name) and 
-                    (doc_id == k)):
-                    del self.map_functions[doc_id]
-                    self.database.delete_id(doc_id)
-                    return
+        if len(val) != 3:
+            raise Exception(f'function {func_name} invalid')
 
+        with self.lock_func:
+            for k, v in self.map_functions.items(): 
+                if v.document:
+                    params = v.document
+                    doc_id = v.document.doc_id
+                    if ((val[0] == params['tenant']) and 
+                        (val[1] == params['namespace']) and 
+                        (val[2] == v.name) and 
+                        (doc_id == k)):
+                            try:
+                                path_delete = pathlib.Path(params['path'])
+                                del self.map_functions[k] # sinal ??
+                                self.database.delete_id(k)
+                                shutil.rmtree(path_delete.parent)   
+                                return
+                            except Exception as exp: 
+                                self.log.error(f'Falha ao apagar function {func_name} : {exp.args[0]}')
+                                raise exp
 
-        self.database.delete(val[0], val[1], val[2])
-
+        path_temp = self.database.delete(val[0], val[1], val[2])
+        if len(path_temp) > 0:
+            p = pathlib.Path(path_temp)
+            shutil.rmtree(p.parent)
 
     def list_all(self, tenant_ns : str) -> List[str]:
         return self.database.list_all(tenant_ns)
 
     def load_funcs_db(self):
         lista : List[Function] = self.database.get_all()
-        for item in lista:
-            self.map_functions[item.document.doc_id] = item
-            self.log.debug(f'function load from db: {item.name}')
+        with self.lock_func:
+            for item in lista:
+                self.map_functions[item.document.doc_id] = item
+                self.log.debug(f'function load from db: {item.name}')
 
     def execute(self) -> Tuple[int, int]:
 

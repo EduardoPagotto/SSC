@@ -10,6 +10,7 @@ import pathlib
 from typing import Any, List, Optional
 
 from tinydb import TinyDB, Query
+from tinydb.table import Document
 
 from SSC.Function import Function
 from SSC.server.Topic import Topic
@@ -106,16 +107,26 @@ class FunctionDB(object):
         with LockDB(self.database, 'funcs', True) as table:
             table.remove(doc_ids=[doc_id])
 
-    def delete(self, tenant :str, namespace : str,  name : str) -> None:
+    def delete(self, tenant :str, namespace : str,  name : str) -> str:
 
-        tot : List[int] = []
-        with LockDB(self.database, 'funcs', True) as table:
+        itens : List[Document] = []
+        with LockDB(self.database, 'funcs', False) as table:
             q = Query()
-            tot = table.remove((q.tenant == tenant) & (q.namespace == namespace) & (q.name == name))
+            itens = table.search((q.tenant == tenant) & (q.namespace == namespace) & (q.name == name))
 
-        if len(tot) == 0:
+        tot = len(itens)
+        if tot == 0:
             raise Exception(f'function {name} does not exist')
 
+        if tot > 1:
+            raise Exception(f'function {name} duplicate')
+
+        doc_id = itens[0].doc_id
+        params : dict = itens[0]
+        with LockDB(self.database, 'funcs', True) as table:
+            table.remove(doc_ids=[doc_id])
+
+        return params['path']       
 
     def list_all(self, tenant_ns : str) -> List[str]:
 
