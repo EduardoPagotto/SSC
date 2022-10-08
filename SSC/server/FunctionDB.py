@@ -71,6 +71,12 @@ class FunctionDB(object):
         klass.name = params['name']
         klass.topic_in = topic_in
         klass.topic_out = topic_out
+        # FIXME : otimizar com carga unica
+        klass.log = logging.getLogger('SSC.function')
+        klass.tot_input  = 0
+        klass.tot_output  = 0
+        klass.tot_erro  = 0
+        klass.alive  = True
 
         return klass
 
@@ -98,6 +104,13 @@ class FunctionDB(object):
             klass.name = params['name']
             klass.topic_in = topic_in
             klass.topic_out = topic_out
+
+            klass.log = logging.getLogger('SSC.function')
+            klass.tot_input  = 0
+            klass.tot_output  = 0
+            klass.tot_erro  = 0
+            klass.alive  = True
+
 
             return klass
 
@@ -166,6 +179,12 @@ class FunctionDB(object):
             klass.name = params['name']
             klass.topic_in = topic_in
             klass.topic_out = topic_out
+
+            klass.log = logging.getLogger('SSC.function')
+            klass.tot_input  = 0
+            klass.tot_output  = 0
+            klass.tot_erro  = 0
+            klass.alive  = True
 
             lista.append(klass)
 

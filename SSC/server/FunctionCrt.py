@@ -63,11 +63,10 @@ class FunctionCrt(object):
         params['useConfig'] = {} # TODO Implementar
 
         function = self.database.create(params)
-        with self.lock_func:
-            if function.document:
-                with self.lock_func:
-                    self.map_functions[function.document.doc_id] = function 
-                    self.start_func(function, function.document.doc_id)
+        if function.document:
+            with self.lock_func:
+                self.map_functions[function.document.doc_id] = function 
+                self.start_func(function, function.document.doc_id)
 
         return f"success create {params['name']}"
 
@@ -82,7 +81,7 @@ class FunctionCrt(object):
 
     def start_func(self, func : Function, doc_id : int):
 
-        t_function : Thread = Thread(target=func.execute(self.database.topic_crt, 5), name=f't_func_{func.name}')
+        t_function : Thread = Thread(target=func.execute ,args=(self.database.topic_crt, 5), name=f't_func_{func.name}')
         t_function.start()
         self.t_functions[doc_id] = t_function
 
