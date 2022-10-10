@@ -34,7 +34,8 @@ logging.basicConfig(
     datefmt='%H:%M:%S',
 )
 
-logging.getLogger('werkzeug').setLevel(logging.CRITICAL)
+logging.getLogger('werkzeug').setLevel(logging.CRITICAL) #urllib3
+logging.getLogger('urllib3').setLevel(logging.CRITICAL)
 
 log = logging.getLogger('SSC')
 log.info(f'>>>>>> SSC v-{VERSION} ({DEPLOY})')

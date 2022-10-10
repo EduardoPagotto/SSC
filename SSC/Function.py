@@ -48,7 +48,7 @@ class Function(ABC):
                 res = self.topic_in.pop(timeout)
                 if res:
 
-                    self.log.debug(f'Function exec {self.name} topic in: {self.topic_in.name} ..')
+                    #self.log.debug(f'Function exec {self.name} topic in: {self.topic_in.name} ..')
                     inputs += 1
                     self.tot_proc += 1
 
@@ -59,7 +59,7 @@ class Function(ABC):
 
                             outputs += 1
 
-                            self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
+                            #self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
                             self.topic_out.push(ret)
 
                     except Exception as exp:
