@@ -5,6 +5,7 @@ Update on 20221007
 '''
 
 from logging import Logger, getLogger
+from typing import Optional
 
 from SSC.server.TopicCrt import TopicsCrt
 
@@ -19,3 +20,6 @@ class Context(object):
 
     def publish(self, topic : str, data : str):
         self.topic_crt.push_name(topic, data)
+
+    def get_message_key(self) -> Optional[dict]:
+        return None 

@@ -44,9 +44,6 @@ class Function(ABC):
 
             inputs = 0
             outputs = 0
-
-            self.log.info(f'function thread tiktak ... {self.name}')
-
             if (self.topic_in) and (self.topic_in.qsize() > 0):
 
                 res = self.topic_in.pop(timeout)

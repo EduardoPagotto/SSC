@@ -156,8 +156,8 @@ def main():
         #   --name ConvertTxt2Dic \
         #   --py /var/app/src/ConvertTxt2Dic.py \
         #   --classname ConvertTxt2Dic.ConvertTxt2Dic \
-        #   --inputs "persistent://rpa/manifest/q01DecodeTxt"  \
-        #   --output "persistent://rpa/manifest/q99Erro" \
+        #   --inputs "persistent://rpa/manifesto/q01DecodeTxt"  \
+        #   --output "persistent://rpa/manifesto/q99Erro" \
         #   --parallelism 1 
 
 

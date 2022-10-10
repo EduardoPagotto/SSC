@@ -29,6 +29,9 @@ class FunctionCrt(object):
 
         self.log = logging.getLogger('SSC.FunctionCrt')
 
+        self.last_tot_in : int = 0
+        self.last_tot_out : int = 0
+
         self.load_funcs_db()
 
     def create(self, params) -> str:
@@ -77,8 +80,7 @@ class FunctionCrt(object):
         for k, v in self.t_functions.items():
             self.stop_func(self.map_functions[k],k)
 
-        
-
+    
     def start_func(self, func : Function, doc_id : int):
 
         t_function : Thread = Thread(target=func.execute ,args=(self.database.topic_crt, 5), name=f't_func_{func.name}')
@@ -179,7 +181,12 @@ class FunctionCrt(object):
 
         with self.lock_func:
             for k, obj in self.map_functions.items():
-                inputs += obj.tot_input
-                outputs += obj.tot_output
-                
+                if obj.tot_input != self.last_tot_in:
+                    inputs += (obj.tot_input - self.last_tot_in)
+                    self.last_tot_in = obj.tot_input
+
+                if obj.tot_output != self.last_tot_out:
+                    outputs += (obj.tot_output - self.last_tot_out)
+                    self.last_tot_out = obj.tot_output
+
         return inputs, outputs

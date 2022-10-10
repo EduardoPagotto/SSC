@@ -60,7 +60,7 @@ class DRegistry(RPC_Responser):
             last_inputs += inputs
             last_outputs += outputs
 
-            self.log.debug(f'Tick-Tack [{last_inputs}  / {last_outputs}]... ')
+            self.log.debug(f'Tick-Tack {self.ticktack} [{last_inputs}  / {last_outputs}]... ')
             self.ticktack += 1
             time.sleep(5)
 
@@ -151,6 +151,6 @@ class DRegistry(RPC_Responser):
         #   --name ConvertTxt2Dic \
         #   --py /var/app/src/ConvertTxt2Dic.py \
         #   --classname ConvertTxt2Dic.ConvertTxt2Dic \
-        #   --inputs "persistent://rpa/manifest/q01DecodeTxt"  \
-        #   --output "persistent://rpa/manifest/q99Erro" \
+        #   --inputs "persistent://rpa/manifesto/q01DecodeTxt"  \
+        #   --output "persistent://rpa/manifesto/q99Erro" \
         #   --parallelism 1 
