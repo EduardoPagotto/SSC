@@ -50,17 +50,12 @@ class DRegistry(RPC_Responser):
 
         time.sleep(10)
         self.log.info('thread cleanner_files start')
-        last_inputs = 0
-        last_outputs = 0
 
         while self.done is False:
 
-            inputs, outputs = self.function_crt.execute()
+            procs, errors = self.function_crt.execute()
 
-            last_inputs += inputs
-            last_outputs += outputs
-
-            self.log.debug(f'Tick-Tack {self.ticktack} [{last_inputs}  / {last_outputs}]... ')
+            self.log.debug(f'Tick-Tack {self.ticktack} [{procs}  / {errors}]... ')
             self.ticktack += 1
             time.sleep(5)
 

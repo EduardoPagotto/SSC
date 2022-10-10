@@ -29,9 +29,6 @@ class FunctionCrt(object):
 
         self.log = logging.getLogger('SSC.FunctionCrt')
 
-        self.last_tot_in : int = 0
-        self.last_tot_out : int = 0
-
         self.load_funcs_db()
 
     def create(self, params) -> str:
@@ -176,17 +173,12 @@ class FunctionCrt(object):
 
     def execute(self) -> Tuple[int, int]:
 
-        inputs = 0
-        outputs = 0
+        tot_proc = 0
+        tot_erro = 0
 
         with self.lock_func:
             for k, obj in self.map_functions.items():
-                if obj.tot_input != self.last_tot_in:
-                    inputs += (obj.tot_input - self.last_tot_in)
-                    self.last_tot_in = obj.tot_input
+                tot_proc += obj.tot_proc 
+                tot_erro += obj.tot_erro 
 
-                if obj.tot_output != self.last_tot_out:
-                    outputs += (obj.tot_output - self.last_tot_out)
-                    self.last_tot_out = obj.tot_output
-
-        return inputs, outputs
+        return tot_proc, tot_erro

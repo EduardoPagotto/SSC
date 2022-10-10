@@ -23,8 +23,7 @@ class Function(ABC):
         self.topic_out : Optional[Topic] = None
         self.name : str = ''
         self.document : Optional[Document] = None
-        self.tot_input : int = 0
-        self.tot_output : int = 0
+        self.tot_proc : int = 0
         self.tot_erro : int = 0
         self.alive : bool = True
 
@@ -44,40 +43,38 @@ class Function(ABC):
 
             inputs = 0
             outputs = 0
-            if (self.topic_in) and (self.topic_in.qsize() > 0):
 
+            if self.topic_in:
                 res = self.topic_in.pop(timeout)
                 if res:
 
                     self.log.debug(f'Function exec {self.name} topic in: {self.topic_in.name} ..')
                     inputs += 1
+                    self.tot_proc += 1
 
                     try:
 
                         ret = self.process(res, Context(topic_crt, self.log))
+                        if (self.topic_out) and (ret != None):
+
+                            outputs += 1
+
+                            self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
+                            self.topic_out.push(ret)
 
                     except Exception as exp:
                         
                         # auto nack
-                        self.topic_in.push(res)
+                        #self.topic_in.push(res)
+                        #TODO: imlementar erro critico de queue 
 
                         self.tot_erro += 1
                         self.log.error(f'Function exec {self.name} erro: ' + exp.args[0])
                         time.sleep(1)
 
-                    if (self.topic_out) and (ret != None):
-
-                        self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
-                        self.topic_out.push(ret)
-                        self.tot_output += 1
-
-                        outputs += 1
+                    continue
 
             if (inputs == 0) and (outputs == 0):
                 time.sleep(timeout)
-            else:
-                self.tot_input += inputs
-                self.tot_output += outputs
-
 
         self.log.info(f'function thread stop... {self.name}')

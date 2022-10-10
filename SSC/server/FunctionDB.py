@@ -73,8 +73,7 @@ class FunctionDB(object):
         klass.topic_out = topic_out
         # FIXME : otimizar com carga unica
         klass.log = logging.getLogger('SSC.function')
-        klass.tot_input  = 0
-        klass.tot_output  = 0
+        klass.tot_proc  = 0
         klass.tot_erro  = 0
         klass.alive  = True
 
@@ -106,8 +105,7 @@ class FunctionDB(object):
             klass.topic_out = topic_out
 
             klass.log = logging.getLogger('SSC.function')
-            klass.tot_input  = 0
-            klass.tot_output  = 0
+            klass.tot_proc  = 0
             klass.tot_erro  = 0
             klass.alive  = True
 
@@ -181,8 +179,7 @@ class FunctionDB(object):
             klass.topic_out = topic_out
 
             klass.log = logging.getLogger('SSC.function')
-            klass.tot_input  = 0
-            klass.tot_output  = 0
+            klass.tot_proc  = 0
             klass.tot_erro  = 0
             klass.alive  = True
 
