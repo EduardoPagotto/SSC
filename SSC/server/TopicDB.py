@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221006
+Update on 20221010
 @author: Eduardo Pagotto
 '''
 
@@ -29,8 +29,12 @@ class TopicDB(object):
 
     def create(self, topic_name : str) -> Topic:
 
+        lista = topic_name.split('/')
+        if len(lista) != 3:
+            raise Exception(f'topic {topic_name} is invalid')
+
         with LockDB(self.database, 'topics', True) as table:
-            id = table.insert({'topic': topic_name, 'name_app':'', 'user_config':''})
+            id = table.insert({'topic': topic_name, 'tenant':lista[0], 'namespace':lista[1], 'queue':lista[2]})
             return Topic(id, topic_name)
         
     def delete(self, topic_name : str) -> None:

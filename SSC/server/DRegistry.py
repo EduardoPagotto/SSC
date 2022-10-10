@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221006
+Update on 20221010
 @author: Eduardo Pagotto
 '''
 
@@ -22,13 +22,12 @@ from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY
 
 class DRegistry(RPC_Responser):
-    def __init__(self, topic_crt : TopicsCrt, function_crt : FunctionCrt, tenant : Tenant, namespace : NameSpace) -> None:
+    def __init__(self, topic_crt : TopicsCrt, function_crt : FunctionCrt, tenant : Tenant) -> None:
         super().__init__(self)
 
         self.topic_crt = topic_crt
         self.function_crt = function_crt
         self.tenant = tenant
-        self.namespace = namespace
         self.done : bool = False
         self.ticktack = 0
         self.log = logging.getLogger('SSC.DRegistry')
@@ -88,15 +87,16 @@ class DRegistry(RPC_Responser):
     # Admin
     def topics_create(self, topic_name : str) -> str:
 
-        lista = topic_name.split('/')
-        if len(lista) != 3:
-            raise Exception(f'topic {topic_name} is invalid')
+        doc = self.tenant.find_tenant_params(topic_name)
 
         topic  = self.topic_crt.create(topic_name)
         return f'success create {topic_name} id {topic.id}'
 
     # Admin
     def topics_delete(self, topic_name : str) -> str:
+
+        doc = self.tenant.find_tenant_params(topic_name)
+
         self.topic_crt.delete(topic_name)
         return f'success delete {topic_name}'
 
@@ -106,6 +106,10 @@ class DRegistry(RPC_Responser):
 
     # Admin
     def function_create(self, params: dict) -> str:
+
+        topic_name = params['tenant'] + '/' + params['namespace']
+        doc = self.tenant.find_tenant_params(topic_name)
+
         return self.function_crt.create(params)
         
     # Admin
@@ -131,15 +135,15 @@ class DRegistry(RPC_Responser):
 
     # Admin
     def namespaces_create(self, name : str) -> str:
-        return self.namespace.create(name)
+        return self.tenant.create_namespace(name)
 
     # Admin
     def namespaces_delete(self, name : str) -> str:
-        return self.namespace.delete(name)
+        return self.tenant.delete_namespace(name)
 
     # Admin
     def namespaces_list(self, name : str) -> List[str]:
-        return self.namespace.list_all(name)
+        return self.tenant.list_all_namespace(name)
 
         #--user-config '{"FileCfg":"aaaaa"}'
         #--user-config-file "/pulsar/host/etc/func1.yaml"

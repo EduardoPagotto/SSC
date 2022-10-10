@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221007
+Update on 20221010
 @author: Eduardo Pagotto
 '''
 
@@ -63,7 +63,7 @@ class TopicsCrt(object):
 
         for k, v in self.map_topics.items():
             if v.name == topic_name:
-                self.log.debug(f'topic find in cashe {topic_name}')
+                self.log.debug(f'topic find in cache {topic_name}')
                 return v
 
         topic : Topic = self.database.find(topic_name)

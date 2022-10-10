@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221007
+Update on 20221010
 @author: Eduardo Pagotto
 '''
 
@@ -47,15 +47,12 @@ path2 = pathlib.Path(SSC_CFG_STORAGE)
 path2.mkdir(parents=True, exist_ok=True)
 
 database = TinyDB(str(path1) + '/master.json')
+
+tenant = Tenant(database, SSC_CFG_STORAGE)
 topic_crt = TopicsCrt(TopicDB(database))
-function_db = FunctionDB(database, topic_crt)
+function_crt = FunctionCrt(FunctionDB(database, topic_crt), SSC_CFG_STORAGE)
 
-function_crt = FunctionCrt(function_db, SSC_CFG_STORAGE)
-tenant = Tenant(SSC_CFG_STORAGE)
-
-namespace = NameSpace(tenant)
-
-rpc_registry = DRegistry(topic_crt, function_crt, tenant, namespace)
+rpc_registry = DRegistry(topic_crt, function_crt, tenant)
 
 app = Flask(__name__)
 app.secret_key = "secret key"
