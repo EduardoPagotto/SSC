@@ -13,7 +13,6 @@ from typing import Any, List
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
 
-from SSC.server.NameSpace import NameSpace
 from SSC.server.Tenant import Tenant
 from SSC.server.FunctionCrt import FunctionCrt
 from SSC.server.TopicCrt import TopicsCrt

@@ -14,7 +14,6 @@ from tinydb import TinyDB
 from SSC.server.DRegistry import DRegistry
 from SSC.server.FunctionCrt import FunctionCrt
 from SSC.server.FunctionDB import FunctionDB
-from SSC.server.NameSpace import NameSpace
 from SSC.server.Tenant import Tenant
 from SSC.server.TopicCrt import TopicsCrt
 from SSC.server.TopicDB import TopicDB
