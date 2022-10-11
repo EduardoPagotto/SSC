@@ -1,14 +1,4 @@
-#!/bin/bash
-		                    
-# ./ssc-admin.py functions \
-#                 create \
-#                 --name name01 \
-#                 --tenant rpa \
-#                 --namespace manifesto \
-#                 --py ./funcs/FuncAdd.py \
-#                 --classname FuncAdd.FuncAdd \
-#                 --inputs rpa/manifesto/queue01 \
-#                 --output rpa/manifesto/queue02 
+#!/bin/sh               
 
 ./ssc-admin.py tenants create rpa
 ./ssc-admin.py namespaces create rpa/manifesto
@@ -47,11 +37,17 @@
                 --inputs rpa/manifesto/q02InjectMongo 
 
 
-# ./ssc-admin.py tenants delete rpa
-# ./ssc-admin.py namespaces delete rpa/manifesto
+# ./ssc-admin.py functions \
+#                 delete \
+#                 --name InjectMongoData \
+#                 --tenant rpa \
+#                 --namespace manifesto
+
+# ./ssc-admin.py functions list --tenant rpa --namespace manifesto
+
 # ./ssc-admin.py topics delete rpa/manifesto/q00DecodePDF
 # ./ssc-admin.py topics delete rpa/manifesto/q01DecodeTxt
 # ./ssc-admin.py topics delete rpa/manifesto/q02InjectMongo
 # ./ssc-admin.py topics delete rpa/manifesto/q99Erro
-
-
+# ./ssc-admin.py namespaces delete rpa/manifesto
+# ./ssc-admin.py tenants delete rpa

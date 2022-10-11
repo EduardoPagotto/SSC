@@ -4,6 +4,11 @@ LABEL MAINTAINER="Eduardo Pagotto <eduardo.pagotto@newspace.com.br>"
 RUN apk update
 RUN apk add git
 
+# set venv
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 RUN pip3 install --upgrade pip
 
 WORKDIR /var/app
@@ -39,10 +44,11 @@ RUN pip3 install -r requirements.txt && \
 
 ENV SSC_CFG_IP "0.0.0.0"
 ENV SSC_CFG_PORT "5152"
-ENV SSC_CFG_DB "/opt/db"
-ENV SSC_CFG_STORAGE "/opt/storage"
+ENV SSC_CFG_DB "./data/db"
+ENV SSC_CFG_STORAGE "./data/storage"
 
 EXPOSE 5152/tcp
 
 # Iniciar aplicação
-CMD ["python3", "./main.py"]
+#CMD ["python", "main.py"]
+CMD . /opt/venv/bin/activate && exec python main.py

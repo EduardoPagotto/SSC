@@ -9,4 +9,4 @@ services:
     ports:
     - 5152:5152
     volumes:
-    - ./data/ssc:/opt
+    - ./data/ssc:/var/app/data
