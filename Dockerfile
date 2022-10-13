@@ -4,11 +4,6 @@ LABEL MAINTAINER="Eduardo Pagotto <eduardo.pagotto@newspace.com.br>"
 RUN apk update
 RUN apk add git
 
-# set venv
-ENV VIRTUAL_ENV=/opt/venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
 RUN pip3 install --upgrade pip
 
 WORKDIR /var/app
@@ -20,16 +15,6 @@ RUN pip3 install -r requirements.txt && \
     pip3 install .
 WORKDIR /var/app
 RUN rm -rf sJsonRpc
-
-#extra SSF 
-RUN git clone https://github.com/EduardoPagotto/SSF.git
-WORKDIR /var/app/SSF/
-RUN pip3 install -r requirements.txt && \
-    pip3 install .
-WORKDIR /var/app
-RUN rm -rf SSF
-RUN apk add poppler-utils
-
 
 COPY ./requirements.txt .
 COPY ./app.py .
@@ -50,5 +35,4 @@ ENV SSC_CFG_STORAGE "./data/storage"
 EXPOSE 5152/tcp
 
 # Iniciar aplicação
-#CMD ["python", "main.py"]
-CMD . /opt/venv/bin/activate && exec python main.py
+CMD ["python", "main.py"]
