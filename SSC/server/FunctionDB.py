@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221014
+Update on 20221015
 @author: Eduardo Pagotto
 '''
 
@@ -82,26 +82,18 @@ class FunctionDB(object):
         with LockDB(self.database, 'funcs', True) as table:
             table.remove(doc_ids=[doc_id])
 
-    def delete(self, tenant :str, namespace : str,  name : str) -> str:
+    def delete(self, tenant :str, namespace : str,  name : str) -> None:
 
         itens : List[Document] = []
-        with LockDB(self.database, 'funcs', False) as table:
+        with LockDB(self.database, 'funcs', True) as table:
             q = Query()
             itens = table.search((q.tenant == tenant) & (q.namespace == namespace) & (q.name == name))
 
-        tot = len(itens)
-        if tot == 0:
-            raise Exception(f'function {name} does not exist')
+            if (len(itens) != 1) :
+                raise Exception(f'function {name} does not exist')
 
-        if tot > 1:
-            raise Exception(f'function {name} duplicate')
-
-        doc_id = itens[0].doc_id
-        params : dict = itens[0]
-        with LockDB(self.database, 'funcs', True) as table:
-            table.remove(doc_ids=[doc_id])
-
-        return params['path']       
+            table.remove(doc_ids=[itens[0].doc_id])
+    
 
     def list_all(self, tenant_ns : str) -> List[str]:
 
@@ -145,7 +137,7 @@ class FunctionDB(object):
         if 'output' in params and params['output'] != None:
             topic_out = self.topic_crt.find_and_load(params['output']) 
 
-        klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
+        klass : Function = self.load(pathlib.Path(params['py']), params['classname'])
 
         klass.name = params['name']
         klass.topic_in = topic_in

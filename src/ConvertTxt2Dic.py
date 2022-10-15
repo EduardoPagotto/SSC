@@ -49,17 +49,7 @@ class ConvertTxt2Dic(Function):
 
         db =  self.client['rpa_manifestacao']
         coll = db['config_estado']
-        cursor =  coll.find({'codeId': registro['codeId']})
-        estado_data : dict = {}
-        for document in cursor:
-          estado_data = document
-
-        # table = self.db.table('config_estado')
-        # q = Query()
-        # itens = table.search(q.codeId == registro['codeId'])
-        # if len(itens) != 1:
-        #   raise Exception('CodeId invalido ' + registro['codeId'])
-        # estado_data = itens[0]
+        estado_data =  coll.find_one({'codeId': registro['codeId']})
 
         processosx = []
         numero_processo = []

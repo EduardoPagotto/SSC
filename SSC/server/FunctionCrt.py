@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221007
+Update on 20221015
 @author: Eduardo Pagotto
 '''
 
@@ -44,22 +44,6 @@ class FunctionCrt(object):
         if function:
             raise Exception(f'topic {params["name"]} already exists')
         
-        tst = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace']))
-        if not tst.is_dir():
-            raise Exception(f'tenant or namespace invalid: {str(tst)}') 
-        #tst.mkdir(parents=True, exist_ok=True) # remover depois
-
-        # copicar pgm para area interna
-        path_file_src = pathlib.Path(params['py'])
-        names = params['classname'].split('.')
-
-        path_dest = pathlib.Path(os.path.join(str(self.storage), params['tenant'], params['namespace'], names[0]))
-        path_dest.mkdir(parents=True, exist_ok=True)
-        final = pathlib.Path(str(path_dest) + '/' + path_file_src.name)
-
-        shutil.copy(str(path_file_src), str(final))
-
-        params['path'] = str(final)
         params['useConfig'] = {} # TODO Implementar
 
         function = self.database.create(params)
@@ -80,7 +64,7 @@ class FunctionCrt(object):
     
     def start_func(self, func : Function, doc_id : int):
 
-        t_function : Thread = Thread(target=func.execute ,args=(self.database.topic_crt, 5), name=f't_func_{func.name}')
+        t_function : Thread = Thread(target=func.execute ,args=(self.database.topic_crt, 5), name=f't_{func.name}')
         t_function.start()
         self.t_functions[doc_id] = t_function
 
@@ -140,24 +124,16 @@ class FunctionCrt(object):
                         (val[2] == v.name) and 
                         (doc_id == k)):
                             try:
-                                path_delete = pathlib.Path(params['path'])
-                        
                                 # stop thread and wait
                                 self.stop_func(self.map_functions[k], k)
-
                                 del self.map_functions[k] 
-                        
-                                self.database.delete_id(k)
-                                shutil.rmtree(path_delete.parent)   
+                                self.database.delete_id(k) 
                                 return
                             except Exception as exp: 
                                 self.log.error(f'Falha ao apagar function {func_name} : {exp.args[0]}')
                                 raise exp
 
-        path_temp = self.database.delete(val[0], val[1], val[2])
-        if len(path_temp) > 0:
-            p = pathlib.Path(path_temp)
-            shutil.rmtree(p.parent)
+        self.database.delete(val[0], val[1], val[2])
 
     def list_all(self, tenant_ns : str) -> List[str]:
         return self.database.list_all(tenant_ns)

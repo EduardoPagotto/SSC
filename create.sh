@@ -38,6 +38,12 @@
 
 # ./ssc-admin.py functions \
 #                 delete \
+#                 --name ConvertePDF2TXT \
+#                 --tenant rpa \
+#                 --namespace manifesto
+
+# ./ssc-admin.py functions \
+#                 delete \
 #                 --name InjectMongoData \
 #                 --tenant rpa \
 #                 --namespace manifesto
