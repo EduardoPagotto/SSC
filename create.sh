@@ -14,7 +14,8 @@
                 --py ./src/ConvertePDF2TXT.py \
                 --classname ConvertePDF2TXT.ConvertePDF2TXT \
                 --inputs rpa/manifesto/q00DecodePDF \
-                --output rpa/manifesto/q01DecodeTxt
+                --output rpa/manifesto/q01DecodeTxt \
+                --userconfigfile ./funcs_cfg.yaml
 
 ./ssc-admin.py functions \
                 create \
@@ -24,7 +25,8 @@
                 --py ./src/ConvertTxt2Dic.py \
                 --classname ConvertTxt2Dic.ConvertTxt2Dic \
                 --inputs rpa/manifesto/q01DecodeTxt \
-                --output rpa/manifesto/q02InjectMongo
+                --output rpa/manifesto/q02InjectMongo \
+                --userconfigfile ./funcs_cfg.yaml
 
 ./ssc-admin.py functions \
                 create \
@@ -33,7 +35,8 @@
                 --namespace manifesto \
                 --py ./src/InjectMongoData.py \
                 --classname InjectMongoData.InjectMongoData \
-                --inputs rpa/manifesto/q02InjectMongo 
+                --inputs rpa/manifesto/q02InjectMongo \
+                --userconfigfile ./funcs_cfg.yaml
 
 
 # ./ssc-admin.py functions \

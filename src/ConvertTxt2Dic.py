@@ -5,33 +5,74 @@ Update on 20221015
 @author: Eduardo Pagotto
  '''
 
-from datetime import datetime, timezone
+from datetime import datetime
 import logging
 import json
 import os
 import tempfile
 import pathlib
+from typing import Any, Dict, Optional
 #from pulsar import Function
 import regex as re
 
 from pymongo import MongoClient
 
+from SSC.Context import Context
 from SSC.Function import Function
 from SSF.ClientSSF  import ClientSSF
 
 class ConvertTxt2Dic(Function):
   def __init__(self):
+
     self.topico_erro = "rpa/manifesto/q99Erro"
     self.topico_db = "rpa/manifesto/q02InjectMongo"
-    self.client = MongoClient('mongodb://rpaadmin:Zaq12wsX@192.168.122.1:27017/?authSource=admin&authMechanism=SCRAM-SHA-1')
-    self.nva = ClientSSF('http://192.168.122.1:5151') # TODO: colocar no json  de carga
-    print('ConvertTxt2Dic v0.1.0 OK!!')
-    
+    self.mongo : Optional[MongoClient] = None
+    self.nva : Optional[ClientSSF] = None
+
+    self.cache_estado : Dict[int, dict] = {}
+
+    print('ConvertTxt2Dic v1.0.0 ' + os.getcwd())
+
+  def initialize(self, log : logging.Logger, context: Context) -> bool:
+    try:
+      urls = context.get_user_config_value('urls')
+      self.nva = ClientSSF(urls['ssfUrl'])
+      self.mongo = MongoClient(urls['mongoUrl'])
+      log.info('Config nva/mongo: ' + urls['ssfUrl'])
+      return True
+
+    except Exception as exp:
+      log.error('Falha no config nva/mongo')
+
+    return False
+
+  def localiza_estado(self, code : int) -> Any:
+
+    for k, v in self.cache_estado.items():
+      if k == code:
+        return v
+
+    if self.mongo:
+      db = self.mongo['rpa_manifestacao']
+      coll = db['config_estado']
+      val = coll.find_one({'codeId': code})
+      if val:
+        self.log.info(f'Estado adicionado ao cache: {val["name"]}')
+        self.cache_estado[code] = val
+        return val
+      else:
+        self.log.critical('Estado nao cadastrado ' + str(code))
+
+    return None
+
   def process(self, input, context):
 
     registro : dict = {}
     log : logging = context.get_logger()
-    #log.info('Key: ' + str(context.get_message_key()) + ' Linha: ' + input)
+
+    if not self.mongo:
+      if not self.initialize(log, context):
+        return
 
     try:
       registro = json.loads(input)
@@ -47,9 +88,9 @@ class ConvertTxt2Dic(Function):
         if path_data.suffix != ".txt":
           raise Exception('Nao e um txt: ' + str(path_data))
 
-        db =  self.client['rpa_manifestacao']
-        coll = db['config_estado']
-        estado_data =  coll.find_one({'codeId': registro['codeId']})
+        estado_data = self.localiza_estado(registro['codeId'])
+        if not estado_data:
+          return
 
         processosx = []
         numero_processo = []

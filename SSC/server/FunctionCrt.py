@@ -44,8 +44,6 @@ class FunctionCrt(object):
         if function:
             raise Exception(f'topic {params["name"]} already exists')
         
-        params['useConfig'] = {} # TODO Implementar
-
         function = self.database.create(params)
         if function.document:
             with self.lock_func:

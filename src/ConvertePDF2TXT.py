@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220922
-Update on 20221011
+Update on 20221015
 @author: Eduardo Pagotto
  '''
 
@@ -10,19 +10,41 @@ import json
 import os
 import tempfile
 import pathlib
+from typing import Optional
+from SSC.Context import Context
 from SSC.Function import Function
 from SSF.ClientSSF  import ClientSSF
 
 class ConvertePDF2TXT(Function):
   def __init__(self):
+
     self.topico_erro = "rpa/manifest/q99Erro"
-    self.nva = ClientSSF('http://192.168.122.1:5151') # TODO: colocar no json  de carga
-    print('ConvertePDF2TXT v0.1.0 OK ' + os.getcwd())
+    self.nva : Optional[ClientSSF] = None
+
+    print('ConvertePDF2TXT v1.0.0 ' + os.getcwd())
+    
+
+  def initialize(self, log : logging.Logger, context: Context) -> bool:
+    try:
+      urls = context.get_user_config_value('urls')
+      self.nva = ClientSSF(urls['ssfUrl'])
+      log.info('Config nva: ' + urls['ssfUrl'])
+      return True
+
+    except Exception as exp:
+      log.error('Falha no config nva')
+
+    return False
+
 
   def process(self, input, context):
 
     registro : dict = {}
     log : logging = context.get_logger()
+
+    if not self.nva:
+      if not self.initialize(log, context):
+        return
 
     try:
       registro = json.loads(input)

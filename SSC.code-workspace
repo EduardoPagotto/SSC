@@ -36,9 +36,16 @@
 				"console": "integratedTerminal",
 				"justMyCode": true,
 				"args": [
-					"topics",
-					"create",
-					"queue01"
+					"functions", 
+					"create", 
+					"--name", "ConvertePDF2TXT", 
+					"--tenant", "rpa", 
+					"--namespace", "manifesto", 
+					"--py", "./src/ConvertePDF2TXT.py", 
+					"--classname", "ConvertePDF2TXT.ConvertePDF2TXT", 
+					"--inputs", "rpa/manifesto/q00DecodePDF", 
+					"--output", "rpa/manifesto/q01DecodeTxt",
+					"--userconfigfile", "./config_teste.yaml"
 				]
 			},
 			{

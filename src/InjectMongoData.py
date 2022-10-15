@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 '''
 Created on 20220922
-Update on 20221011
+Update on 20221015
 @author: Eduardo Pagotto
  '''
 
 import logging
 import json
+import os
+from typing import Optional
 #from pulsar import Function
+from SSC.Context import Context
 from SSC.Function import Function
 from pymongo import MongoClient
 
@@ -15,8 +18,21 @@ class InjectMongoData(Function):
   def __init__(self):
 
     self.topico_erro = "rpa/manifesto/q99Erro"
-    print('InjectMongoData v0.0.2 OK!!')
-    self.client = MongoClient('mongodb://rpaadmin:Zaq12wsX@192.168.122.1:27017/?authSource=admin&authMechanism=SCRAM-SHA-1')
+    self.mongo : Optional[MongoClient] = None
+
+    print('InjectMongoData v1.0.0 ' + os.getcwd())
+
+  def initialize(self, log : logging.Logger, context: Context) -> bool:
+    try:
+      urls = context.get_user_config_value('urls')
+      self.mongo = MongoClient(urls['mongoUrl'])
+      log.info('Config mongo')
+      return True
+
+    except Exception as exp:
+      log.error(f'Falha no config mongo: {exp.args[0]}')
+
+    return False
 
   def process(self, input, context):
 
@@ -24,9 +40,13 @@ class InjectMongoData(Function):
     log : logging = context.get_logger()
     #log.debug('Key: ' + str(context.get_message_key()) + ' Linha: ' + input)
 
+    if not self.mongo:
+      if not self.initialize(log, context):
+        return
+
     try:
       registro = json.loads(input)
-      db = self.client['rpa_manifestacao']
+      db = self.mongo['rpa_manifestacao']
       collection = db['colection_' + registro['estado']]
 
       collection.update_one({'numero_cnj':registro['numero_cnj']},  {'$set':registro}, upsert=True)

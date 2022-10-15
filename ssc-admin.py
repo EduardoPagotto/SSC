@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20220927
+Update on 20221015
 @author: Eduardo Pagotto
 '''
 
@@ -10,6 +10,8 @@ import json
 import logging
 from typing import List
 import requests
+import yaml
+from pathlib import Path
 
 from sJsonRpc.ConnectionControl import ConnectionControl
 from sJsonRpc.ProxyObject import ProxyObject
@@ -113,6 +115,8 @@ def main():
         funcions.add_argument('--classname', type=str, help='Nome da classe')
         funcions.add_argument('--inputs', type=str, help='queue input')
         funcions.add_argument('--output', type=str, help='queue output')
+        funcions.add_argument('--userconfig', type=str, help='other config user', required=False, default="")
+        funcions.add_argument('--userconfigfile', type=str, help='other file config user', required=False, default="")
 
         tenants = subparser.add_parser('tenants')
         tenants.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
@@ -136,15 +140,27 @@ def main():
         elif args.command == 'functions':
             if args.opp == 'create':
 
-                parm = {'name': args.name, 
-                        'tenant': args.tenant,
-                        'namespace' : args.namespace,
-                        'py':args.py,
-                        'classname':args.classname,
-                        'inputs':args.inputs,
-                        'output':args.output}
+                val : dict = {}
+                try:
+                    if len(args.userconfig) > 0:
+                        # load cfg json string
+                        val = json.loads(args.userconfig)
+                    elif len(args.userconfigfile) > 0:
+                        # load cfg yaml file
+                        val = yaml.safe_load(Path(args.userconfigfile).read_text())
+                except:
+                    Exception('userconfig or userconfigfile is not a valid')
 
-                log.info(admin.function_create(parm))
+                param = {'name': args.name, 
+                         'tenant': args.tenant,
+                         'namespace' : args.namespace,
+                         'py':args.py,
+                         'classname':args.classname,
+                         'inputs':args.inputs,
+                         'output':args.output,
+                         'useConfig': val}
+
+                log.info(admin.function_create(param))
 
             elif args.opp == 'delete':
                 log.info(admin.function_delete(args.tenant + '/' + args.namespace + '/' +args.name)) 
