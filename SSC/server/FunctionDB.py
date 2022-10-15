@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221007
+Update on 20221014
 @author: Eduardo Pagotto
 '''
 
@@ -54,28 +54,10 @@ class FunctionDB(object):
 
     def create(self, params : dict) -> Function:
 
-        topic_in : Optional[Topic] = None
-        topic_out : Optional[Topic] = None
-
-        if 'inputs' in params and params['inputs'] != None:
-            topic_in = self.topic_crt.find_and_load(params['inputs'])
-
-        if 'output' in params and params['output'] != None:
-            topic_out = self.topic_crt.find_and_load(params['output']) 
-
-        klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
+        klass : Function = self.__make_func(params)
 
         with LockDB(self.database, 'funcs', True) as table:
             klass.document = table.get(doc_id=table.insert(params))
-
-        klass.name = params['name']
-        klass.topic_in = topic_in
-        klass.topic_out = topic_out
-        # FIXME : otimizar com carga unica
-        klass.log = logging.getLogger('SSC.function')
-        klass.tot_proc  = 0
-        klass.tot_erro  = 0
-        klass.alive  = True
 
         return klass
 
@@ -89,26 +71,8 @@ class FunctionDB(object):
         if len(itens) == 1:
             params = itens[0]
 
-            topic_in : Optional[Topic] = None
-            topic_out : Optional[Topic] = None
-
-            if 'inputs' in params and params['inputs'] != None:
-                topic_in = self.topic_crt.find_and_load(params['inputs'])
-
-            if 'output' in params and params['output'] != None:
-                topic_out = self.topic_crt.find_and_load(params['output']) 
-
-            klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
+            klass : Function = self.__make_func(params)
             klass.document = params
-            klass.name = params['name']
-            klass.topic_in = topic_in
-            klass.topic_out = topic_out
-
-            klass.log = logging.getLogger('SSC.function')
-            klass.tot_proc  = 0
-            klass.tot_erro  = 0
-            klass.alive  = True
-
 
             return klass
 
@@ -163,26 +127,33 @@ class FunctionDB(object):
             
         for params in itens:
 
-            topic_in : Optional[Topic] = None
-            topic_out : Optional[Topic] = None
-
-            if 'inputs' in params and params['inputs'] != None:
-                topic_in = self.topic_crt.find_and_load(params['inputs'])
-
-            if 'output' in params and params['output'] != None:
-                topic_out = self.topic_crt.find_and_load(params['output']) 
-
-            klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
+            klass : Function = self.__make_func(params)
             klass.document = params
-            klass.name = params['name']
-            klass.topic_in = topic_in
-            klass.topic_out = topic_out
-
-            klass.log = logging.getLogger('SSC.function')
-            klass.tot_proc  = 0
-            klass.tot_erro  = 0
-            klass.alive  = True
 
             lista.append(klass)
 
         return lista
+
+    def __make_func(self, params : Document | dict) -> Function:
+
+        topic_in : Optional[Topic] = None
+        topic_out : Optional[Topic] = None
+
+        if 'inputs' in params and params['inputs'] != None:
+            topic_in = self.topic_crt.find_and_load(params['inputs'])
+
+        if 'output' in params and params['output'] != None:
+            topic_out = self.topic_crt.find_and_load(params['output']) 
+
+        klass : Function = self.load(pathlib.Path(params['path']), params['classname'])
+
+        klass.name = params['name']
+        klass.topic_in = topic_in
+        klass.topic_out = topic_out
+
+        klass.log = logging.getLogger('SSC.function')
+        klass.tot_proc  = 0
+        klass.tot_erro  = 0
+        klass.alive  = True
+
+        return klass

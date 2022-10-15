@@ -22,7 +22,7 @@ class Function(ABC):
         self.topic_in : Optional[Topic] = None
         self.topic_out : Optional[Topic] = None
         self.name : str = ''
-        self.document : Optional[Document] = None
+        self.document : Document = Document({},0)
         self.tot_proc : int = 0
         self.tot_erro : int = 0
         self.alive : bool = True
@@ -54,7 +54,7 @@ class Function(ABC):
 
                     try:
 
-                        ret = self.process(res, Context(topic_crt, self.log))
+                        ret = self.process(res, Context(self.document, topic_crt, self.log))
                         if (self.topic_out) and (ret != None):
 
                             outputs += 1
