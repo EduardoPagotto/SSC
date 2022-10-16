@@ -39,6 +39,7 @@ class InjectMongoData(Function):
     registro : dict = {}
     log : logging = context.get_logger()
     #log.debug('Key: ' + str(context.get_message_key()) + ' Linha: ' + input)
+    #log.debug(' Linha: ' + input)
 
     if not self.mongo:
       if not self.initialize(log, context):

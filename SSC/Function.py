@@ -7,6 +7,7 @@ Update on 20221016
 
 from abc import ABC, abstractmethod
 from logging import getLogger
+from threading import Thread
 import time
 from typing import List, Optional
 from tinydb.table import Document
@@ -26,6 +27,7 @@ class Function(ABC):
         self.tot_proc : int = 0
         self.tot_erro : int = 0
         self.alive : bool = True
+        self.paralel : Optional[Thread] = None
 
     @abstractmethod
     def process(self, input : str, context : Context):
