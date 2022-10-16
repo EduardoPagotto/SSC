@@ -117,6 +117,7 @@ def main():
         funcions.add_argument('--output', type=str, help='queue output')
         funcions.add_argument('--userconfig', type=str, help='other config user', required=False, default="")
         funcions.add_argument('--userconfigfile', type=str, help='other file config user', required=False, default="")
+        funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
 
         tenants = subparser.add_parser('tenants')
         tenants.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
@@ -160,7 +161,8 @@ def main():
                          'classname':args.classname,
                          'inputs':args.inputs.replace(' ','').split(','),
                          'output':args.output,
-                         'useConfig': val}
+                         'useConfig': val,
+                         'parallelism': args.parallelism}
 
                 log.info(admin.function_create(param))
 
