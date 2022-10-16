@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221015
+Update on 20221016
 @author: Eduardo Pagotto
 '''
 
@@ -128,11 +128,13 @@ class FunctionDB(object):
 
     def __make_func(self, params : Document | dict) -> Function:
 
-        topic_in : Optional[Topic] = None
+        topics_in : List[Topic] = []
         topic_out : Optional[Topic] = None
 
         if 'inputs' in params and params['inputs'] != None:
-            topic_in = self.topic_crt.find_and_load(params['inputs'])
+            for item in params['inputs']:
+                topics_in.append(self.topic_crt.find_and_load(item))
+
 
         if 'output' in params and params['output'] != None:
             topic_out = self.topic_crt.find_and_load(params['output']) 
@@ -140,7 +142,7 @@ class FunctionDB(object):
         klass : Function = self.load(pathlib.Path(params['py']), params['classname'])
 
         klass.name = params['name']
-        klass.topic_in = topic_in
+        klass.topics_in = topics_in
         klass.topic_out = topic_out
 
         klass.log = logging.getLogger('SSC.function')

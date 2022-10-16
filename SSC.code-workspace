@@ -45,7 +45,7 @@
 					"--classname", "ConvertePDF2TXT.ConvertePDF2TXT", 
 					"--inputs", "rpa/manifesto/q00DecodePDF", 
 					"--output", "rpa/manifesto/q01DecodeTxt",
-					"--userconfigfile", "./config_teste.yaml"
+					"--userconfigfile", "./etc/funcs_cfg.yaml"
 				]
 			},
 			{

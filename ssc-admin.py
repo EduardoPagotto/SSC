@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20221015
+Update on 20221016
 @author: Eduardo Pagotto
 '''
 
@@ -108,12 +108,12 @@ def main():
 
         funcions = subparser.add_parser('functions')
         funcions.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
-        funcions.add_argument('--tenant', type=str, help='Tenant')
-        funcions.add_argument('--namespace', type=str, help='Namespace')
-        funcions.add_argument('--name', type=str, help='nome da thread')
-        funcions.add_argument('--py', type=str, help='python script pathfile')
-        funcions.add_argument('--classname', type=str, help='Nome da classe')
-        funcions.add_argument('--inputs', type=str, help='queue input')
+        funcions.add_argument('--tenant', type=str, help='Tenant', required=True)
+        funcions.add_argument('--namespace', type=str, help='Namespace', required=True)
+        funcions.add_argument('--name', type=str, help='nome da thread', required=True)
+        funcions.add_argument('--py', type=str, help='python script pathfile', required=True)
+        funcions.add_argument('--classname', type=str, help='Nome da classe', required=True)
+        funcions.add_argument('--inputs', type=str, help='queue input', required=True)
         funcions.add_argument('--output', type=str, help='queue output')
         funcions.add_argument('--userconfig', type=str, help='other config user', required=False, default="")
         funcions.add_argument('--userconfigfile', type=str, help='other file config user', required=False, default="")
@@ -148,15 +148,17 @@ def main():
                     elif len(args.userconfigfile) > 0:
                         # load cfg yaml file
                         val = yaml.safe_load(Path(args.userconfigfile).read_text())
-                except:
-                    Exception('userconfig or userconfigfile is not a valid')
+                except FileNotFoundError as err1:
+                    raise Exception(f'{err1.filename} fail: {err1.strerror}')
+                except Exception as exp:
+                    raise Exception(f'userconfig or userconfigfile is not a valid {str(exp.args[0])}')
 
                 param = {'name': args.name, 
                          'tenant': args.tenant,
                          'namespace' : args.namespace,
                          'py':args.py,
                          'classname':args.classname,
-                         'inputs':args.inputs,
+                         'inputs':args.inputs.replace(' ','').split(','),
                          'output':args.output,
                          'useConfig': val}
 

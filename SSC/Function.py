@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221007
+Update on 20221016
 @author: Eduardo Pagotto
 '''
 
@@ -8,7 +8,7 @@ Update on 20221007
 from abc import ABC, abstractmethod
 from logging import getLogger
 import time
-from typing import Optional
+from typing import List, Optional
 from tinydb.table import Document
 
 from SSC.server.Topic import Topic
@@ -19,7 +19,7 @@ from SSC.server.TopicCrt import TopicsCrt
 class Function(ABC):
     def __init__(self) -> None:
         self.log = getLogger('SSC.function')
-        self.topic_in : Optional[Topic] = None
+        self.topics_in : List[Topic] = []
         self.topic_out : Optional[Topic] = None
         self.name : str = ''
         self.document : Document = Document({},0)
@@ -44,8 +44,8 @@ class Function(ABC):
             inputs = 0
             outputs = 0
 
-            if self.topic_in:
-                res = self.topic_in.pop(timeout)
+            for topic in self.topics_in:
+                res = topic.pop(timeout)
                 if res:
 
                     #self.log.debug(f'Function exec {self.name} topic in: {self.topic_in.name} ..')
