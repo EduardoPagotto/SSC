@@ -36,7 +36,8 @@
                 --py ./src/InjectMongoData.py \
                 --classname InjectMongoData.InjectMongoData \
                 --inputs rpa/manifesto/q02InjectMongo \
-                --userconfigfile ./etc/funcs_cfg.yaml
+                --userconfigfile ./etc/funcs_cfg.yaml \
+                --parallelism 3
 
 
 # ./ssc-admin.py functions \
