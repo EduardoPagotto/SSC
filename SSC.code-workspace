@@ -111,7 +111,20 @@
 				],
 				"jinja": true,
 				"justMyCode": true
-			}			
+			},	
+			{
+				"name": "Python: TESTE",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/teste.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"consume",
+					"-s", "appteste",
+					"queue02"
+				]
+			},		
 		],
 		"compounds": []
 	}
