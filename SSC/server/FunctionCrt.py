@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221016
+Update on 20221022
 @author: Eduardo Pagotto
 '''
 
@@ -11,6 +11,7 @@ from threading import Lock, Thread
 from typing import List, Tuple
 
 from SSC.Function import Function
+from SSC.server import splitTopic
 from SSC.server.FunctionDB import FunctionDB
 
 class FunctionCrt(object):
@@ -42,14 +43,14 @@ class FunctionCrt(object):
         with self.lock_func:
             num = 1
             max = func.document['parallelism']
-            func.paralel = Thread(target=func.execute ,args=(self.database.topic_crt, 5), name=f't_{str(num)}_{max}_{func.name}')
+            func.paralel = Thread(target=func.execute ,args=(5,), name=f't_{str(num)}_{max}_{func.name}')
             func.paralel.start()
             self.list_function.append(func)
             
             if max > 1:
                 for c in range(num, max):
                     aux = self.database.find(func.document['name'])
-                    aux.paralel = Thread(target=aux.execute ,args=(self.database.topic_crt, 5), name=f't_{str(c + 1)}_{max}_{aux.name}')
+                    aux.paralel = Thread(target=aux.execute ,args=(5,), name=f't_{str(c + 1)}_{max}_{aux.name}')
                     aux.paralel.start()
                     self.list_function.append(aux)
 
@@ -102,11 +103,9 @@ class FunctionCrt(object):
 
         self.log.debug(f'Function delete {func_name}')
 
-        val = func_name.split('/')
-        if len(val) != 3:
-            raise Exception(f'function {func_name} invalid')
+        tenant, namespace, func_name = splitTopic(func_name)
 
-        lista = self.__list_in_memory(val[0], val[1], val[2])
+        lista = self.__list_in_memory(tenant, namespace, func_name)
         if len(lista) > 0:
             doc_id = lista[0].document.doc_id
             for func in lista:

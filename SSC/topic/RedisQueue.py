@@ -1,6 +1,6 @@
 '''
 Created on 20221019
-Update on 20221019
+Update on 20221022
 @author: Eduardo Pagotto
 '''
 
@@ -28,19 +28,11 @@ class RedisQueue(object):
     def nack(self, item : Any) -> int:
         return self.__redis.lpush(self.__queue_name, item)
 
-    def dequeue(self) -> Union[Tuple, Any]:
-        result = self.__redis.lpop(self.__queue_name)
-        if result is None:
-            raise Empty
+    def dequeue(self) -> Any:
+        return self.__redis.lpop(self.__queue_name)
 
-        return result
-
-    def bdequeue(self, timeout : float = 0) -> Union[Tuple, Any]:
-        result = self.__redis.blpop(self.__queue_name, timeout=timeout)
-        if result is None:
-            raise Empty
-
-        return result
+    def bdequeue(self, timeout : float = 0) -> Tuple | None:
+        return self.__redis.blpop(self.__queue_name, timeout=timeout)
 
     def get_name(self) -> str:
         return self.__queue_name

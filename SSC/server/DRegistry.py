@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221010
+Update on 20221022
 @author: Eduardo Pagotto
 '''
 
@@ -12,6 +12,7 @@ from threading import  Thread
 from typing import Any, List
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
+from SSC.server import splitTopic
 
 from SSC.server.Tenant import Tenant
 from SSC.server.FunctionCrt import FunctionCrt
@@ -63,53 +64,31 @@ class DRegistry(RPC_Responser):
         self.log.info('thread cleanner_files stop')
 
     # ClientQueue
-    def create_producer(self, topic_name : str) -> int:
-        return self.topic_crt.find_and_load(topic_name).id
-        
+    def create_producer(self, topic_name : str) -> dict:
+        return self.tenant.create_queue(topic_name)
+  
     # ClientQueue
-    def subscribe(self, topic_name) -> int:
-        return self.topic_crt.find_and_load(topic_name).id
+    def create_subscribe(self, topic_name : str | List[str]) -> dict:
 
-    # Producer
-    def send_producer(self, id : int, msg : str):
-        self.topic_crt.push_id(id, msg)
+        if type(topic_name) == list:
+            return self.tenant.create_queues(topic_name)
 
-    # Subscribe
-    def subscribe_receive(self, id: int, timeOut: int) -> Optional[Any]:
-        return self.topic_crt.pop_id(id, timeOut)
+        if type(topic_name) == str:
+            return self.tenant.create_queue(topic_name)
+
+        raise Exception('topic invalid ' + str(topic_name))
 
     # Admin
     def topics_create(self, topic_name : str) -> str:
-
-        doc = self.tenant.find_tenant_params(topic_name)
-
-        topic  = self.topic_crt.create(topic_name)
-        return f'success create {topic_name} id {topic.id}'
+        return self.tenant.create_topic(topic_name)
 
     # Admin
     def topics_delete(self, topic_name : str) -> str:
-
-        doc = self.tenant.find_tenant_params(topic_name)
-
-        self.topic_crt.delete(topic_name)
-        return f'success delete {topic_name}'
+        return self.tenant.delete_topics(topic_name)
 
     # Admin
     def topics_list(self, ns : str) -> List[str]:
-        return self.topic_crt.list_all(ns)
-
-    # Admin
-    def function_create(self, params: dict) -> str:
-
-        topic_name = params['tenant'] + '/' + params['namespace']
-        doc = self.tenant.find_tenant_params(topic_name)
-
-        return self.function_crt.create(params)
-        
-    # Admin
-    def function_delete(self, name: str):
-        self.function_crt.delete(name)
-        return f'success delete {name}'
+        return self.tenant.list_topics(ns)
     
     # Admin
     def functions_list(self, tenant_ns : str) -> List[str]:
@@ -138,6 +117,15 @@ class DRegistry(RPC_Responser):
     # Admin
     def namespaces_list(self, name : str) -> List[str]:
         return self.tenant.list_all_namespace(name)
+
+    # Admin
+    def function_create(self, params: dict) -> str:
+        return self.function_crt.create(params)
+        
+    # Admin
+    def function_delete(self, name: str):
+        self.function_crt.delete(name)
+        return f'success delete {name}'
 
         #--user-config '{"FileCfg":"aaaaa"}'
         #--user-config-file "/pulsar/host/etc/func1.yaml"

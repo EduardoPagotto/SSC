@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221010
+Update on 20221021
 @author: Eduardo Pagotto
 '''
 
@@ -27,6 +27,7 @@ SSC_CFG_IP : str  = '0.0.0.0' if getenv('SSC_CFG_IP') is None else getenv('SSC_C
 SSC_CFG_PORT : int  =  5152 if getenv('SSC_CFG_PORT') is None else int(getenv('SSC_CFG_PORT'))
 SSC_CFG_DB : str  = './data/db' if getenv('SSC_CFG_DB') is None else getenv('SSC_CFG_DB')
 SSC_CFG_STORAGE : str = './data/storage' if getenv('SSC_CFG_STORAGE') is None else getenv('SSC_CFG_STORAGE')
+REDIS_URL : str = 'redis://localhost:6379/0' if getenv('REDIS_URL') is None else getenv('REDIS_URL')
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -48,9 +49,9 @@ path2.mkdir(parents=True, exist_ok=True)
 
 database = TinyDB(str(path1) + '/master.json')
 
-tenant = Tenant(database, SSC_CFG_STORAGE)
+tenant = Tenant(database, SSC_CFG_STORAGE, REDIS_URL)
 topic_crt = TopicsCrt(TopicDB(database))
-function_crt = FunctionCrt(FunctionDB(database, topic_crt), SSC_CFG_STORAGE)
+function_crt = FunctionCrt(FunctionDB(database, tenant), SSC_CFG_STORAGE)
 
 rpc_registry = DRegistry(topic_crt, function_crt, tenant)
 

@@ -1,41 +1,53 @@
 '''
 Created on 20221019
-Update on 20221019
+Update on 20221022
 @author: Eduardo Pagotto
 '''
 
-from typing import Any, List
+from ast import Bytes
+from optparse import Option
+from typing import Any, List, Optional
 import redis
 
 from SSC.topic import Producer, Consumer
 from SSC.topic.RedisQueue import RedisQueue
 
 class QueueProducer(Producer):
-    def __init__(self, redis : redis.Redis, queue_name : str) -> None:
-        self.queue = RedisQueue(redis, queue_name)
+    def __init__(self, url : str, queue_name : str) -> None:
+        self.queue = RedisQueue(redis.Redis.from_url(url), queue_name)
 
     def send(self, register : Any) -> int:
         return self.queue.enqueue(register)
 
 class QueueConsumer(Consumer):
-    def __init__(self, redis : redis.Redis, queues_name : List[str]) -> None:
+    def __init__(self, url : str, queues_name : List[str] | str) -> None:
+
         self.queues : List[RedisQueue] = []
-        for item in queues_name:
-            self.queues.append(RedisQueue(redis, item))
 
-    def receive(self, timeout : float = 0) -> dict[str, Any] | None:
+        if type(queues_name) == list:         
+            for item in queues_name:
+                self.queues.append(RedisQueue(redis.Redis.from_url(url), item))
+        elif type(queues_name) == str:
+            self.queues.append(RedisQueue(redis.Redis.from_url(url), queues_name))
+        else:
+            raise Exception('topic name invalid ' + str(queues_name))
 
-        output : dict[str, Any] = {}
+    def receive(self, timeout : float = 0) -> Any:#dict[str, Any] | None:
+
+        output = {}
         for item in self.queues:
             if timeout == 0:
                 val = item.dequeue()
                 if val:
-                    output[val[0]] = val[1]
+                    output[item.get_name()] = val.decode('utf8')
             else:
                 val = item.bdequeue(timeout)
                 if val:
-                    output[val[0]] = val[1]
+                    qin = val[0].decode('utf8')
+                    output[qin.replace(':','/')] = val[1].decode('utf8')
 
+        if not bool(output):
+            return None
 
         return output
 

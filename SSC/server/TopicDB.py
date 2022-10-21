@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221010
+Update on 20221022
 @author: Eduardo Pagotto
 '''
 
@@ -8,6 +8,7 @@ import logging
 from typing import List
 
 from tinydb import TinyDB, Query
+from SSC.server import splitTopic
 from SSC.server.Topic import Topic
 from SSC.subsys.LockDB import LockDB
 
@@ -29,12 +30,9 @@ class TopicDB(object):
 
     def create(self, topic_name : str) -> Topic:
 
-        lista = topic_name.split('/')
-        if len(lista) != 3:
-            raise Exception(f'topic {topic_name} is invalid')
-
+        tenant, namespace, queue = splitTopic(topic_name)
         with LockDB(self.database, 'topics', True) as table:
-            id = table.insert({'topic': topic_name, 'tenant':lista[0], 'namespace':lista[1], 'queue':lista[2]})
+            id = table.insert({'topic': topic_name, 'tenant':tenant, 'namespace':namespace, 'queue':queue})
             return Topic(id, topic_name)
         
     def delete(self, topic_name : str) -> None:

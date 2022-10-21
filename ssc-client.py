@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20221003
+Update on 20221022
 @author: Eduardo Pagotto
 '''
 
@@ -59,7 +59,7 @@ def main():
                 if val != None:
                     log.info(str(val))
                     c += 1
-                    if c == args.number:
+                    if c > args.number:
                         break
 
                     continue

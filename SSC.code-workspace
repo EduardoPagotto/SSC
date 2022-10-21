@@ -91,7 +91,8 @@
 				"args": [
 					"consume",
 					"-s", "appteste",
-					"queue02"
+					"rpa/manifesto/q00DecodePDF",
+					"-n", "100"
 				]
 			},
 			{
@@ -102,6 +103,7 @@
 				"env": {
 					"FLASK_APP": "main.py",
 					"FLASK_DEBUG": "1",
+					"REDIS_URL":"redis://:AAABBBCCC@192.168.122.1:6379/0"
 				},
 				"args": [
 					"run",

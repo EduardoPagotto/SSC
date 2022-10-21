@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221016
+Update on 20221022
 @author: Eduardo Pagotto
 '''
 
@@ -13,14 +13,16 @@ from tinydb import TinyDB, Query
 from tinydb.table import Document
 
 from SSC.Function import Function
-from SSC.server.Topic import Topic
-from SSC.server.TopicCrt import TopicsCrt
+from SSC.server import splitNamespace, splitTopic
+from SSC.server.Tenant import Tenant
 from SSC.subsys.LockDB import LockDB
+from SSC.topic.Connection import Connection
+from SSC.topic.QueueProdCons import QueueConsumer
 
 class FunctionDB(object):
-    def __init__(self, database : TinyDB, topic_crt : TopicsCrt) -> None:
+    def __init__(self, database : TinyDB, tenant : Tenant) -> None:
         self.database = database
-        self.topic_crt = topic_crt
+        self.tenant = tenant
         self.log = logging.getLogger('SSC.TopicDB')
 
     def load(self, path_file : pathlib.Path, class_name : str) -> Any:
@@ -102,10 +104,8 @@ class FunctionDB(object):
 
         lista : List[str] = []
         for item in itens:
-            val = tenant_ns.split('/')
-            te = item['tenant']
-            ns = item['namespace']
-            if (val[0] == te) and (val[1] == ns): 
+            tenant, namespace = splitNamespace(tenant_ns)
+            if (tenant == item['tenant']) and (namespace == item['namespace']): 
                 lista.append(item['name'])
 
         return lista
@@ -128,26 +128,30 @@ class FunctionDB(object):
 
     def __make_func(self, params : Document | dict) -> Function:
 
-        topics_in : List[Topic] = []
-        topic_out : Optional[Topic] = None
+        consumer = None
+        producer = None
 
-        if 'inputs' in params and params['inputs'] != None:
-            for item in params['inputs']:
-                topics_in.append(self.topic_crt.find_and_load(item))
+        if ('inputs' in params) and (params['inputs'] is not None):
+            data_in = self.tenant.create_queues(params['inputs'])
+            conn_in = Connection(data_in['urlRedis'])
+            consumer = conn_in.create_consumer(data_in['queue'])
 
+        if ('output' in params) and (params['output'] is not None):
+            data_out = self.tenant.create_queue(params['output'])
+            conn_out = Connection(data_out['urlRedis'])
+            producer = conn_out.create_producer(data_out['queue'])
 
-        if 'output' in params and params['output'] != None:
-            topic_out = self.topic_crt.find_and_load(params['output']) 
 
         klass : Function = self.load(pathlib.Path(params['py']), params['classname'])
 
         klass.name = params['name']
-        klass.topics_in = topics_in
-        klass.topic_out = topic_out
+        klass.consumer = consumer
+        klass.producer = producer
 
         klass.log = logging.getLogger('SSC.function')
         klass.tot_proc  = 0
         klass.tot_erro  = 0
         klass.alive  = True
+        klass.tenant = self.tenant
 
         return klass
