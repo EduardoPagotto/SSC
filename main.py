@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220924
-Update on 20221022
+Update on 20221029
 @author: Eduardo Pagotto
 '''
 
@@ -18,7 +18,9 @@ def allowed_file(filename):
 
 @app.route("/")
 def home():
-    return rpc_registry.sumario()
+	resp = jsonify(rpc_registry.sumario())
+	resp.status_code = 201
+	return resp
 
 @app.route('/client-queue', methods=['POST'])
 def client_queue():

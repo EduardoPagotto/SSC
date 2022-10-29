@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221022
+Update on 20221029
 @author: Eduardo Pagotto
 '''
 
@@ -76,6 +76,15 @@ class FunctionCrt(object):
         self.list_function.remove(func)
         self.log.debug(f'func {func.name} is dead')
         
+    def summario(self) -> List[dict]:
+        result = []
+        with self.lock_func:   
+            for i in self.list_function:
+                result.append({'name':i.name, 'ok':i.tot_proc, 'err':i.tot_erro})  
+
+        return result
+
+
     def create(self, params : dict) -> str:
 
         self.log.debug(f"function create {params['name']}")

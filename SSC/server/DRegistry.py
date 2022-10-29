@@ -28,18 +28,19 @@ class DRegistry(RPC_Responser):
         self.ticktack = 0
         self.log = logging.getLogger('SSC.DRegistry')
 
+        self.proc = 0
+        self.erros = 0
+
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
         self.t_cleanner.start()
 
-    def sumario(self) -> str:
-        return "TODO"
-        # lista = self.topic_crt.summario()
-        # res = ''
-        # for i in lista:
-        #     res += str(i) + '<p>'
-
-        # return f'>>>>>> SSC v-{VERSION} ({DEPLOY})<p> Topics: <p> {res}'
-
+    def sumario(self) -> dict:
+        return {'app':'SSC', 
+                'version':VERSION ,
+                'deploy':DEPLOY,
+                'tictac': self.ticktack,
+                'topics': self.tenant.sumario(),
+                'func':{'online': len(self.function_crt.list_function), 'ok': self.proc, 'err':self.erros, 'class': self.function_crt.summario()}}
 
     def cleanner(self) ->None:
         """[Garbage collector of files]
@@ -50,9 +51,9 @@ class DRegistry(RPC_Responser):
 
         while self.done is False:
 
-            procs, errors = self.function_crt.execute()
+            self.proc, self.erros = self.function_crt.execute()
 
-            self.log.debug(f'Tick-Tack {self.ticktack} [{procs}  / {errors}]... ')
+            self.log.debug(f'Tick-Tack {self.ticktack} [{self.proc}  / {self.erros}]... ')
             self.ticktack += 1
             time.sleep(5)
 

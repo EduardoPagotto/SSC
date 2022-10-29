@@ -82,6 +82,7 @@ class Function(ABC):
 
                 except Exception as exp:
                     self.log.error(exp.args[0])
+                    self.tot_erro += 1
 
             if (inputs == 0) and (outputs == 0):
                 time.sleep(timeout)

@@ -8,11 +8,15 @@ import logging
 import pathlib
 from typing import List
 
+import redis
+
 from tinydb import TinyDB, Query
 from tinydb.table import Document
 from SSC.server import splitNamespace, splitTopic, topic_to_redis_queue
 
 from SSC.subsys.LockDB import LockDB
+from SSC.topic.RedisQueue import RedisQueue
+
 
 class Tenant(object):
     def __init__(self, database : TinyDB, path_storage : str, urlRedis : str) -> None:
@@ -86,6 +90,26 @@ class Tenant(object):
             ns_list.append(doc['namespace'])
 
         raise Exception(f'tenant has namespaces: {str(ns_list)}')
+
+
+    def sumario(self):
+        results = []
+
+        try:
+            with LockDB(self.database, 'topics') as table:
+                    lista = table.all()
+                    for doc in lista:
+                        for q in doc['queues']:
+                            queue = RedisQueue(redis.Redis.from_url(doc['redis']), topic_to_redis_queue(doc['tenant'], doc['namespace'], q))
+                            results.append({'topic' : f"{doc['tenant']}/{doc['namespace']}/{q}", 'size': queue.qsize()})
+
+
+        except Exception as exp:
+            self.log.error(exp.args[0])
+
+        return results
+
+
 
     def list_all(self) -> List[str]:
         lista = []
