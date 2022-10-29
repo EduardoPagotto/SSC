@@ -16,8 +16,8 @@ def main():
         log = logging.getLogger('Client')
 
         client = ClientQueue('http://127.0.0.1:5152')
-        producer = client.create_producer('queue01')
-        consumer = client.subscribe('queue01')
+        producer = client.create_producer('test/ns01/queue01')
+        consumer = client.subscribe('test/ns01/queue01')
 
         msg_1 = json.dumps({'id': 0,
                             'create': datetime.now(tz=timezone.utc).timestamp(),
@@ -26,9 +26,9 @@ def main():
 
         producer.send(msg_1)
 
-        msg = consumer.receive()
+        msg = consumer.receive(5)
 
-        msg2 = consumer.receive(5)
+        msg2 = consumer.receive()
 
         log.debug(msg)
         # producer.send(str.encode(json.dumps({'id': id, 

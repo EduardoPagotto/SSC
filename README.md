@@ -3,33 +3,37 @@ Simple Stream Control
 
 ## Comandos 
 ```bash
-# Cria fila 
-./ssc-admin.py topics create queue01
-./ssc-admin.py topics create queue02
-#./ssc-admin.py topics create fila1
-#./ssc-admin.py topics delete fila1
+# Cria tenant/namespace/topic 
+./ssc-admin.py tenants create test
+./ssc-admin.py namespaces create test/ns01
+./ssc-admin.py topics create test/ns01/queue01
+./ssc-admin.py topics create test/ns01/queue02
 
 # cria funcs
 ./ssc-admin.py functions \
                 create \
                 --name name01 \
-                --py ./funcs/FuncAdd.py \
-                --classname externo.FuncAdd.FuncAdd \
-                --inputs queue01 \
-                --output queue02
+                --tenant test \
+                --namespace ns01 \
+                --py ./src/FuncAdd.py \
+                --classname FuncAdd.FuncAdd \
+                --inputs test/ns01/queue01 \
+                --output test/ns01/queue02
+
 
 # envai dados de teste a filas 1
-./ssc-client.py produce queue01 -m "entrando em 1" -n 10
+./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 5
 
 # FuncAdd le queue01 e envia a queue02!!
+
 # receber dados em queue02
-./ssc-client.py consume -s appteste queue02 -n 10
+./ssc-client.py consume -s app1 test/ns01/queue02 -n 2
 
 # remove a func named01
-./ssc-admin.py functions delete --tenant rpa --namespace manifesto --name name01
+./ssc-admin.py functions delete --tenant test --namespace ns01 --name name01
 
 
-./ssc-admin.py functions list --tenant rpa --namespace manifesto
+./ssc-admin.py functions list --tenant test --namespace ns01 --name none
 ```
 
 
