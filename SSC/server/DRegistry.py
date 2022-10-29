@@ -1,31 +1,27 @@
 '''
 Created on 20220924
-Update on 20221022
+Update on 20221029
 @author: Eduardo Pagotto
 '''
 
 import logging
 import time
 
-from typing import Any, Optional
 from threading import  Thread
 from typing import Any, List
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
-from SSC.server import splitTopic
 
 from SSC.server.Tenant import Tenant
 from SSC.server.FunctionCrt import FunctionCrt
-from SSC.server.TopicCrt import TopicsCrt
 
 from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY
 
 class DRegistry(RPC_Responser):
-    def __init__(self, topic_crt : TopicsCrt, function_crt : FunctionCrt, tenant : Tenant) -> None:
+    def __init__(self, function_crt : FunctionCrt, tenant : Tenant) -> None:
         super().__init__(self)
 
-        self.topic_crt = topic_crt
         self.function_crt = function_crt
         self.tenant = tenant
         self.done : bool = False
@@ -36,13 +32,13 @@ class DRegistry(RPC_Responser):
         self.t_cleanner.start()
 
     def sumario(self) -> str:
+        return "TODO"
+        # lista = self.topic_crt.summario()
+        # res = ''
+        # for i in lista:
+        #     res += str(i) + '<p>'
 
-        lista = self.topic_crt.summario()
-        res = ''
-        for i in lista:
-            res += str(i) + '<p>'
-
-        return f'>>>>>> SSC v-{VERSION} ({DEPLOY})<p> Topics: <p> {res}'
+        # return f'>>>>>> SSC v-{VERSION} ({DEPLOY})<p> Topics: <p> {res}'
 
 
     def cleanner(self) ->None:
@@ -78,6 +74,8 @@ class DRegistry(RPC_Responser):
 
         raise Exception('topic invalid ' + str(topic_name))
 
+    # --
+
     # Admin
     def topics_create(self, topic_name : str) -> str:
         return self.tenant.create_topic(topic_name)
@@ -89,10 +87,8 @@ class DRegistry(RPC_Responser):
     # Admin
     def topics_list(self, ns : str) -> List[str]:
         return self.tenant.list_topics(ns)
-    
-    # Admin
-    def functions_list(self, tenant_ns : str) -> List[str]:
-        return self.function_crt.list_all(tenant_ns)
+
+    # ---
 
     # Admin
     def tenants_create(self, name : str) -> str:
@@ -106,6 +102,8 @@ class DRegistry(RPC_Responser):
     def tenants_list(self) -> List[str]:
         return self.tenant.list_all()
 
+    # ---
+
     # Admin
     def namespaces_create(self, name : str) -> str:
         return self.tenant.create_namespace(name)
@@ -118,14 +116,20 @@ class DRegistry(RPC_Responser):
     def namespaces_list(self, name : str) -> List[str]:
         return self.tenant.list_all_namespace(name)
 
+    # ---
+
     # Admin
     def function_create(self, params: dict) -> str:
         return self.function_crt.create(params)
-        
+
     # Admin
     def function_delete(self, name: str):
         self.function_crt.delete(name)
         return f'success delete {name}'
+
+    # Admin
+    def functions_list(self, tenant_ns : str) -> List[str]:
+        return self.function_crt.list_all(tenant_ns)
 
         #--user-config '{"FileCfg":"aaaaa"}'
         #--user-config-file "/pulsar/host/etc/func1.yaml"

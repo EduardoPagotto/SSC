@@ -1,6 +1,6 @@
 '''
 Created on 20221007
-Update on 20221022
+Update on 20221029
 @author: Eduardo Pagotto
 '''
 
@@ -14,13 +14,13 @@ from SSC.topic.QueueProdCons import Producer, QueueProducer
 
 
 class Context(object):
-    def __init__(self, params: Document, curr_topic : str, tenant : Tenant, log : Logger) -> None:
+    def __init__(self, extra : dict[str, Producer] , params: Document, curr_topic : str, tenant : Tenant, log : Logger) -> None:
         self.__log : Logger = log
         self.__curr_topic : str = curr_topic
         self.__tenant : Tenant = tenant
         self.__params = params
 
-        self.__map_puplish : dict[str, Producer] = {}
+        self.__extra : dict[str, Producer] = extra
 
     def get_message_key(self) -> Optional[dict]:
         return None # TODO: implementar
@@ -54,12 +54,13 @@ class Context(object):
 
     def publish(self, topic : str, data : str):
 
-        if topic not in self.__map_puplish: # FIXME: trocar para a base de func
+        if topic not in self.__extra:
             tenant_name, namespace, queue = splitTopic(topic)
-            tn = self.__tenant.find_tenant_by_name(tenant_name)
-            if self.__tenant.hasQueue(tenant_name, namespace, queue):
-                self.__map_puplish[topic] = QueueProducer(tn['redis'], topic.replace('/',':'))
+
+            doc = self.__tenant.find_topic_by_namespace(tenant_name, namespace)
+            if queue in doc['queues']:
+                self.__extra[topic] = QueueProducer(doc['redis'], topic.replace('/',':'))                
             else:
                 raise Exception(f'topic invalid im publish func ' + topic)
         
-            self.__map_puplish[topic].send(data)
+        self.__extra[topic].send(data)

@@ -6,7 +6,19 @@ services:
       context: ..
     image: ssc_server_img
     hostname: "SSC01"
+    depends_on:
+    - redis
     ports:
     - 5152:5152
     volumes:
     - ./data/ssc:/var/app/data
+
+  redis:
+    container_name: redis_container
+    image: redis
+    command: redis-server --requirepass AAABBBCCC
+    hostname: "redis01"
+    ports:
+    - 6379:6379
+    volumes:
+    - ./data/redis:/data

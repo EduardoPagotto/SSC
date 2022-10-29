@@ -1,12 +1,12 @@
 '''
 Created on 20221006
-Update on 20221022
+Update on 20221029
 @author: Eduardo Pagotto
 '''
 
 import logging
 import pathlib
-from typing import List, Tuple
+from typing import List
 
 from tinydb import TinyDB, Query
 from tinydb.table import Document
@@ -24,71 +24,42 @@ class Tenant(object):
         self.log = logging.getLogger('SSC.Tenant')
 
 
-    def find_tenant_by_name(self, tenant_name : str) -> Document:
-        with LockDB(self.database, 'tenants') as table:
+    def find_topics_by_tenant(self, tenant) -> List[Document]:
+        with LockDB(self.database, 'topics') as table:
             q = Query()
-            itens = table.search(q.name == tenant_name)
+            itens = table.search(q.tenant == tenant)
             if len(itens) > 0:
+                return itens
+
+        raise Exception(f'tenant {tenant} does not exist')        
+
+    def find_topic_by_namespace(self, tenant, namespace) -> Document:
+        with LockDB(self.database, 'topics') as table:
+            q = Query()
+            itens = table.search((q.tenant == tenant) & (q.namespace == namespace ))
+            if len(itens) == 1:
                 return itens[0]
 
-        raise Exception(f'tenant {tenant_name} does not exist')
-
-    def __find_namespace_from_name(self, tenant_name : str, namespace_name : str) -> Document:
-
-        tn = self.find_tenant_by_name(tenant_name)
-        with LockDB(self.database, 'namespaces') as table:
-            q = Query()
-            list_ns = table.search((q.tenant == tn.doc_id) & (q.name == namespace_name))
-            if len(list_ns) > 0:
-                return list_ns[0]
-            
-        raise Exception(f'namespace {namespace_name} does not exist in tenant {tenant_name}')
-
-
-    def __find_namespace_from_tenant_id(self, tenant_id : int) -> List[Document]:
-        with LockDB(self.database, 'namespaces') as table:
-            q = Query()
-            return table.search(q.tenant == tenant_id)
-
-
-    def find_namespace_from_tenant_id_name(self, tenant_id : int, namespace_name : str) -> Document:
-
-        with LockDB(self.database, 'namespaces') as table:
-            q = Query()
-            list_ns = table.search((q.tenant == tenant_id) & (q.name == namespace_name))
-            if len(list_ns) > 0:
-                return list_ns[0]
-
-        raise Exception(f'namespace {namespace_name} does not exist')
-
-    def hasQueue(self, tenant_name : str, namespace_name : str, queue_name : str) -> bool:
-        try:
-            ns = self.__find_namespace_from_name(tenant_name, namespace_name)
-            for item in ns['queues']:
-                if item == queue_name:
-                    return True
-        except:
-            pass
-
-        return False
-
-
+        raise Exception(f'tenant ou namespace {tenant}/{namespace} does not exist') 
 
     def create(self, name : str) -> str:
 
         self.log.debug(f'tenant create {name}')
-        exist : bool = False
+
+        tot = 0
         try:
-            self.find_tenant_by_name(name)
-            exist = True
+            tot = len(self.find_topics_by_tenant(name))
         except:
             pass
 
-        if exist:
+        if tot > 0:
             raise Exception(f'tenant {name} already exists')
 
-        with LockDB(self.database, 'tenants', True) as table:
-            id = table.insert({'name': name,'redis':self.redis_url})
+        with LockDB(self.database, 'topics', True) as table:
+            id = table.insert({'tenant': name,
+                               'redis':self.redis_url,
+                               'namespace':None,
+                               'queues':[]})
 
         return f'Sucess {name} id: {id}'
 
@@ -96,71 +67,76 @@ class Tenant(object):
 
         self.log.debug(f'tenant delete {name}')
 
-        tn = self.find_tenant_by_name(name)
-        ns_list = self.__find_namespace_from_tenant_id(tn.doc_id)
-        if len(ns_list) == 0:
-            with LockDB(self.database, 'tenants', True) as table:
-                table.remove(doc_ids=[tn.doc_id])
-                return f'tenant {name} deleted'
-        else:
-            names = []
-            for v in ns_list:
-                names.append(v['name'])
+        lista = self.find_topics_by_tenant(name)
+        tot = len(lista)
+        if tot == 1:
+            doc = lista[0]
+            if len(doc['queues']) > 0:
+                raise Exception(f'tenant has queues: {str(doc["queues"])}')
 
-            raise Exception(f'tenant has namespaces: {str(names)}')
-        
+            if doc['namespace'] != None:
+                raise Exception(f'tenant has namespace: {doc["namespace"]}')
 
+            with LockDB(self.database, 'topics', True) as table:
+                table.remove(doc_ids=[doc.doc_id])
+                return f'tenant {name} deleted'            
+
+        ns_list : List[str] = []
+        for doc in lista:
+            ns_list.append(doc['namespace'])
+
+        raise Exception(f'tenant has namespaces: {str(ns_list)}')
 
     def list_all(self) -> List[str]:
         lista = []
 
         tenant_list = []
-        with LockDB(self.database, 'tenants') as table:
+        with LockDB(self.database, 'topics') as table:
             tenant_list = table.all()
 
         for val in tenant_list:
-            lista.append(val['name'])
+            if val['tenant'] not in lista:
+                lista.append(val['tenant'])
 
         return lista
-
-    
 
     def create_namespace(self, name : str):
         self.log.debug(f'namespace create {name}')
 
         tenant_name, namespace = splitNamespace(name)
 
-        tn = self.find_tenant_by_name(tenant_name)
+        lista = self.find_topics_by_tenant(tenant_name)
+        tot = len(lista)
+        if tot == 1:
+            doc = lista[0]
+            if doc['namespace'] == None:
+                doc['namespace'] = namespace
+                with LockDB(self.database, 'topics', True) as table:
+                    table.update(doc, doc_ids=[doc.doc_id])
+                    return f'Success {name} id: {doc.doc_id}'  
+        
 
-        exist : bool = False
-        try:
-            self.find_namespace_from_tenant_id_name(tn.doc_id, namespace)
-            exist = True
-        except:
-            pass
+        for doc in lista:
+            if doc['namespace'] == namespace:
+                raise Exception(f'namespace {name} already exists')   
 
-        if exist:
-            raise Exception(f'namespace {name} already exists')
 
-        with LockDB(self.database, 'namespaces', True) as table:
-            id = table.insert({'name':namespace, "tenant": tn.doc_id, "queues":[]})
+        with LockDB(self.database, 'topics', True) as table:
+            id = table.insert({'tenant': tenant_name,
+                                'redis':self.redis_url,
+                                'namespace':namespace,
+                                'queues':[]})  
             return f'Success {name} id: {id}'
-        
-        
 
     def list_all_namespace(self, name : str) -> List[str]:
 
-        tn = self.find_tenant_by_name(name)
-        ns = self.__find_namespace_from_tenant_id(tn.doc_id)
-        if ns:
-            lista_ns = []
-            for val in ns:
-                lista_ns.append(val['name'])
+        lista_ns = []
+        lista = self.find_topics_by_tenant(name)
+        for doc in lista:
+            if doc['namespace'] != None:
+                lista_ns.append(doc['namespace'])            
 
-            return lista_ns
-
-        raise Exception(f'namespace {name} does not exist')    
-
+        return lista_ns
 
     def delete_namespace(self, name)-> str:
 
@@ -168,79 +144,74 @@ class Tenant(object):
 
         tenant_name, namespace = splitNamespace(name)
 
-        tn = self.find_tenant_by_name(tenant_name)
-        ns = self.find_namespace_from_tenant_id_name(tn.doc_id, namespace)
-        lista = ns['queues'] 
-        if len(lista) > 0:
-            raise Exception(f'namespace {namespace} has topics: {str(lista)}')
+        doc = self.find_topic_by_namespace(tenant_name, namespace)
+        if len(doc['queues']) > 0:
+            raise Exception(f'namespace has queues: {str(doc["queues"])}')
 
-        with LockDB(self.database, 'namespaces', True) as table:
-            table.remove(doc_ids=[ns.doc_id])
+        if len(self.find_topics_by_tenant(tenant_name)) == 1:
+            doc['namespace'] = None
+            with LockDB(self.database, 'topics', True) as table:
+                table.update(doc, doc_ids=[doc.doc_id])
+                return f'namespace {name} deleted'
+
+        with LockDB(self.database, 'topics', True) as table:
+            table.remove(doc_ids=[doc.doc_id])
             return f'namespace {name} deleted'
+
 
     def create_topic(self, topic_name : str) -> str:
 
         tenant, namespace, queue = splitTopic(topic_name)
+        doc = self.find_topic_by_namespace(tenant, namespace)
+        if queue in doc['queues']:
+            raise Exception(f'topic {queue} already exists')
 
-        ns = self.__find_namespace_from_name(tenant, namespace)
-        if queue not in ns['queues']:
-            ns['queues'].append(queue)
-            with LockDB(self.database, 'namespaces', True) as table:
-                table.update({'queues' : ns['queues']}, doc_ids=[ns.doc_id])
-                return f'success create {topic_name}'
+        doc['queues'].append(queue)
+        with LockDB(self.database, 'topics', True) as table:
+            table.update({'queues' : doc['queues']}, doc_ids=[doc.doc_id])
+            return f'success create {topic_name}'
         
-        raise Exception(f'topic {queue} already exists')
-
-
     def list_topics(self, name) -> List:
-
         tenant, namespace = splitNamespace(name)
+        doc = self.find_topic_by_namespace(tenant, namespace)
+        return doc['queues']
 
-        ns = self.__find_namespace_from_name(tenant, namespace)
-        return ns['queues']
-                   
     def delete_topics(self, name) -> str:
 
         tenant, namespace, queue = splitTopic(name)
+        doc = self.find_topic_by_namespace(tenant, namespace)
 
-        ns = self.__find_namespace_from_name(tenant, namespace)
-        lista_queue : List[str] = ns['queues']
-        if queue in lista_queue:
-            lista_queue.remove(queue)
-            with LockDB(self.database, 'namespaces', True) as table:
-                table.update({'queues' : lista_queue}, doc_ids=[ns.doc_id]) # TODO verificar se nao há functions anexado ao topic
+        if queue in doc['queues']:
+            doc['queues'].remove(queue)
+
+            with LockDB(self.database, 'topics', True) as table:
+                table.update({'queues' : doc['queues']}, doc_ids=[doc.doc_id]) # TODO verificar se nao há functions anexado ao topic
                 return f'success delete {name}'
 
         raise Exception(f'topic {name} does not exist')  
-  
 
     def create_queue(self, topic_name : str) -> dict:
         
         tenant, namespace, queue = splitTopic(topic_name)
-        tn = self.find_tenant_by_name(tenant)
-        ns = self.find_namespace_from_tenant_id_name(tn.doc_id, namespace)
-        if queue in ns['queues']:
-            return{'urlRedis' : tn['redis'], 'queue' : topic_to_redis_queue(tenant, namespace, queue)}
+        doc = self.find_topic_by_namespace(tenant, namespace)
+        if queue in doc['queues']:
+            return{'urlRedis' : doc['redis'], 'queue' : topic_to_redis_queue(tenant, namespace, queue)}
 
         raise Exception(f'topic {topic_name} does not exist') 
 
-
     def create_queues(self, topics_name : List[str]) -> dict:
 
-        last_tenant = ''
-        tn : Document = Document({},0)
         redisUrl = ''
         lista_topics : List[str] = []
         for item in topics_name:
 
             tenant, namespace, queue = splitTopic(item)
-            if last_tenant == '':
-                last_tenant = tenant
-                tn = self.find_tenant_by_name(tenant)
-                redisUrl = tn['redis']
 
-            ns = self.find_namespace_from_tenant_id_name(tn.doc_id, namespace)
-            if queue in ns['queues']:
+            doc = self.find_topic_by_namespace(tenant, namespace)
+            if redisUrl == '':
+                redisUrl = doc['redis']
+
+            if queue in doc['queues']:
                 lista_topics.append(topic_to_redis_queue(tenant, namespace, queue))
             else:
                 raise Exception(f'topic {item} does not exist') 

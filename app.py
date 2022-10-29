@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221021
+Update on 20221029
 @author: Eduardo Pagotto
 '''
 
@@ -15,8 +15,6 @@ from SSC.server.DRegistry import DRegistry
 from SSC.server.FunctionCrt import FunctionCrt
 from SSC.server.FunctionDB import FunctionDB
 from SSC.server.Tenant import Tenant
-from SSC.server.TopicCrt import TopicsCrt
-from SSC.server.TopicDB import TopicDB
 
 from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY
@@ -27,7 +25,8 @@ SSC_CFG_IP : str  = '0.0.0.0' if getenv('SSC_CFG_IP') is None else getenv('SSC_C
 SSC_CFG_PORT : int  =  5152 if getenv('SSC_CFG_PORT') is None else int(getenv('SSC_CFG_PORT'))
 SSC_CFG_DB : str  = './data/db' if getenv('SSC_CFG_DB') is None else getenv('SSC_CFG_DB')
 SSC_CFG_STORAGE : str = './data/storage' if getenv('SSC_CFG_STORAGE') is None else getenv('SSC_CFG_STORAGE')
-REDIS_URL : str = 'redis://localhost:6379/0' if getenv('REDIS_URL') is None else getenv('REDIS_URL')
+#REDIS_URL : str = 'redis://localhost:6379/0' if getenv('REDIS_URL') is None else getenv('REDIS_URL') 
+REDIS_URL : str = 'redis://:AAABBBCCC@192.168.122.1:6379/0' if getenv('REDIS_URL') is None else getenv('REDIS_URL')
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -50,10 +49,9 @@ path2.mkdir(parents=True, exist_ok=True)
 database = TinyDB(str(path1) + '/master.json')
 
 tenant = Tenant(database, SSC_CFG_STORAGE, REDIS_URL)
-topic_crt = TopicsCrt(TopicDB(database))
 function_crt = FunctionCrt(FunctionDB(database, tenant), SSC_CFG_STORAGE)
 
-rpc_registry = DRegistry(topic_crt, function_crt, tenant)
+rpc_registry = DRegistry(function_crt, tenant)
 
 app = Flask(__name__)
 app.secret_key = "secret key"

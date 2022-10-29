@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221022
+Update on 20221029
 @author: Eduardo Pagotto
 '''
 
@@ -13,11 +13,8 @@ from typing import List, Optional
 from tinydb.table import Document
 from SSC.server.Tenant import Tenant
 
-from SSC.server.Topic import Topic
 from SSC.Context import Context
-from SSC.server.TopicCrt import TopicsCrt
 from SSC.topic import Consumer, Producer
-
 
 class Function(ABC):
     def __init__(self) -> None:
@@ -44,39 +41,47 @@ class Function(ABC):
         if timeout <= 0:
             timeout = 5
 
+        extra_map_puplish : dict[str, Producer] = {}
+
         while (self.alive):
 
             inputs = 0
             outputs = 0
 
             if self.consumer:
-                res = self.consumer.receive(timeout)
-                if res:
-                    for k, v in res.items():
-                        #self.log.debug(f'Function exec {self.name} topic in: {self.topic_in.name} ..')
-                        inputs += 1
-                        self.tot_proc += 1
 
-                        try:
-                            ret = self.process(v, Context(self.document, k, self.tenant ,self.log))
-                            if (self.producer) and (ret != None):
+                try:
 
-                                outputs += 1
+                    res = self.consumer.receive(timeout)
+                    if res:
+                        for k, v in res.items():
+                            #self.log.debug(f'Function exec {self.name} topic in: {self.topic_in.name} ..')
+                            inputs += 1
+                            self.tot_proc += 1
 
-                                #self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
-                                self.producer.send(ret)
+                            try:
+                                ret = self.process(v, Context(extra_map_puplish, self.document, k, self.tenant ,self.log))
+                                if (self.producer) and (ret != None):
 
-                        except Exception as exp:
-                            
-                            # auto nack
-                            #self.topic_in.push(res)
-                            #TODO: imlementar erro critico de queue 
+                                    outputs += 1
 
-                            self.tot_erro += 1
-                            self.log.error(f'Function exec {self.name} erro: ' + exp.args[0])
-                            time.sleep(1)
+                                    #self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
+                                    self.producer.send(ret)
 
-                        continue
+                            except Exception as exp:
+                                
+                                # auto nack
+                                #self.topic_in.push(res)
+                                #TODO: imlementar erro critico de queue 
+
+                                self.tot_erro += 1
+                                self.log.error(f'Function exec {self.name} erro: ' + exp.args[0])
+                                time.sleep(1)
+
+                            continue
+
+                except Exception as exp:
+                    self.log.error(exp.args[0])
 
             if (inputs == 0) and (outputs == 0):
                 time.sleep(timeout)
