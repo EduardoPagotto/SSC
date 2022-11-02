@@ -1,70 +1,34 @@
 '''
 Created on 20221006
-Update on 20221022
+Update on 20221101
 @author: Eduardo Pagotto
 '''
 
-import importlib
 import logging
-import pathlib
-from typing import Any, List, Optional
+from typing import List
 
 from tinydb import TinyDB, Query
 from tinydb.table import Document
 
-from SSC.Function import Function
-from SSC.server import splitNamespace, splitTopic
-from SSC.server.Tenant import Tenant
+from SSC.server import splitNamespace
+from SSC.server.FuncCocoon import FuncCocoon
 from SSC.subsys.LockDB import LockDB
-from SSC.topic.Connection import Connection
-from SSC.topic.QueueProdCons import QueueConsumer
 
 class FunctionDB(object):
-    def __init__(self, database : TinyDB, tenant : Tenant) -> None:
+    def __init__(self, database : TinyDB) -> None:
         self.database = database
-        self.tenant = tenant
         self.log = logging.getLogger('SSC.TopicDB')
 
-    def load(self, path_file : pathlib.Path, class_name : str) -> Any:
-            klass = None
+    def create(self, params : dict) -> FuncCocoon:
 
-            plugin = str(path_file.parent).replace('/','.') + '.' + class_name
-
-            self.log.debug(f'function import {plugin}')
-
-            if plugin is None or plugin == '':
-                self.log.error("Cannot have an empty plugin string.")
-
-            try:
-                (module, x, classname) = plugin.rpartition('.')
-
-                if module == '':
-                    raise Exception()
-                mod = importlib.import_module(module)
-                klass = getattr(mod, classname)
-
-            except Exception as ex:
-                msg_erro = "Could not enable class %s - %s" % (plugin, str(ex))
-                self.log.error(msg_erro)
-                raise Exception(msg_erro)
-
-            if klass is None:
-                self.log.error(f"Could not enable at least one class: {plugin}")
-                raise Exception(f"Could not enable at least one class: {plugin}") 
-
-            return klass()
-
-    def create(self, params : dict) -> Function:
-
-        klass : Function = self.__make_func(params)
-
+        cocoon : FuncCocoon = FuncCocoon(params, self.database)
         with LockDB(self.database, 'funcs', True) as table:
-            klass.document = table.get(doc_id=table.insert(params))
+            cocoon.document = table.get(doc_id=table.insert(params))
 
-        return klass
+        return cocoon
 
 
-    def find(self, function_name : str) -> Function:
+    def find(self, function_name : str) -> FuncCocoon:
 
         with LockDB(self.database, 'funcs', False) as table:
             q = Query()
@@ -73,10 +37,10 @@ class FunctionDB(object):
         if len(itens) == 1:
             params = itens[0]
 
-            klass : Function = self.__make_func(params)
-            klass.document = params
+            cocoon = FuncCocoon(params, self.database)
+            cocoon.document = params
 
-            return klass
+            return cocoon
 
         raise Exception(f'function {function_name} does not exist')
 
@@ -110,48 +74,18 @@ class FunctionDB(object):
 
         return lista
 
-    def get_all(self) -> List[Function]:
+    def get_all(self) -> List[FuncCocoon]:
 
-        lista : List[Function] = []
+        lista : List[FuncCocoon] = []
 
         with LockDB(self.database, 'funcs', False) as table:
             itens = table.all()
             
         for params in itens:
 
-            klass : Function = self.__make_func(params)
-            klass.document = params
+            cocoon = FuncCocoon(params, self.database)
+            cocoon.document = params
 
-            lista.append(klass)
+            lista.append(cocoon)
 
         return lista
-
-    def __make_func(self, params : Document | dict) -> Function:
-
-        consumer = None
-        producer = None
-
-        if ('inputs' in params) and (params['inputs'] is not None):
-            data_in = self.tenant.create_queues(params['inputs'])
-            conn_in = Connection(data_in['urlRedis'])
-            consumer = conn_in.create_consumer(data_in['queue'])
-
-        if ('output' in params) and (params['output'] is not None):
-            data_out = self.tenant.create_queue(params['output'])
-            conn_out = Connection(data_out['urlRedis'])
-            producer = conn_out.create_producer(data_out['queue'])
-
-
-        klass : Function = self.load(pathlib.Path(params['py']), params['classname'])
-
-        klass.name = params['name']
-        klass.consumer = consumer
-        klass.producer = producer
-
-        klass.log = logging.getLogger('SSC.function')
-        klass.tot_proc  = 0
-        klass.tot_erro  = 0
-        klass.alive  = True
-        klass.tenant = self.tenant
-
-        return klass

@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221029
+Update on 20221101
 @author: Eduardo Pagotto
 '''
 
@@ -12,11 +12,10 @@ import redis
 
 from tinydb import TinyDB, Query
 from tinydb.table import Document
-from SSC.server import splitNamespace, splitTopic, topic_to_redis_queue
+from SSC.server import splitNamespace, splitTopic, topic_to_redis_queue, topic_by_namespace
 
 from SSC.subsys.LockDB import LockDB
 from SSC.topic.RedisQueue import RedisQueue
-
 
 class Tenant(object):
     def __init__(self, database : TinyDB, path_storage : str, urlRedis : str) -> None:
@@ -36,15 +35,6 @@ class Tenant(object):
                 return itens
 
         raise Exception(f'tenant {tenant} does not exist')        
-
-    def find_topic_by_namespace(self, tenant, namespace) -> Document:
-        with LockDB(self.database, 'topics') as table:
-            q = Query()
-            itens = table.search((q.tenant == tenant) & (q.namespace == namespace ))
-            if len(itens) == 1:
-                return itens[0]
-
-        raise Exception(f'tenant ou namespace {tenant}/{namespace} does not exist') 
 
     def create(self, name : str) -> str:
 
@@ -168,7 +158,7 @@ class Tenant(object):
 
         tenant_name, namespace = splitNamespace(name)
 
-        doc = self.find_topic_by_namespace(tenant_name, namespace)
+        doc = topic_by_namespace(self.database, tenant_name, namespace)
         if len(doc['queues']) > 0:
             raise Exception(f'namespace has queues: {str(doc["queues"])}')
 
@@ -186,7 +176,7 @@ class Tenant(object):
     def create_topic(self, topic_name : str) -> str:
 
         tenant, namespace, queue = splitTopic(topic_name)
-        doc = self.find_topic_by_namespace(tenant, namespace)
+        doc = topic_by_namespace(self.database, tenant, namespace)
         if queue in doc['queues']:
             raise Exception(f'topic {queue} already exists')
 
@@ -197,13 +187,13 @@ class Tenant(object):
         
     def list_topics(self, name) -> List:
         tenant, namespace = splitNamespace(name)
-        doc = self.find_topic_by_namespace(tenant, namespace)
+        doc = topic_by_namespace(self.database, tenant, namespace)
         return doc['queues']
 
     def delete_topics(self, name) -> str:
 
         tenant, namespace, queue = splitTopic(name)
-        doc = self.find_topic_by_namespace(tenant, namespace)
+        doc = topic_by_namespace(self.database, tenant, namespace)
 
         if queue in doc['queues']:
             doc['queues'].remove(queue)
@@ -214,30 +204,3 @@ class Tenant(object):
 
         raise Exception(f'topic {name} does not exist')  
 
-    def create_queue(self, topic_name : str) -> dict:
-        
-        tenant, namespace, queue = splitTopic(topic_name)
-        doc = self.find_topic_by_namespace(tenant, namespace)
-        if queue in doc['queues']:
-            return{'urlRedis' : doc['redis'], 'queue' : topic_to_redis_queue(tenant, namespace, queue)}
-
-        raise Exception(f'topic {topic_name} does not exist') 
-
-    def create_queues(self, topics_name : List[str]) -> dict:
-
-        redisUrl = ''
-        lista_topics : List[str] = []
-        for item in topics_name:
-
-            tenant, namespace, queue = splitTopic(item)
-
-            doc = self.find_topic_by_namespace(tenant, namespace)
-            if redisUrl == '':
-                redisUrl = doc['redis']
-
-            if queue in doc['queues']:
-                lista_topics.append(topic_to_redis_queue(tenant, namespace, queue))
-            else:
-                raise Exception(f'topic {item} does not exist') 
-
-        return {'urlRedis': redisUrl, 'queue' : lista_topics}

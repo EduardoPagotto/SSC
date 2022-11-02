@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221029
+Update on 20221101
 @author: Eduardo Pagotto
 '''
 
@@ -11,6 +11,7 @@ from threading import  Thread
 from typing import Any, List
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
+from SSC.server import create_queue, create_queues
 
 from SSC.server.Tenant import Tenant
 from SSC.server.FunctionCrt import FunctionCrt
@@ -62,16 +63,16 @@ class DRegistry(RPC_Responser):
 
     # ClientQueue
     def create_producer(self, topic_name : str) -> dict:
-        return self.tenant.create_queue(topic_name)
+        return create_queue(self.tenant.database, topic_name)
   
     # ClientQueue
     def create_subscribe(self, topic_name : str | List[str]) -> dict:
 
         if type(topic_name) == list:
-            return self.tenant.create_queues(topic_name)
+            return create_queues(self.tenant.database, topic_name)
 
         if type(topic_name) == str:
-            return self.tenant.create_queue(topic_name)
+            return create_queue(self.tenant.database, topic_name)
 
         raise Exception('topic invalid ' + str(topic_name))
 

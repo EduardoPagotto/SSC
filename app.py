@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221029
+Update on 20221101
 @author: Eduardo Pagotto
 '''
 
@@ -49,7 +49,7 @@ path2.mkdir(parents=True, exist_ok=True)
 database = TinyDB(str(path1) + '/master.json')
 
 tenant = Tenant(database, SSC_CFG_STORAGE, REDIS_URL)
-function_crt = FunctionCrt(FunctionDB(database, tenant), SSC_CFG_STORAGE)
+function_crt = FunctionCrt(FunctionDB(database), SSC_CFG_STORAGE)
 
 rpc_registry = DRegistry(function_crt, tenant)
 

@@ -1,13 +1,12 @@
 '''
 Created on 20221019
-Update on 20221022
+Update on 20221101
 @author: Eduardo Pagotto
 '''
 
-from ast import Bytes
-from optparse import Option
-from typing import Any, List, Optional
 import redis
+
+from typing import Any, List
 
 from SSC.topic import Producer, Consumer
 from SSC.topic.RedisQueue import RedisQueue

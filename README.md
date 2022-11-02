@@ -92,5 +92,15 @@ docker run --name zdev -it SSC_server_img /bin/sh
 docker exec -it server_SSC_dev /bin/sh
 ```
 
+### TODO
+- [x] Separar controle de function de function
+- [ ] Testar functions
+- [ ] Implementar payload com key, message_prop, timestamp
+- [ ] Implementar chamada de queue no RPC e limpeza de codigo
+- [ ] Implementar plugin connector
+- [ ] Implementar plugin sink
+- [ ] Implementar pause/resume em functions/connectors/sinks
+
+
 refs: 
 - https://roytuts.com/python-flask-rest-api-file-upload/

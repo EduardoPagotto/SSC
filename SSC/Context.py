@@ -1,66 +1,67 @@
 '''
 Created on 20221007
-Update on 20221029
+Update on 20221101
 @author: Eduardo Pagotto
 '''
 
-from logging import Logger, getLogger
+from logging import Logger
 from typing import Any, List, Optional
-from tinydb.table import Document
-from SSC.server import splitTopic
 
-from SSC.server.Tenant import Tenant
+from tinydb.table import Document
+from tinydb import TinyDB
+
+from SSC.server import splitTopic, topic_by_namespace
 from SSC.topic.QueueProdCons import Producer, QueueProducer
 
 
 class Context(object):
-    def __init__(self, extra : dict[str, Producer] , params: Document, curr_topic : str, tenant : Tenant, log : Logger) -> None:
-        self.__log : Logger = log
-        self.__curr_topic : str = curr_topic
-        self.__tenant : Tenant = tenant
-        self.__params = params
+    def __init__(self, extra : dict[str, Producer] , params: Document, curr_topic : str, database : TinyDB, log : Logger) -> None:
+        self.log : Logger = log
+        self.curr_topic : str = curr_topic
+        self.database : TinyDB = database
+        self.params : Document = params
 
-        self.__extra : dict[str, Producer] = extra
+        self.extra : dict[str, Producer] = extra
 
     def get_message_key(self) -> Optional[dict]:
         return None # TODO: implementar
 
     def get_current_message_topic_name(self) -> str:
-        return self.__curr_topic
+        return self.curr_topic
 
     def get_function_name(self) -> str:
-        return self.__params['name']
+        return self.params['name']
 
     def get_function_tenant(self) -> str:
-        return self.__params['tenant']
+        return self.params['tenant']
 
     def get_function_namespace(self) -> str:
-        return self.__params['namespace']
+        return self.params['namespace']
 
     def get_function_id(self):
-        return self.__params.doc_id
+        return self.params.doc_id
         
     def get_logger(self) -> Logger:
-        return self.__log
+        return self.log
 
     def get_user_config_value(self, key : str) -> Any:
-        return self.__params['useConfig'][key]
+        return self.params['useConfig'][key]
 
     def get_input_topics(self) -> List[str]:
-        return [self.__params['inputs']]
+        return [self.params['inputs']]
 
     def get_output_topic(self) -> str:
-        return self.__params['output']
+        return self.params['output']
 
     def publish(self, topic : str, data : str):
 
-        if topic not in self.__extra:
+        if topic not in self.extra:
             tenant_name, namespace, queue = splitTopic(topic)
 
-            doc = self.__tenant.find_topic_by_namespace(tenant_name, namespace)
+            doc = topic_by_namespace(self.database, tenant_name, namespace) # FIXME!!!!! vou precisdar do DB!!!!
             if queue in doc['queues']:
-                self.__extra[topic] = QueueProducer(doc['redis'], topic.replace('/',':'))                
+                self.extra[topic] = QueueProducer(doc['redis'], topic.replace('/',':'))                
             else:
                 raise Exception(f'topic invalid im publish func ' + topic)
         
-        self.__extra[topic].send(data)
+        self.extra[topic].send(data)
