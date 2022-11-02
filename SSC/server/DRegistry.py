@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221101
+Update on 20221102
 @author: Eduardo Pagotto
 '''
 
@@ -41,7 +41,7 @@ class DRegistry(RPC_Responser):
                 'deploy':DEPLOY,
                 'tictac': self.ticktack,
                 'topics': self.tenant.sumario(),
-                'func':{'online': len(self.function_crt.list_function), 'ok': self.proc, 'err':self.erros, 'class': self.function_crt.summario()}}
+                'functions' : self.function_crt.summario()}
 
     def cleanner(self) ->None:
         """[Garbage collector of files]
@@ -119,6 +119,12 @@ class DRegistry(RPC_Responser):
         return self.tenant.list_all_namespace(name)
 
     # ---
+
+    def function_pause(self, name : str) -> str:
+        return self.function_crt.pause(name)
+
+    def function_resume(self, name : str) -> str:
+        return self.function_crt.resume(name)
 
     # Admin
     def function_create(self, params: dict) -> str:

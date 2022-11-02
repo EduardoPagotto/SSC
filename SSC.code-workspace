@@ -49,6 +49,36 @@
 				]
 			},
 			{
+				"name": "Python: Admin pause",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/ssc-admin.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"functions", 
+					"pause", 
+					"--name", "InjectMongoData", 
+					"--tenant", "rpa", 
+					"--namespace", "manifesto"
+				]
+			},
+			{
+				"name": "Python: Admin resume",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/ssc-admin.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"functions", 
+					"resume", 
+					"--name", "InjectMongoData", 
+					"--tenant", "rpa", 
+					"--namespace", "manifesto"
+				]
+			},
+			{
 				"name": "Admin Function List",
 				"type": "python",
 				"request": "launch",

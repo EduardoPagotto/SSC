@@ -1,6 +1,6 @@
 '''
 Created on 20221007
-Update on 20221101
+Update on 20221102
 @author: Eduardo Pagotto
 '''
 
@@ -45,7 +45,7 @@ def create_queue(database : TinyDB, topic_name : str) -> dict:
     tenant, namespace, queue = splitTopic(topic_name)
     doc = topic_by_namespace(database, tenant, namespace)
     if queue in doc['queues']:
-        return{'urlRedis' : doc['redis'], 'queue' : topic_to_redis_queue(tenant, namespace, queue)}
+        return {'urlRedis' : doc['redis'], 'queue' : topic_to_redis_queue(tenant, namespace, queue)}
 
     raise Exception(f'topic {topic_name} does not exist') 
 

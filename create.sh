@@ -52,6 +52,18 @@
 #                 --tenant rpa \
 #                 --namespace manifesto
 
+# ./ssc-admin.py functions \
+#                 pause \
+#                 --name InjectMongoData \
+#                 --tenant rpa \
+#                 --namespace manifesto
+
+# ./ssc-admin.py functions \
+#                 resume \
+#                 --name InjectMongoData \
+#                 --tenant rpa \
+#                 --namespace manifesto
+
 # ./ssc-admin.py functions list --tenant rpa --namespace manifesto
 
 # ./ssc-admin.py topics delete rpa/manifesto/q00DecodePDF
