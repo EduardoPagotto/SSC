@@ -198,7 +198,8 @@ class FuncCocoon(object):
         for t in self.list_t:
             t.esta.done = True
 
-    def join(self):
+    def join(self): 
+        # FIXME: implementar um kill depois de um tempo sem resposta
         self.log.debug(f'{self.name} signed to join')
         for t in self.list_t:
             t.join()

@@ -20,6 +20,11 @@ Simple Stream Control
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
 
+# pause function
+./ssc-admin.py functions pause --tenant test --namespace ns01 --name name01
+
+# resume function
+./ssc-admin.py functions resume --tenant test --namespace ns01 --name name01
 
 # envai dados de teste a filas 1
 ./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 5
