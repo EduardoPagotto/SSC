@@ -107,14 +107,16 @@ docker exec -it server_SSC_dev /bin/sh
 - [x] Implementar plugin functions
 - [x] Implementar pause/resume functions
 - [x] Testar functions
+- [x] Implementar payload com key, message_prop, timestamp
+- [ ] Remover classes de producer e subscribe abstratas
+- [ ] Implementar chamada de queue no RPC e limpeza de codigo
 - [ ] Implementar plugin connectors (file / rest-api)
 - [ ] Implementar pause/resume connectors
 - [ ] Testar connectors
 - [ ] Implementar plugin sinks (file / rest-api)
 - [ ] Implementar pause/resume sinks
 - [ ] Testar sinks
-- [ ] Implementar payload com key, message_prop, timestamp
-- [ ] Implementar chamada de queue no RPC e limpeza de codigo
+
 
 refs: 
 - https://roytuts.com/python-flask-rest-api-file-upload/

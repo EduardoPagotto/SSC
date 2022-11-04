@@ -22,18 +22,16 @@ class Context(object):
         self.params : Document = params
 
         self.extra : dict[str, Producer] = extra
-        self.msg_prop = msg['properties']
-        self.msg_key = msg['key']
-        self.msg_id = msg['seq_id']
+        self.msg = msg
 
     def get_message_id(self) -> int:
-        return self.msg_id
+        return self.msg['seq_id']
 
     def get_message_properties(self) -> dict:
-        return self.msg_prop
+        return self.msg['properties']
 
     def get_message_key(self) -> str:
-        return self.msg_key
+        return self.msg['key']
 
     def get_current_message_topic_name(self) -> str:
         return self.curr_topic
