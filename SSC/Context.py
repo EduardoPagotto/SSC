@@ -1,6 +1,6 @@
 '''
 Created on 20221007
-Update on 20221101
+Update on 20221103
 @author: Eduardo Pagotto
 '''
 
@@ -15,16 +15,25 @@ from SSC.topic.QueueProdCons import Producer, QueueProducer
 
 
 class Context(object):
-    def __init__(self, extra : dict[str, Producer] , params: Document, curr_topic : str, database : TinyDB, log : Logger) -> None:
+    def __init__(self, msg : dict, extra : dict[str, Producer], params: Document, curr_topic : str, database : TinyDB, log : Logger) -> None:
         self.log : Logger = log
         self.curr_topic : str = curr_topic
         self.database : TinyDB = database
         self.params : Document = params
 
         self.extra : dict[str, Producer] = extra
+        self.msg_prop = msg['properties']
+        self.msg_key = msg['key']
+        self.msg_id = msg['seq_id']
 
-    def get_message_key(self) -> Optional[dict]:
-        return None # TODO: implementar
+    def get_message_id(self) -> int:
+        return self.msg_id
+
+    def get_message_properties(self) -> dict:
+        return self.msg_prop
+
+    def get_message_key(self) -> str:
+        return self.msg_key
 
     def get_current_message_topic_name(self) -> str:
         return self.curr_topic

@@ -1,10 +1,11 @@
 '''
 Created on 20221102
-Update on 20221102
+Update on 20221103
 @author: Eduardo Pagotto
 '''
 
 import importlib
+import json
 import logging
 import pathlib
 import threading
@@ -128,9 +129,10 @@ class FuncThread(threading.Thread):
                             #self.log.debug(f'Function exec {self.name} topic in: {self.topic_in.name} ..')
                             inputs += 1
                             self.esta.tot_ok += 1
+                            content = json.loads(v)
 
                             try:
-                                ret = self.function.process(v, Context(extra_map_puplish, self.document, k, self.database ,self.log))
+                                ret = self.function.process(content['payload'], Context(content, extra_map_puplish, self.document, k, self.database, self.log))
                                 if (self.producer) and (ret != None):
 
                                     outputs += 1

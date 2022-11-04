@@ -1,10 +1,10 @@
 '''
 Created on 20221019
-Update on 20221022
+Update on 20221103
 @author: Eduardo Pagotto
 '''
 
-from typing import Any, Tuple, Union
+from typing import Any, Tuple
 import redis
 
 class Empty(Exception):

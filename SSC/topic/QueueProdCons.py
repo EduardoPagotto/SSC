@@ -1,22 +1,35 @@
 '''
 Created on 20221019
-Update on 20221101
+Update on 20221103
 @author: Eduardo Pagotto
 '''
 
+import dataclasses
+import json
 import redis
 
 from typing import Any, List
 
 from SSC.topic import Producer, Consumer
 from SSC.topic.RedisQueue import RedisQueue
+from SSC.Message import Message
 
 class QueueProducer(Producer):
-    def __init__(self, url : str, queue_name : str) -> None:
+    def __init__(self, url : str, queue_name : str, producer_name : str = '') -> None:
+        self.topic = queue_name
+        self.producer_name = producer_name
         self.queue = RedisQueue(redis.Redis.from_url(url), queue_name)
 
-    def send(self, register : Any) -> int:
-        return self.queue.enqueue(register)
+    def send(self, content : Any, properties : dict  = {}, msg_key : str = '' ,sequence_id : int = 0) -> int:
+
+        msg = Message(seq_id=sequence_id,
+                      payload=content,
+                      topic=self.topic,
+                      properties=properties,
+                      producer=self.producer_name,
+                      key = msg_key)
+
+        return self.queue.enqueue(json.dumps(dataclasses.asdict(msg)))
 
 class QueueConsumer(Consumer):
     def __init__(self, url : str, queues_name : List[str] | str) -> None:

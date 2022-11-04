@@ -104,7 +104,7 @@
 				"justMyCode": true,
 				"args": [
 					"produce",
-					"queue01",
+					"test/ns01/queue01",
 					"-m",
 					"\"teste 123..... \"",
 					"-n",
