@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221102
+Update on 20221104
 @author: Eduardo Pagotto
 '''
 
@@ -120,18 +120,15 @@ class DRegistry(RPC_Responser):
 
     # ---
 
-    def function_pause(self, name : str) -> str:
-        return self.function_crt.pause(name)
-
-    def function_resume(self, name : str) -> str:
-        return self.function_crt.resume(name)
+    def function_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.function_crt.pause_resume(name, is_pause)
 
     # Admin
     def function_create(self, params: dict) -> str:
         return self.function_crt.create(params)
 
     # Admin
-    def function_delete(self, name: str):
+    def function_delete(self, name: str) -> str:
         return self.function_crt.delete(name)
 
     # Admin

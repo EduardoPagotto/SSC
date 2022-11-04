@@ -1,6 +1,6 @@
 '''
 Created on 20221102
-Update on 20221103
+Update on 20221104
 @author: Eduardo Pagotto
 '''
 
@@ -17,10 +17,9 @@ from tinydb import TinyDB
 from tinydb.table import Document
 
 from SSC.server import create_queue, create_queues
-from SSC.topic.Connection import Connection
 from SSC.Context import Context
-from SSC.topic import Consumer, Producer
 from SSC.Function import Function
+from SSC.topic.QueueProdCons import QueueConsumer, QueueProducer
 
 class FuncData(object):
     def __init__(self) -> None:
@@ -39,9 +38,10 @@ class FuncThread(threading.Thread):
         self.esta = FuncData()
 
         self.timeout = 5 # TODO: parame
+        temp_name : str = f't_{index}_' + params['name']
 
-        self.consumer : Optional[Consumer] = None
-        self.producer : Optional[Producer] = None
+        self.consumer : Optional[QueueConsumer] = None
+        self.producer : Optional[QueueProducer] = None
 
         self.log = logging.getLogger('SSC.FuncThread')
         self.database : TinyDB = database
@@ -49,17 +49,15 @@ class FuncThread(threading.Thread):
 
         if ('inputs' in params) and (params['inputs'] is not None):
             data_in = create_queues(self.database ,params['inputs'])
-            conn_in = Connection(data_in['urlRedis'])
-            self.consumer = conn_in.create_consumer(data_in['queue'])
+            self.consumer = QueueConsumer(data_in['urlRedis'], data_in['queue'])
 
         if ('output' in params) and (params['output'] is not None):
             data_out = create_queue(self.database, params['output'])
-            conn_out = Connection(data_out['urlRedis'])
-            self.producer = conn_out.create_producer(data_out['queue'])
+            self.producer = QueueProducer(data_in['urlRedis'], data_out['queue'], temp_name)
 
         self.function : Function = self.__load(pathlib.Path(params['py']), params['classname'])
 
-        super().__init__(None, None, f't_{index}_' + params['name'])
+        super().__init__(None, None, temp_name)
 
     def __load(self, path_file : pathlib.Path, class_name : str) -> Any:
             klass = None
@@ -97,7 +95,7 @@ class FuncThread(threading.Thread):
         if self.timeout <= 0:
             self.timeout = 5
 
-        extra_map_puplish : dict[str, Producer] = {}
+        extra_map_puplish : dict[str, QueueProducer] = {}
 
         is_running = True
 

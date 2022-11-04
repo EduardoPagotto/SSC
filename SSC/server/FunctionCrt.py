@@ -1,6 +1,6 @@
 '''
 Created on 20221006
-Update on 20221102
+Update on 20221104
 @author: Eduardo Pagotto
 '''
 
@@ -74,28 +74,23 @@ class FunctionCrt(object):
                 func.join()
                 self.list_function.remove(func)
 
-
-    def pause(self, func_name : str):
-        self.log.debug(f'function pause {func_name}')
+    def pause_resume(self, func_name : str, is_pause : bool):
         tenant, namespace, name = splitTopic(func_name)   
-
         with self.lock_func:
             for fun in self.list_function:
                 if ((fun.document['tenant'] == tenant) and (fun.document['namespace'] == namespace) and (fun.document['name'] == name)):
-                    fun.pause()
-                    return f'func {name} paused'
+                    msg : str = ''
+                    if is_pause:
+                        msg = f'func {name} paused'
+                        fun.pause()
+                    else:
+                        msg = f'func {name} resumed'
+                        fun.resume()
+
+                    self.log.info(msg)
+                    return msg
 
         raise Exception(f'function {func_name} does not exist')
-
-    def resume(self, func_name : str):
-        self.log.debug(f'function resume {func_name}')
-        tenant, namespace, name = splitTopic(func_name)
-
-        with self.lock_func:
-            for fun in self.list_function:
-                if ((fun.document['tenant'] == tenant) and (fun.document['namespace'] == namespace) and (fun.document['name'] == name)):
-                    fun.resume()
-                    return f'func {name} paused'
 
     def delete(self, func_name : str):
 
