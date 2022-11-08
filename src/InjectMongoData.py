@@ -19,11 +19,12 @@ class InjectMongoData(Function):
 
     self.topico_erro = "rpa/manifesto/q99Erro"
     self.mongo : Optional[MongoClient] = None
-
+    self.log = None
     print('InjectMongoData v1.0.0 ' + os.getcwd())
 
   def initialize(self, log : logging.Logger, context: Context) -> bool:
     try:
+      self.log = log
       urls = context.get_user_config_value('urls')
       self.mongo = MongoClient(urls['mongoUrl'])
       log.info('Config mongo')
@@ -39,7 +40,6 @@ class InjectMongoData(Function):
     registro : dict = {}
     log : logging = context.get_logger()
     #log.debug('Key: ' + str(context.get_message_key()) + ' Linha: ' + input)
-    #log.debug(' Linha: ' + input)
 
     if not self.mongo:
       if not self.initialize(log, context):

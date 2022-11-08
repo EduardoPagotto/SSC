@@ -30,11 +30,13 @@ class ConvertTxt2Dic(Function):
     self.nva : Optional[ClientSSF] = None
 
     self.cache_estado : Dict[int, dict] = {}
+    self.log = None
 
     print('ConvertTxt2Dic v1.0.0 ' + os.getcwd())
 
   def initialize(self, log : logging.Logger, context: Context) -> bool:
     try:
+      self.log = log
       urls = context.get_user_config_value('urls')
       self.nva = ClientSSF(urls['ssfUrl'])
       self.mongo = MongoClient(urls['mongoUrl'])
