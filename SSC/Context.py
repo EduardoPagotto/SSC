@@ -1,6 +1,6 @@
 '''
 Created on 20221007
-Update on 20221103
+Update on 20221108
 @author: Eduardo Pagotto
 '''
 
@@ -10,7 +10,7 @@ from typing import Any, List, Optional
 from tinydb.table import Document
 from tinydb import TinyDB
 
-from SSC.server import splitTopic, topic_by_namespace
+from SSC.server import splitTopic, topic_by_namespace, topic_to_redis_queue
 from SSC.topic.QueueProdCons import Producer, QueueProducer
 
 
@@ -67,7 +67,7 @@ class Context(object):
 
             doc = topic_by_namespace(self.database, tenant_name, namespace) # FIXME!!!!! vou precisdar do DB!!!!
             if queue in doc['queues']:
-                self.extra[topic] = QueueProducer(doc['redis'], topic.replace('/',':'))                
+                self.extra[topic] = QueueProducer(doc['redis'], topic_to_redis_queue(tenant_name, namespace, queue), self.params['name'])                
             else:
                 raise Exception(f'topic invalid im publish func ' + topic)
         

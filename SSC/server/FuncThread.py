@@ -1,6 +1,6 @@
 '''
 Created on 20221102
-Update on 20221104
+Update on 20221108
 @author: Eduardo Pagotto
 '''
 
@@ -36,10 +36,7 @@ class FuncThread(threading.Thread):
     def __init__(self, index : int, params : Document, database : TinyDB) -> None:
 
         self.esta = FuncData()
-
         self.timeout = 5 # TODO: parame
-        temp_name : str = f't_{index}_' + params['name']
-
         self.consumer : Optional[QueueConsumer] = None
         self.producer : Optional[QueueProducer] = None
 
@@ -53,11 +50,11 @@ class FuncThread(threading.Thread):
 
         if ('output' in params) and (params['output'] is not None):
             data_out = create_queue(self.database, params['output'])
-            self.producer = QueueProducer(data_in['urlRedis'], data_out['queue'], temp_name)
+            self.producer = QueueProducer(data_in['urlRedis'], data_out['queue'], params['name'])
 
         self.function : Function = self.__load(pathlib.Path(params['py']), params['classname'])
 
-        super().__init__(None, None, temp_name)
+        super().__init__(None, None, f't_{index}_' + params['name'])
 
     def __load(self, path_file : pathlib.Path, class_name : str) -> Any:
             klass = None

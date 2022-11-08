@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20221021
+Update on 20221108
 @author: Eduardo Pagotto
 '''
 
@@ -45,9 +45,9 @@ class ClientQueue(object):
 
         return ProxyObject(self.restAPI)
 
-    def create_producer(self, topic : str) -> Producer:
+    def create_producer(self, topic : str, producer : str = '') -> Producer:
         conn : dict = self.__rpc().create_producer(topic)
-        return QueueProducer(conn['urlRedis'], conn['queue'])
+        return QueueProducer(conn['urlRedis'], conn['queue'], producer)
 
     def subscribe(self, topics : List[str]) -> Consumer:
         conn : dict = self.__rpc().create_subscribe(topics)

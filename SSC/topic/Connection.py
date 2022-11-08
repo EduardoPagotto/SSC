@@ -1,6 +1,6 @@
 '''
 Created on 20221019
-Update on 20221022
+Update on 20221108
 @author: Eduardo Pagotto
 '''
 
@@ -26,8 +26,8 @@ class Connection(object):
     def create_subscribe(self, topics : List[str]) -> Consumer:
         return Subscribe(self.url, topics)
 
-    def create_producer(self, queue : str)-> Producer:
-        return QueueProducer(self.url, queue)
+    def create_producer(self, queue : str, producer : str = '')-> Producer:
+        return QueueProducer(self.url, queue, producer)
 
     def create_consumer(self, names : List[str]) -> Consumer:
         return QueueConsumer(self.url, names)

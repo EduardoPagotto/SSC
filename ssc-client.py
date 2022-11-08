@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20221022
+Update on 20221108
 @author: Eduardo Pagotto
 '''
 
@@ -44,7 +44,7 @@ def main():
         args = parser.parse_args()
 
         if args.command == "produce":
-            producer = client.create_producer(args.queue_name)
+            producer = client.create_producer(args.queue_name, 'ssc-client')
             for i in range(0, args.number):
                 producer.send(args.message)
 

@@ -1,6 +1,6 @@
 '''
 Created on 20221019
-Update on 20221103
+Update on 20221108
 @author: Eduardo Pagotto
 '''
 
@@ -15,7 +15,7 @@ from SSC.topic.RedisQueue import RedisQueue
 from SSC.Message import Message
 
 class QueueProducer(Producer):
-    def __init__(self, url : str, queue_name : str, producer_name : str = '') -> None:
+    def __init__(self, url : str, queue_name : str, producer_name : str) -> None:
         self.topic = queue_name
         self.producer_name = producer_name
         self.queue = RedisQueue(redis.Redis.from_url(url), queue_name)
