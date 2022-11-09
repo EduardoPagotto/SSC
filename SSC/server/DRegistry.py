@@ -135,13 +135,34 @@ class DRegistry(RPC_Responser):
     def functions_list(self, tenant_ns : str) -> List[str]:
         return self.function_crt.list_all(tenant_ns)
 
-        #--user-config '{"FileCfg":"aaaaa"}'
-        #--user-config-file "/pulsar/host/etc/func1.yaml"
+    # --
 
-        # /pulsar/bin/pulsar-admin functions create \
-        #   --name ConvertTxt2Dic \
-        #   --py /var/app/src/ConvertTxt2Dic.py \
-        #   --classname ConvertTxt2Dic.ConvertTxt2Dic \
-        #   --inputs "persistent://rpa/manifesto/q01DecodeTxt"  \
-        #   --output "persistent://rpa/manifesto/q99Erro" \
-        #   --parallelism 1 
+    def connector_pause_resume(self, name : str, is_pause : bool) -> str:
+        return 'TODO' #self.connector_crt.pause_resume(name, is_pause)
+
+    # Admin
+    def connector_create(self, params: dict) -> str:
+        return 'TODO' #return self.connector_crt.create(params)
+
+    # Admin
+    def connector_delete(self, name: str) -> str:
+        return 'TODO' #return self.connector_crt.delete(name)
+
+    # Admin
+    def connectors_list(self, tenant_ns : str) -> List[str]:
+        return ['TODO'] #return self.connector_crt.list_all(tenant_ns)
+
+
+# /pulsar/bin/pulsar-admin sources create \
+# --name dir-watch-rpa-serpro \
+# --destination-topic-name "persistent://rpa/ns01/serpro_file_in" \
+# --archive /pulsar/host/connector/pulsar-io-file-2.9.3.nar \
+# --tenant rpa \
+# --namespace ns01 \
+# --source-config-file /pulsar/host/etc/file-connector.yaml 
+
+
+# /pulsar/bin/pulsar-admin sources delete \
+# --tenant rpa \
+# --namespace ns01 \ 
+# --name dir-watch-rpa-serpro

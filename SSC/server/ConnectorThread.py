@@ -1,5 +1,5 @@
 '''
-Created on 20221102
+Created on 20221108
 Update on 20221108
 @author: Eduardo Pagotto
 '''
@@ -15,13 +15,12 @@ from typing import Any, Optional
 
 from tinydb import TinyDB
 from tinydb.table import Document
+from SSC.Connector import Connector
 
-from SSC.server import create_queue, create_queues
-from SSC.Context import Context
-from SSC.Function import Function
-from SSC.topic.QueueProdCons import QueueConsumer, QueueProducer
+from SSC.server import create_queue
+from SSC.topic.QueueProdCons import QueueProducer
 
-class FuncData(object):
+class ConnData(object): # FIXME: usar o mesmo de fun mas mudar nome na base!!
     def __init__(self) -> None:
         self.tot_ok = 0
         self.tot_err = 0
@@ -32,27 +31,22 @@ class FuncData(object):
         return {'ok' : self.tot_ok, 'err': self.tot_err, 'pause':str(self.pause)}
 
 
-class FuncThread(threading.Thread):
+class ConnectorThread(threading.Thread):
     def __init__(self, index : int, params : Document, database : TinyDB) -> None:
 
-        self.esta = FuncData()
+        self.esta = ConnData()
         self.timeout = 5 # TODO: parame
-        self.consumer : Optional[QueueConsumer] = None
         self.producer : Optional[QueueProducer] = None
 
-        self.log = logging.getLogger('SSC.FuncThread')
+        self.log = logging.getLogger('SSC.ConnThread')
         self.database : TinyDB = database
         self.document = params
-
-        if ('inputs' in params) and (params['inputs'] is not None):
-            data_in = create_queues(self.database ,params['inputs'])
-            self.consumer = QueueConsumer(data_in['urlRedis'], data_in['queue'])
 
         if ('output' in params) and (params['output'] is not None):
             data_out = create_queue(self.database, params['output'])
             self.producer = QueueProducer(data_out['urlRedis'], data_out['queue'], params['name'])
 
-        self.function : Function = self.__load(pathlib.Path(params['py']), params['classname'])
+        self.connector : Connector = self.__load(pathlib.Path(params['archive']), 'src.plugins') # FIXME: esta errado!!!!
 
         super().__init__(None, None, f't_{index}_' + params['name'])
 
@@ -92,9 +86,9 @@ class FuncThread(threading.Thread):
         if self.timeout <= 0:
             self.timeout = 5
 
-        extra_map_puplish : dict[str, QueueProducer] = {}
-
         is_running = True
+
+        self.connector.start({}) # FIXME: colocar a catrga do cfg aqui !!!!
 
         while (not self.esta.done):
 
@@ -114,42 +108,19 @@ class FuncThread(threading.Thread):
                     self.log.info(f'resume {self.name}')
                     is_running = True
 
-            if self.consumer:
+            try:
+                data = self.connector.process({}) # FIXME: dados para criar a msg
+                if data:
+                    content = json.loads(data)
+                    outputs += 1
 
-                try:
+                    #self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
+                    self.producer.send(content)
+                    continue
 
-                    res = self.consumer.receive(self.timeout)
-                    if res:
-                        for k, v in res.items():
-                            #self.log.debug(f'Function exec {self.name} topic in: {self.topic_in.name} ..')
-                            inputs += 1
-                            self.esta.tot_ok += 1
-                            content = json.loads(v)
-
-                            try:
-                                ret = self.function.process(content['payload'], Context(content, extra_map_puplish, self.document, k, self.database, self.log))
-                                if (self.producer) and (ret != None):
-
-                                    outputs += 1
-
-                                    #self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
-                                    self.producer.send(ret)
-
-                            except Exception as exp:
-                                
-                                # auto nack
-                                #self.topic_in.push(res)
-                                #TODO: imlementar erro critico de queue 
-
-                                self.esta.tot_err += 1
-                                self.log.error(f'Function exec {self.name} erro: ' + exp.args[0])
-                                time.sleep(1)
-
-                            continue
-
-                except Exception as exp:
-                    self.log.error(exp.args[0])
-                    self.esta.tot_err += 1
+            except Exception as exp:
+                self.log.error(exp.args[0])
+                self.esta.tot_err += 1
 
             if (inputs == 0) and (outputs == 0):
                 time.sleep(self.timeout)

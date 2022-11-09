@@ -68,6 +68,18 @@ class Admin(object):
     def functions_list(self, tenant_ns : str) -> List[str]:
         return self.__rpc().functions_list(tenant_ns)
 
+    def connector_create(self, params) -> str:
+        return self.__rpc().connector_create(params)
+
+    def connector_delete(self, name : str) -> str:
+        return self.__rpc().connector_delete(name)
+
+    def connector_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.__rpc().connector_pause_resume(name, is_pause)
+
+    def connector_list(self, tenant_ns : str) -> List[str]:
+        return self.__rpc().connector_list(tenant_ns)
+
     def tenants_create(self, name : str) -> str:
         return self.__rpc().tenants_create(name)
 
@@ -121,6 +133,13 @@ def main():
         funcions.add_argument('--userconfig', type=str, help='other config user', required=False, default="")
         funcions.add_argument('--userconfigfile', type=str, help='other file config user', required=False, default="")
         funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
+
+        # only connector
+        funcions.add_argument('--sourceconfigfile ', type=str, help='other config connectos', required=False, default="")
+        funcions.add_argument('--sourceconfig ', type=str, help='other config connectos', required=False, default="")
+        funcions.add_argument('--archive ', type=str, help='other config connectos', required=False, default="")
+        funcions.add_argument('--destinationtopicname ', type=str, help='other config connectos', required=False, default="")
+
 
         tenants = subparser.add_parser('tenants')
         tenants.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
@@ -179,6 +198,55 @@ def main():
                 log.info(admin.functions_list(args.tenant + '/' + args.namespace)) 
             else:
                 log.error(f'Opp invalida: {args.opp}')
+
+        elif args.command == 'sources':
+
+            if args.opp == 'create':
+
+                val : dict = {}
+                try:
+                    if len(args.sourceconfig) > 0:
+                        # load cfg json string
+                        val = json.loads(args.sourceconfig)
+                    elif len(args.sourceconfigfile) > 0:
+                        # load cfg yaml file
+                        val = yaml.safe_load(Path(args.sourceconfigfile).read_text())
+                except FileNotFoundError as err1:
+                    raise Exception(f'{err1.filename} fail: {err1.strerror}')
+                except Exception as exp:
+                    raise Exception(f'userconfig or sourceconfigfile is not a valid {str(exp.args[0])}')
+
+                param = {'name': args.name, 
+                         'tenant': args.tenant,
+                         'namespace' : args.namespace,
+                         'archive': args.archive,
+                         'output' : args.destinationtopicname,
+                         'config': val,
+                         'parallelism': args.parallelism}
+
+                log.info(admin.connector_create(param))
+
+            elif args.opp == 'delete':
+                log.info(admin.connector_delete(args.tenant + '/' + args.namespace + '/' +args.name)) 
+            elif args.opp == 'pause':
+                log.info(admin.connector_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, True)) 
+            elif args.opp == 'resume':
+                log.info(admin.connector_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, False)) 
+            elif args.opp == 'list':
+                log.info(admin.connector_list(args.tenant + '/' + args.namespace)) 
+
+        elif args.command == 'sinks':
+
+            if args.opp == 'create':
+                pass # TODO:
+            elif args.opp == 'delete':
+                pass # TODO:
+            elif args.opp == 'pause':
+                pass # TODO:
+            elif args.opp == 'resume':
+                pass # TODO:
+            elif args.opp == 'list':
+                pass # TODO:
 
         elif args.command == 'tenants':
             if args.opp == 'create':

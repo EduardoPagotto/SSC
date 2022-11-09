@@ -1,6 +1,6 @@
 '''
-Created on 20221006
-Update on 20221104
+Created on 20221108
+Update on 20221108
 @author: Eduardo Pagotto
 '''
 
@@ -12,21 +12,21 @@ from typing import List, Tuple
 from tinydb import TinyDB
 
 from SSC.server import splitNamespace, splitTopic
-from SSC.server.FuncCocoon import FuncCocoon
+from SSC.server.ConnectorCocoon import ConnectorCocoon
 from SSC.subsys.LockDB import LockDB
 
-class FunctionCrt(object):
+class ConnectorCrt(object):
 
-    def __init__(self, database : TinyDB, path_storage : str) -> None:
+    def __init__(self, database : TinyDB, path_storage : str) -> None: # FIXME?: TUDO  A FAZER!!!!
 
         self.database = database
         self.storage = pathlib.Path(path_storage, 'tenant')
         self.storage.mkdir(parents=True, exist_ok=True)
 
         self.lock_func = Lock()
-        self.list_function : List[FuncCocoon] = []
+        self.list_function : List[ConnectorCocoon] = []
 
-        self.log = logging.getLogger('SSC.FunctionCrt')
+        self.log = logging.getLogger('SSC.ConnectorCrt')
 
         self.load_funcs_db()
 
@@ -49,7 +49,7 @@ class FunctionCrt(object):
                 if (params['tenant'] == func.document['tenant']) and (params['namespace'] == func.document['namespace']) and (params['name'] == func.document['name']):
                     raise Exception(f'topic {params["name"]} already exists')
 
-            cocoon : FuncCocoon = FuncCocoon(params, self.database)
+            cocoon : ConnectorCocoon = ConnectorCocoon(params, self.database)
             cocoon.start()
             self.list_function.append(cocoon)
 
@@ -127,7 +127,7 @@ class FunctionCrt(object):
             try:
                 with self.lock_func:
                     self.log.debug(f'function load from db: {params["name"]}')
-                    cocoon : FuncCocoon = FuncCocoon(params, self.database)
+                    cocoon : ConnectorCocoon = ConnectorCocoon(params, self.database)
                     cocoon.start()
                     self.list_function.append(cocoon)
             except:
