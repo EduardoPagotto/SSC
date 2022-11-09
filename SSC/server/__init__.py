@@ -11,6 +11,16 @@ from tinydb.table import Document
 
 from SSC.subsys.LockDB import LockDB
 
+class EstatData(object):
+    def __init__(self) -> None:
+        self.tot_ok = 0
+        self.tot_err = 0
+        self.pause = False
+        self.done = False
+
+    def summary(self):
+        return {'ok' : self.tot_ok, 'err': self.tot_err, 'pause':str(self.pause)}
+
 
 def splitTopic(topic : str) -> Tuple[str, str, str]:
     lista = topic.split('/')

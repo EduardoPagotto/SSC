@@ -16,26 +16,15 @@ from typing import Any, Optional
 from tinydb import TinyDB
 from tinydb.table import Document
 
-from SSC.server import create_queue, create_queues
+from SSC.server import EstatData, create_queue, create_queues
 from SSC.Context import Context
 from SSC.Function import Function
 from SSC.topic.QueueProdCons import QueueConsumer, QueueProducer
 
-class FuncData(object):
-    def __init__(self) -> None:
-        self.tot_ok = 0
-        self.tot_err = 0
-        self.pause = False
-        self.done = False
-
-    def summary(self):
-        return {'ok' : self.tot_ok, 'err': self.tot_err, 'pause':str(self.pause)}
-
-
 class FuncThread(threading.Thread):
     def __init__(self, index : int, params : Document, database : TinyDB) -> None:
 
-        self.esta = FuncData()
+        self.esta = EstatData()
         self.timeout = 5 # TODO: parame
         self.consumer : Optional[QueueConsumer] = None
         self.producer : Optional[QueueProducer] = None
