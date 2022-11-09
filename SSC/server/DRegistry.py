@@ -12,7 +12,7 @@ from typing import Any, List
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
 from SSC.server import create_queue, create_queues
-from SSC.server.ConnectorCrt import ConnectorCrt
+from SSC.server.SourceCrt import SourceCrt
 
 from SSC.server.Tenant import Tenant
 from SSC.server.FunctionCrt import FunctionCrt
@@ -21,11 +21,11 @@ from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY
 
 class DRegistry(RPC_Responser):
-    def __init__(self, function_crt : FunctionCrt, conn_crt : ConnectorCrt, tenant : Tenant) -> None:
+    def __init__(self, function_crt : FunctionCrt, source_crt : SourceCrt, tenant : Tenant) -> None:
         super().__init__(self)
 
         self.function_crt = function_crt
-        self.conn_crt = conn_crt
+        self.source_crt = source_crt
         self.tenant = tenant
         self.done : bool = False
         self.ticktack = 0
@@ -138,20 +138,20 @@ class DRegistry(RPC_Responser):
 
     # --
 
-    def connector_pause_resume(self, name : str, is_pause : bool) -> str:
-        return self.conn_crt.pause_resume(name, is_pause)
+    def source_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.source_crt.pause_resume(name, is_pause)
 
     # Admin
-    def connector_create(self, params: dict) -> str:
-        return self.conn_crt.create(params)
+    def source_create(self, params: dict) -> str:
+        return self.source_crt.create(params)
 
     # Admin
-    def connector_delete(self, name: str) -> str:
-        return self.conn_crt.delete(name)
+    def source_delete(self, name: str) -> str:
+        return self.source_crt.delete(name)
 
     # Admin
     def connectors_list(self, tenant_ns : str) -> List[str]:
-        return self.conn_crt.list_all(tenant_ns)
+        return self.source_crt.list_all(tenant_ns)
 
 
 # /pulsar/bin/pulsar-admin sources create \

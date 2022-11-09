@@ -13,7 +13,7 @@ from tinydb import TinyDB
 
 from SSC.server.DRegistry import DRegistry
 from SSC.server.FunctionCrt import FunctionCrt
-from SSC.server.ConnectorCrt import ConnectorCrt
+from SSC.server.SourceCrt import SourceCrt
 from SSC.server.Tenant import Tenant
 
 from SSC.__init__ import __version__ as VERSION
@@ -47,7 +47,7 @@ path2 = pathlib.Path(SSC_CFG_STORAGE)
 path2.mkdir(parents=True, exist_ok=True)
 
 database = TinyDB(str(path1) + '/master.json')
-rpc_registry = DRegistry(FunctionCrt(database, SSC_CFG_STORAGE), ConnectorCrt(database, SSC_CFG_STORAGE), Tenant(database, SSC_CFG_STORAGE, REDIS_URL))
+rpc_registry = DRegistry(FunctionCrt(database, SSC_CFG_STORAGE), SourceCrt(database, SSC_CFG_STORAGE), Tenant(database, SSC_CFG_STORAGE, REDIS_URL))
 
 app = Flask(__name__)
 app.secret_key = "secret key"

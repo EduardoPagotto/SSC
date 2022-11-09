@@ -9,7 +9,7 @@ from typing import Optional
 
 from SSC.Message import Message
 
-class Connector(ABC):
+class Source(ABC):
 
     @abstractmethod
     def start(self, config : dict) -> None:

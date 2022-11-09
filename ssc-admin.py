@@ -68,17 +68,17 @@ class Admin(object):
     def functions_list(self, tenant_ns : str) -> List[str]:
         return self.__rpc().functions_list(tenant_ns)
 
-    def connector_create(self, params) -> str:
-        return self.__rpc().connector_create(params)
+    def source_create(self, params) -> str:
+        return self.__rpc().source_create(params)
 
-    def connector_delete(self, name : str) -> str:
-        return self.__rpc().connector_delete(name)
+    def source_delete(self, name : str) -> str:
+        return self.__rpc().source_delete(name)
 
-    def connector_pause_resume(self, name : str, is_pause : bool) -> str:
-        return self.__rpc().connector_pause_resume(name, is_pause)
+    def source_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.__rpc().source_pause_resume(name, is_pause)
 
-    def connector_list(self, tenant_ns : str) -> List[str]:
-        return self.__rpc().connector_list(tenant_ns)
+    def source_list(self, tenant_ns : str) -> List[str]:
+        return self.__rpc().source_list(tenant_ns)
 
     def tenants_create(self, name : str) -> str:
         return self.__rpc().tenants_create(name)
@@ -228,16 +228,16 @@ def main():
                          'output' : args.destinationtopicname,
                          'config': val}
 
-                log.info(admin.connector_create(param))
+                log.info(admin.source_create(param))
 
             elif args.opp == 'delete':
-                log.info(admin.connector_delete(args.tenant + '/' + args.namespace + '/' +args.name)) 
+                log.info(admin.source_delete(args.tenant + '/' + args.namespace + '/' +args.name)) 
             elif args.opp == 'pause':
-                log.info(admin.connector_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, True)) 
+                log.info(admin.source_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, True)) 
             elif args.opp == 'resume':
-                log.info(admin.connector_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, False)) 
+                log.info(admin.source_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, False)) 
             elif args.opp == 'list':
-                log.info(admin.connector_list(args.tenant + '/' + args.namespace)) 
+                log.info(admin.source_list(args.tenant + '/' + args.namespace)) 
 
         elif args.command == 'sinks':
 
