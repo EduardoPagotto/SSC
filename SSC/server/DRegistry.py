@@ -38,9 +38,8 @@ class DRegistry(RPC_Responser):
         self.t_cleanner.start()
 
     def sumario(self) -> dict:
-        return {'app':'SSC', 
-                'version':VERSION ,
-                'deploy':DEPLOY,
+
+        return {'app':{'name':'SSC', 'version':VERSION ,'deploy':DEPLOY},
                 'tictac': self.ticktack,
                 'topics': self.tenant.sumario(),
                 'functions' : self.function_crt.summario()}

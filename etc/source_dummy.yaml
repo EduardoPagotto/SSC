@@ -1,4 +1,2 @@
-urls:
-  ssfUrl: 'http://192.168.122.1:5151'
-  mongoUrl: 'mongodb://rpaadmin:Zaq12wsX@192.168.122.1:27017/?authSource=admin&authMechanism=SCRAM-SHA-1'
-ellapse: 10
+cfg:
+ ellapse: 10

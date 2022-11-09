@@ -135,10 +135,15 @@ def main():
         funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
 
         # only connector
-        funcions.add_argument('--sourceconfigfile ', type=str, help='other config connectos', required=False, default="")
-        funcions.add_argument('--sourceconfig ', type=str, help='other config connectos', required=False, default="")
-        funcions.add_argument('--archive ', type=str, help='other config connectos', required=False, default="")
-        funcions.add_argument('--destinationtopicname ', type=str, help='other config connectos', required=False, default="")
+        sources = subparser.add_parser('sources')
+        sources.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        sources.add_argument('--name', type=str, help='nome da thread', required=False)
+        sources.add_argument('--tenant', type=str, help='Tenant', required=False)
+        sources.add_argument('--namespace', type=str, help='Namespace', required=False)
+        sources.add_argument('--sourceconfigfile', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--sourceconfig', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--archive', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--destinationtopicname', type=str, help='other config connectos', required=False, default="")
 
 
         tenants = subparser.add_parser('tenants')
@@ -221,8 +226,7 @@ def main():
                          'namespace' : args.namespace,
                          'archive': args.archive,
                          'output' : args.destinationtopicname,
-                         'config': val,
-                         'parallelism': args.parallelism}
+                         'config': val}
 
                 log.info(admin.connector_create(param))
 
