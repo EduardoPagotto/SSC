@@ -6,10 +6,10 @@ Update on 20221109
 
 from typing import Optional
 
-from SSC.Connector import Connector
+from SSC.Source import Source
 from SSC.Message import Message
 
-class Dummy(Connector):
+class Dummy(Source):
     def __init__(self) -> None:
         print('Dummy Constructor')
         super().__init__()
