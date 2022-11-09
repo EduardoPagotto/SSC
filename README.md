@@ -10,8 +10,7 @@ Simple Stream Control
 ./ssc-admin.py topics create test/ns01/queue02
 
 # cria funcs
-./ssc-admin.py functions \
-                create \
+./ssc-admin.py functions create \
                 --name name01 \
                 --tenant test \
                 --namespace ns01 \
@@ -39,9 +38,16 @@ Simple Stream Control
 
 
 ./ssc-admin.py functions list --tenant test --namespace ns01 --name none
+
+./ssc-admin.py sources create \
+                --name dummy-teste \
+                --destinationtopicname test/ns01/queue01 \
+                --archive connectors/Dummy.py \
+                --tenant test \
+                --namespace ns01 \
+                --sourceconfigfile ./etc/source_dummy.yaml 
+
 ```
-
-
 
 ## Running and debug local
 1. Set VENV:

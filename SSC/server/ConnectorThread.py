@@ -1,6 +1,6 @@
 '''
 Created on 20221108
-Update on 20221108
+Update on 20221109
 @author: Eduardo Pagotto
 '''
 
@@ -46,7 +46,7 @@ class ConnectorThread(threading.Thread):
             data_out = create_queue(self.database, params['output'])
             self.producer = QueueProducer(data_out['urlRedis'], data_out['queue'], params['name'])
 
-        self.connector : Connector = self.__load(pathlib.Path(params['archive']), 'src.plugins') # FIXME: esta errado!!!!
+        self.connector : Connector = self.__load(pathlib.Path(params['archive']), 'connectors') # FIXME: esta errado!!!!
 
         super().__init__(None, None, f't_{index}_' + params['name'])
 

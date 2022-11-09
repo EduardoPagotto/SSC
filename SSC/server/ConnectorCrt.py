@@ -1,6 +1,6 @@
 '''
 Created on 20221108
-Update on 20221108
+Update on 20221109
 @author: Eduardo Pagotto
 '''
 
@@ -24,19 +24,19 @@ class ConnectorCrt(object):
         self.storage.mkdir(parents=True, exist_ok=True)
 
         self.lock_func = Lock()
-        self.list_function : List[ConnectorCocoon] = []
+        self.list_connector : List[ConnectorCocoon] = []
 
         self.log = logging.getLogger('SSC.ConnectorCrt')
 
-        self.load_funcs_db()
+        self.load_connectors_db()
 
     def summario(self) ->dict:
         
         result = []
         tot = 0
         with self.lock_func:
-            tot = len(self.list_function)  
-            for i in self.list_function:
+            tot = len(self.list_connector)  
+            for i in self.list_connector:
                 result.append(i.sumary())  
 
         return {'online': tot, 'tasks': result}
@@ -45,37 +45,37 @@ class ConnectorCrt(object):
 
         self.log.debug(f"function create {params['name']}")
         with self.lock_func:
-            for func in self.list_function:
-                if (params['tenant'] == func.document['tenant']) and (params['namespace'] == func.document['namespace']) and (params['name'] == func.document['name']):
+            for conn in self.list_connector:
+                if (params['tenant'] == conn.document['tenant']) and (params['namespace'] == conn.document['namespace']) and (params['name'] == conn.document['name']):
                     raise Exception(f'topic {params["name"]} already exists')
 
             cocoon : ConnectorCocoon = ConnectorCocoon(params, self.database)
             cocoon.start()
-            self.list_function.append(cocoon)
+            self.list_connector.append(cocoon)
 
         return f"success create {params['name']}"
 
     def stop_func_all(self):
 
         with self.lock_func:
-            for func in self.list_function:
-                func.stop()
+            for conn in self.list_connector:
+                conn.stop()
 
-            for func in self.list_function:
-                func.join()
-                self.list_function.remove(func)
+            for conn in self.list_connector:
+                conn.join()
+                self.list_connector.remove(conn)
 
     def pause_resume(self, func_name : str, is_pause : bool):
         tenant, namespace, name = splitTopic(func_name)   
         with self.lock_func:
-            for fun in self.list_function:
+            for fun in self.list_connector:
                 if ((fun.document['tenant'] == tenant) and (fun.document['namespace'] == namespace) and (fun.document['name'] == name)):
                     msg : str = ''
                     if is_pause:
-                        msg = f'func {name} paused'
+                        msg = f'conn {name} paused'
                         fun.pause()
                     else:
-                        msg = f'func {name} resumed'
+                        msg = f'conn {name} resumed'
                         fun.resume()
 
                     self.log.info(msg)
@@ -91,15 +91,15 @@ class ConnectorCrt(object):
         funcValid = None
 
         with self.lock_func:
-            for func in self.list_function:
-                if (tenant == func.document['tenant']) and (namespace == func.document['namespace']) and (name == func.document['name']):
-                    self.list_function.remove(func)
-                    funcValid = func
+            for conn in self.list_connector:
+                if (tenant == conn.document['tenant']) and (namespace == conn.document['namespace']) and (name == conn.document['name']):
+                    self.list_connector.remove(conn)
+                    funcValid = conn
 
         if funcValid:            
             funcValid.stop()
             funcValid.join()
-            with LockDB(self.database, 'funcs', True) as table:
+            with LockDB(self.database, 'connectors', True) as table:
                 table.remove(doc_ids=[funcValid.document.doc_id])
 
             return f'success delete {func_name}'
@@ -107,7 +107,7 @@ class ConnectorCrt(object):
         raise Exception(f'function {func_name} does not exist')
 
     def list_all(self, tenant_ns : str) -> List[str]:
-        with LockDB(self.database, 'funcs', False) as table:
+        with LockDB(self.database, 'connectors', False) as table:
             itens = table.all()
 
         lista : List[str] = []
@@ -118,9 +118,9 @@ class ConnectorCrt(object):
 
         return lista
 
-    def load_funcs_db(self):
+    def load_connectors_db(self):
 
-        with LockDB(self.database, 'funcs', False) as table:
+        with LockDB(self.database, 'connectors', False) as table:
             itens = table.all()
             
         for params in itens:
@@ -129,7 +129,7 @@ class ConnectorCrt(object):
                     self.log.debug(f'function load from db: {params["name"]}')
                     cocoon : ConnectorCocoon = ConnectorCocoon(params, self.database)
                     cocoon.start()
-                    self.list_function.append(cocoon)
+                    self.list_connector.append(cocoon)
             except:
                 pass
 
@@ -139,8 +139,8 @@ class ConnectorCrt(object):
         tot_proc = 0
         tot_erro = 0
         with self.lock_func:
-            for func in self.list_function:
-                ok, erro = func.count_tot()
+            for conn in self.list_connector:
+                ok, erro = conn.count_tot()
                 tot_proc += ok
                 tot_erro += erro
 
