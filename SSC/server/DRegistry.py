@@ -42,7 +42,8 @@ class DRegistry(RPC_Responser):
         return {'app':{'name':'SSC', 'version':VERSION ,'deploy':DEPLOY},
                 'tictac': self.ticktack,
                 'topics': self.tenant.sumario(),
-                'functions' : self.function_crt.summario()}
+                'functions' : self.function_crt.summario(),
+                'sources' : self.source_crt.summario()}
 
     def cleanner(self) ->None:
         """[Garbage collector of files]
