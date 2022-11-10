@@ -153,18 +153,3 @@ class DRegistry(RPC_Responser):
     # Admin
     def source_list(self, tenant_ns : str) -> List[str]:
         return self.source_crt.list_all(tenant_ns)
-
-
-# /pulsar/bin/pulsar-admin sources create \
-# --name dir-watch-rpa-serpro \
-# --destination-topic-name "persistent://rpa/ns01/serpro_file_in" \
-# --archive /pulsar/host/connector/pulsar-io-file-2.9.3.nar \
-# --tenant rpa \
-# --namespace ns01 \
-# --source-config-file /pulsar/host/etc/file-connector.yaml 
-
-
-# /pulsar/bin/pulsar-admin sources delete \
-# --tenant rpa \
-# --namespace ns01 \ 
-# --name dir-watch-rpa-serpro
