@@ -143,6 +143,7 @@ def main():
         sources.add_argument('--sourceconfigfile', type=str, help='other config connectos', required=False, default="")
         sources.add_argument('--sourceconfig', type=str, help='other config connectos', required=False, default="")
         sources.add_argument('--archive', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--classname', type=str, help='Nome da classe')
         sources.add_argument('--destinationtopicname', type=str, help='other config connectos', required=False, default="")
 
 
@@ -225,6 +226,7 @@ def main():
                          'tenant': args.tenant,
                          'namespace' : args.namespace,
                          'archive': args.archive,
+                         'classname':args.classname,
                          'output' : args.destinationtopicname,
                          'config': val}
 

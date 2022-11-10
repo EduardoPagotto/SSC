@@ -42,7 +42,8 @@ Simple Stream Control
 ./ssc-admin.py sources create \
                 --name dummy-teste \
                 --destinationtopicname test/ns01/queue01 \
-                --archive connectors/Dummy.py \
+                --archive sources/Dummy/Dummy.py \
+                --classname Dummy.Dummy \
                 --tenant test \
                 --namespace ns01 \
                 --sourceconfigfile ./etc/source_dummy.yaml 

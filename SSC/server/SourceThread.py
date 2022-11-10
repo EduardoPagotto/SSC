@@ -5,7 +5,6 @@ Update on 20221109
 '''
 
 import importlib
-import json
 import logging
 import pathlib
 import threading
@@ -35,7 +34,7 @@ class SourceThread(threading.Thread):
             data_out = create_queue(self.database, params['output'])
             self.producer = QueueProducer(data_out['urlRedis'], data_out['queue'], params['name'])
 
-        self.source : Source = self.__load(pathlib.Path(params['archive']), 'sources') # FIXME: esta errado!!!!
+        self.source : Source = self.__load(pathlib.Path(params['archive']), params['classname'])
 
         super().__init__(None, None, f't_{index}_' + params['name'])
 
@@ -69,20 +68,13 @@ class SourceThread(threading.Thread):
             return klass()
 
     def run(self):
-
         self.log.info(f'started {self.name}')
-
+        is_running = True
+        self.timeout = self.source.start(self.document)
         if self.timeout <= 0:
             self.timeout = 5
 
-        is_running = True
-
-        self.source.start({}) # FIXME: colocar a catrga do cfg aqui !!!!
-
         while (not self.esta.done):
-
-            inputs = 0
-            outputs = 0
 
             if self.esta.pause is True:
 
@@ -98,20 +90,16 @@ class SourceThread(threading.Thread):
                     is_running = True
 
             try:
-                data = self.source.process({}) # FIXME: dados para criar a msg
+                data = self.source.process(self.producer.size())
                 if data:
-                    content = json.loads(data)
-                    outputs += 1
-
-                    #self.log.debug(f'Function exec {self.name} topic out: {self.topic_out.name} ..')
-                    self.producer.send(content)
+                    self.producer.send(data.payload, data.properties, data.msg_key, data.sequence_id)
+                    self.esta.tot_ok += 1
                     continue
 
             except Exception as exp:
                 self.log.error(exp.args[0])
                 self.esta.tot_err += 1
 
-            if (inputs == 0) and (outputs == 0):
-                time.sleep(self.timeout)
+            time.sleep(self.timeout)
 
         self.log.info(f'stopped {self.name}')

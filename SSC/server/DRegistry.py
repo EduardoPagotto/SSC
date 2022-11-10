@@ -150,7 +150,7 @@ class DRegistry(RPC_Responser):
         return self.source_crt.delete(name)
 
     # Admin
-    def connectors_list(self, tenant_ns : str) -> List[str]:
+    def source_list(self, tenant_ns : str) -> List[str]:
         return self.source_crt.list_all(tenant_ns)
 
 
