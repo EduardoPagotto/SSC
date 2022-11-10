@@ -14,16 +14,17 @@ from tinydb.table import Document
 from SSC.subsys.LockDB import LockDB
 
 class Cocoon(object):
-    def __init__(self, sufix : str, params : Document | dict, database : TinyDB) -> None:
+    def __init__(self, colection_name : str, params : Document | dict, database : TinyDB) -> None:
 
-        self.log = logging.getLogger(f'SSC.{sufix}')
+        self.colection_name = colection_name
+        self.log = logging.getLogger(f'SSC.Cocoon')
         self.name = params['name']
         self.database : TinyDB = database
 
         self.list_t : List[Any] = []
 
         if type(params) == dict:
-            with LockDB(self.database, 'funcs', True) as table:
+            with LockDB(self.database, self.colection_name, True) as table:
                 self.document = table.get(doc_id=table.insert(params))
         else:
             self.document = params

@@ -1,15 +1,42 @@
 # SSC
 Simple Stream Control
 
-## Comandos 
+## Comando de filas 
 ```bash
 # Cria tenant/namespace/topic 
 ./ssc-admin.py tenants create test
 ./ssc-admin.py namespaces create test/ns01
 ./ssc-admin.py topics create test/ns01/queue01
 ./ssc-admin.py topics create test/ns01/queue02
+./ssc-admin.py topics create test/ns01/queue03
 
-# cria funcs
+# lista filas em tenant test namespace ns01
+./ssc-admin.py topics list test/ns01
+
+# deleta fila queue03
+./ssc-admin.py topics delete test/ns01/queue03
+
+# lista namespaces em tenant test
+./ssc-admin.py namespaces list test
+
+# Lista tenants
+./ssc-admin.py tenants list none
+
+```
+
+## Envio e recebimento as filas via CLI
+```bash
+# envai 5 mensagens a filas 1
+./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 5
+
+# receber 2 mensagens de queue02
+./ssc-client.py consume -s app1 test/ns01/queue02 -n 2
+
+```
+
+## Comandos Functions
+```bash
+# cria 
 ./ssc-admin.py functions create \
                 --name name01 \
                 --tenant test \
@@ -19,26 +46,23 @@ Simple Stream Control
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
 
-# pause function
-./ssc-admin.py functions pause --tenant test --namespace ns01 --name name01
-
-# resume function
-./ssc-admin.py functions resume --tenant test --namespace ns01 --name name01
-
-# envai dados de teste a filas 1
-./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 5
-
-# FuncAdd le queue01 e envia a queue02!!
-
-# receber dados em queue02
-./ssc-client.py consume -s app1 test/ns01/queue02 -n 2
-
-# remove a func named01
-./ssc-admin.py functions delete --tenant test --namespace ns01 --name name01
-
-
+# listar 
 ./ssc-admin.py functions list --tenant test --namespace ns01 --name none
 
+# pause 
+./ssc-admin.py functions pause --tenant test --namespace ns01 --name name01
+
+# resume 
+./ssc-admin.py functions resume --tenant test --namespace ns01 --name name01
+
+# remove 
+./ssc-admin.py functions delete --tenant test --namespace ns01 --name name01
+
+```
+## Comandos Sources
+```bash
+# Cria
+# FuncAdd le queue01 e envia a queue02!!
 ./ssc-admin.py sources create \
                 --name dummy-teste \
                 --destinationtopicname test/ns01/queue01 \
@@ -46,9 +70,22 @@ Simple Stream Control
                 --classname Dummy.Dummy \
                 --tenant test \
                 --namespace ns01 \
-                --sourceconfigfile ./etc/source_dummy.yaml 
+                --sourceconfigfile ./etc/source_dummy.yaml
+
+# listar 
+./ssc-admin.py sources list --tenant test --namespace ns01 --name none
+
+# pause 
+./ssc-admin.py sources pause --tenant test --namespace ns01 --name dummy-teste
+
+# resume
+./ssc-admin.py sources resume --tenant test --namespace ns01 --name dummy-teste
+
+# remove 
+./ssc-admin.py sources delete --tenant test --namespace ns01 --name dummy-teste
 
 ```
+
 
 ## Running and debug local
 1. Set VENV:
@@ -117,9 +154,9 @@ docker exec -it server_SSC_dev /bin/sh
 - [x] Implementar payload com key, message_prop, timestamp
 - [ ] Remover classes de producer e subscribe abstratas
 - [ ] Implementar chamada de queue no RPC e limpeza de codigo
-- [ ] Implementar plugin connectors (file / rest-api)
-- [ ] Implementar pause/resume connectors
-- [ ] Testar connectors
+- [x] Implementar plugin sources (file / rest-api)
+- [x] Implementar pause/resume sources
+- [x] Testar sources
 - [ ] Implementar plugin sinks (file / rest-api)
 - [ ] Implementar pause/resume sinks
 - [ ] Testar sinks

@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221109
+Update on 20221110
 @author: Eduardo Pagotto
 '''
 
@@ -31,9 +31,6 @@ class DRegistry(RPC_Responser):
         self.ticktack = 0
         self.log = logging.getLogger('SSC.DRegistry')
 
-        self.proc = 0
-        self.erros = 0
-
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
         self.t_cleanner.start()
 
@@ -54,9 +51,10 @@ class DRegistry(RPC_Responser):
 
         while self.done is False:
 
-            self.proc, self.erros = self.function_crt.execute()
+            f_ok, f_err = self.function_crt.execute()
+            s_ok, s_err = self.source_crt.execute()
+            self.log.debug(f'Online:{self.ticktack} functions:({f_ok}/{f_err}) sources:({s_ok}/{s_err})')
 
-            self.log.debug(f'Tick-Tack {self.ticktack} [{self.proc}  / {self.erros}]... ')
             self.ticktack += 1
             time.sleep(5)
 
