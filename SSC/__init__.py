@@ -5,4 +5,4 @@ Update on 20221109
 '''
 
 __version__ : str = '1.3.0'
-__date_deploy__ : str = '20221109'
+__date_deploy__ : str = '20221110'

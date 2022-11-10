@@ -59,6 +59,8 @@ class DRegistry(RPC_Responser):
             time.sleep(5)
 
         self.function_crt.stop_func_all()
+        self.source_crt.stop_func_all()
+        
         self.log.info('thread cleanner_files stop')
 
     # ClientQueue
