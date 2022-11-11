@@ -37,10 +37,7 @@ class SourceThread(EntThread):
                 continue
 
             try:
-                data = self.source.process(self.producer.size())
-                if data:
-                    self.producer.send(data.payload, data.properties, data.msg_key, data.sequence_id)
-                    self.esta.tot_ok += 1
+                if self.source.process(self.producer, self.esta):
                     continue
 
             except Exception as exp:

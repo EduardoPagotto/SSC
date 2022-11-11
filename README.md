@@ -72,6 +72,16 @@ Simple Stream Control
                 --namespace ns01 \
                 --sourceconfigfile ./etc/source_dummy.yaml
 
+./ssc-admin.py sources create \
+                --name watch1 \
+                --destinationtopicname test/ns01/queue01 \
+                --archive sources/Watchdogdir/Watchdogdir.py \
+                --classname Watchdogdir.Watchdogdir \
+                --tenant test \
+                --namespace ns01 \
+                --sourceconfigfile ./etc/watchdogdir_cfg.yaml
+
+
 # listar 
 ./ssc-admin.py sources list --tenant test --namespace ns01 --name none
 

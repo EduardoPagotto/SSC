@@ -1,0 +1,10 @@
+watchdogdir:
+  input: ./data/input
+  work: ./data/work
+  erro: ./data/erro
+  delay: 5
+  pattern:
+  - txt
+  - json
+  - yaml
+  watermark: 2

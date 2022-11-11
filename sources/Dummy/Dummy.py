@@ -9,7 +9,9 @@ from typing import Optional
 
 from tinydb.table import Document
 
-from SSC.Source import Source, SourceData
+from SSC.Source import Source
+from SSC.server import EstatData
+from SSC.topic.QueueProdCons import QueueProducer
 
 
 class Dummy(Source):
@@ -31,10 +33,10 @@ class Dummy(Source):
 
         return 5
 
-    def process(self, size: int) -> Optional[SourceData]:
+    def process(self, producer : QueueProducer, estat : EstatData) -> bool:
 
-        if size > self.water_mark:
-            return None
+        if producer.size() > self.water_mark:
+            return False
 
         self.count += 1
         if self.count % 2 == 0:
@@ -42,6 +44,9 @@ class Dummy(Source):
             payload = f'msg {self.serial}'
             self.log.debug(payload)
 
-            return SourceData(payload=payload, sequence_id=self.serial, msg_key='', properties={})
-            
-        return None
+            producer.send(payload, properties={}, msg_key='', sequence_id=self.serial)
+            estat.tot_ok += 1
+            return True
+
+        return False
+

@@ -1,23 +1,15 @@
 '''
 Created on 20221108
-Update on 20221109
+Update on 20221111
 @author: Eduardo Pagotto
 '''
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import Any, Optional
 
 from tinydb.table import Document
 
-from SSC.Message import Message
-
-@dataclass(frozen=True, kw_only=True, slots=True)
-class SourceData:
-    payload : Any
-    sequence_id : int
-    msg_key : str 
-    properties : dict
+from SSC.server import EstatData
+from SSC.topic.QueueProdCons import QueueProducer
 
 class Source(ABC):
 
@@ -26,5 +18,5 @@ class Source(ABC):
         pass
 
     @abstractmethod
-    def process(self, size: int) -> Optional[SourceData]:
+    def process(self, producer : QueueProducer, estat : EstatData) -> bool:
         pass
