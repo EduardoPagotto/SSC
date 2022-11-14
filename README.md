@@ -78,7 +78,7 @@ Simple Stream Control
                 --name name01 \
                 --tenant test \
                 --namespace ns01 \
-                --py ./src/Relay.py \
+                --py ./functions/Relay.py \
                 --classname Relay.Relay \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
