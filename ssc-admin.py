@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20221104
+Update on 20221114
 @author: Eduardo Pagotto
 '''
 
@@ -80,6 +80,18 @@ class Admin(object):
     def source_list(self, tenant_ns : str) -> List[str]:
         return self.__rpc().source_list(tenant_ns)
 
+    def sink_create(self, params) -> str:
+        return self.__rpc().sink_create(params)
+
+    def sink_delete(self, name : str) -> str:
+        return self.__rpc().sink_delete(name)
+
+    def sink_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.__rpc().sink_pause_resume(name, is_pause)
+
+    def sink_list(self, tenant_ns : str) -> List[str]:
+        return self.__rpc().sink_list(tenant_ns)
+
     def tenants_create(self, name : str) -> str:
         return self.__rpc().tenants_create(name)
 
@@ -134,7 +146,6 @@ def main():
         funcions.add_argument('--userconfigfile', type=str, help='other file config user', required=False, default="")
         funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
 
-        # only connector
         sources = subparser.add_parser('sources')
         sources.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
         sources.add_argument('--name', type=str, help='nome da thread', required=False)
@@ -146,6 +157,17 @@ def main():
         sources.add_argument('--classname', type=str, help='Nome da classe')
         sources.add_argument('--destinationtopicname', type=str, help='other config connectos', required=False, default="")
 
+        sinks = subparser.add_parser('sinks')
+        sinks.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        sinks.add_argument('--name', type=str, help='nome da thread', required=False)
+        sinks.add_argument('--tenant', type=str, help='Tenant', required=False)
+        sinks.add_argument('--namespace', type=str, help='Namespace', required=False)
+        sinks.add_argument('--sinkconfigfile', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--sinkconfig', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--archive', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--classname', type=str, help='Nome da classe')
+        sinks.add_argument('--inputs', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
 
         tenants = subparser.add_parser('tenants')
         tenants.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
@@ -244,15 +266,39 @@ def main():
         elif args.command == 'sinks':
 
             if args.opp == 'create':
-                pass # TODO:
+
+                val : dict = {}
+                try:
+                    if len(args.sinkconfig) > 0:
+                        # load cfg json string
+                        val = json.loads(args.sinkconfig)
+                    elif len(args.sinkconfigfile) > 0:
+                        # load cfg yaml file
+                        val = yaml.safe_load(Path(args.sinkconfigfile).read_text())
+                except FileNotFoundError as err1:
+                    raise Exception(f'{err1.filename} fail: {err1.strerror}')
+                except Exception as exp:
+                    raise Exception(f'userconfig or sinkconfigfile is not a valid {str(exp.args[0])}')
+
+                param = {'name': args.name, 
+                         'tenant': args.tenant,
+                         'namespace' : args.namespace,
+                         'archive': args.archive,
+                         'classname':args.classname,
+                         'inputs' : args.inputs,
+                         'config': val,
+                         'parallelism': args.parallelism}
+
+                log.info(admin.sink_create(param))
+
             elif args.opp == 'delete':
-                pass # TODO:
+                log.info(admin.sink_delete(args.tenant + '/' + args.namespace + '/' +args.name)) 
             elif args.opp == 'pause':
-                pass # TODO:
+                log.info(admin.sink_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, True)) 
             elif args.opp == 'resume':
-                pass # TODO:
+                log.info(admin.sink_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, False)) 
             elif args.opp == 'list':
-                pass # TODO:
+                log.info(admin.sink_list(args.tenant + '/' + args.namespace)) 
 
         elif args.command == 'tenants':
             if args.opp == 'create':

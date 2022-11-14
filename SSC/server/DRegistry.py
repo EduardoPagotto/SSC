@@ -5,10 +5,13 @@ Update on 20221110
 '''
 
 import logging
+import pathlib
 import time
 
 from threading import  Thread
 from typing import Any, List
+
+from tinydb import TinyDB
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
 from SSC.server import create_queue, create_queues
@@ -16,19 +19,22 @@ from SSC.server.SourceCrt import SourceCrt
 
 from SSC.server.Tenant import Tenant
 from SSC.server.FunctionCrt import FunctionCrt
+from SSC.server.SinkCrt import SinkCrt
 
 from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY
 
 class DRegistry(RPC_Responser):
-    def __init__(self, function_crt : FunctionCrt, source_crt : SourceCrt, tenant : Tenant) -> None:
+    def __init__(self, database : TinyDB , path : pathlib.Path, redis_url : str) -> None:
         super().__init__(self)
 
-        self.function_crt = function_crt
-        self.source_crt = source_crt
-        self.tenant = tenant
+        self.function_crt : FunctionCrt = FunctionCrt(database, str(path.resolve()))
+        self.source_crt : SourceCrt = SourceCrt(database, str(path.resolve()))
+        self.sink_crt : SinkCrt = SinkCrt(database, str(path.resolve()))
+        self.tenant : Tenant = Tenant(database, str(path.resolve()), redis_url)
+
         self.done : bool = False
-        self.ticktack = 0
+        self.ticktack : int = 0
         self.log = logging.getLogger('SSC.DRegistry')
 
         self.t_cleanner : Thread = Thread(target=self.cleanner, name='cleanner_files')
@@ -40,7 +46,8 @@ class DRegistry(RPC_Responser):
                 'tictac': self.ticktack,
                 'topics': self.tenant.sumario(),
                 'functions' : self.function_crt.summario(),
-                'sources' : self.source_crt.summario()}
+                'sources' : self.source_crt.summario(),
+                'sinks' : self.sink_crt.summario()}
 
     def cleanner(self) ->None:
         """[Garbage collector of files]
@@ -53,7 +60,8 @@ class DRegistry(RPC_Responser):
 
             f_ok, f_err = self.function_crt.execute()
             s_ok, s_err = self.source_crt.execute()
-            self.log.debug(f'Online:{self.ticktack} functions:({f_ok}/{f_err}) sources:({s_ok}/{s_err})')
+            i_ok, i_err = self.sink_crt.execute()
+            self.log.debug(f'on:{self.ticktack} fu:({f_ok}/{f_err}) so:({s_ok}/{s_err}) si:({i_ok}/{i_err})') 
 
             self.ticktack += 1
             time.sleep(5)
@@ -78,78 +86,71 @@ class DRegistry(RPC_Responser):
 
         raise Exception('topic invalid ' + str(topic_name))
 
-    # --
-
-    # Admin
+    # -- Topics Admin
     def topics_create(self, topic_name : str) -> str:
         return self.tenant.create_topic(topic_name)
 
-    # Admin
     def topics_delete(self, topic_name : str) -> str:
         return self.tenant.delete_topics(topic_name)
 
-    # Admin
     def topics_list(self, ns : str) -> List[str]:
         return self.tenant.list_topics(ns)
 
-    # ---
-
-    # Admin
+    # -- Tenants Admin
     def tenants_create(self, name : str) -> str:
         return self.tenant.create(name)
 
-    # Admin
     def tenants_delete(self, name : str) -> str:
         return self.tenant.delete(name)
 
-    # Admin
     def tenants_list(self) -> List[str]:
         return self.tenant.list_all()
 
-    # ---
-
-    # Admin
+    # -- Namespaces Admin
     def namespaces_create(self, name : str) -> str:
         return self.tenant.create_namespace(name)
 
-    # Admin
     def namespaces_delete(self, name : str) -> str:
         return self.tenant.delete_namespace(name)
 
-    # Admin
     def namespaces_list(self, name : str) -> List[str]:
         return self.tenant.list_all_namespace(name)
 
-    # ---
-
+    # -- Functions Admin
     def function_pause_resume(self, name : str, is_pause : bool) -> str:
         return self.function_crt.pause_resume(name, is_pause)
 
-    # Admin
     def function_create(self, params: dict) -> str:
         return self.function_crt.create(params)
 
-    # Admin
     def function_delete(self, name: str) -> str:
         return self.function_crt.delete(name)
 
-    # Admin
     def functions_list(self, tenant_ns : str) -> List[str]:
         return self.function_crt.list_all(tenant_ns)
 
-    # --
-
+    # -- Source Admin
     def source_pause_resume(self, name : str, is_pause : bool) -> str:
         return self.source_crt.pause_resume(name, is_pause)
 
-    # Admin
     def source_create(self, params: dict) -> str:
         return self.source_crt.create(params)
 
-    # Admin
     def source_delete(self, name: str) -> str:
         return self.source_crt.delete(name)
 
-    # Admin
     def source_list(self, tenant_ns : str) -> List[str]:
         return self.source_crt.list_all(tenant_ns)
+
+    # -- Sinks Admin
+    def sink_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.sink_crt.pause_resume(name, is_pause)
+
+    def sink_create(self, params: dict) -> str:
+        return self.sink_crt.create(params)
+
+    def sink_delete(self, name: str) -> str:
+        return self.sink_crt.delete(name)
+
+    def sink_list(self, tenant_ns : str) -> List[str]:
+        return self.sink_crt.list_all(tenant_ns)
