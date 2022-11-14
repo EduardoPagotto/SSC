@@ -1,7 +1,7 @@
 # SSC
 Simple Stream Control
 
-## Comando de filas 
+## Comando CRUD de filas 
 ```bash
 # Cria tenant/namespace/topic 
 ./ssc-admin.py tenants create test
@@ -34,34 +34,9 @@ Simple Stream Control
 
 ```
 
-## Comandos Functions
+## Comandos CRUD para Sources de dados
 ```bash
-# cria 
-./ssc-admin.py functions create \
-                --name name01 \
-                --tenant test \
-                --namespace ns01 \
-                --py ./src/Relay.py \
-                --classname Relay.Relay \
-                --inputs test/ns01/queue01 \
-                --output test/ns01/queue02
-
-# listar 
-./ssc-admin.py functions list --tenant test --namespace ns01 --name none
-
-# pause 
-./ssc-admin.py functions pause --tenant test --namespace ns01 --name name01
-
-# resume 
-./ssc-admin.py functions resume --tenant test --namespace ns01 --name name01
-
-# remove 
-./ssc-admin.py functions delete --tenant test --namespace ns01 --name name01
-
-```
-## Comandos Sources
-```bash
-
+# gera mensagens sequenciais para debug na queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name dummy-teste \
                 --destinationtopicname test/ns01/queue01 \
@@ -71,6 +46,7 @@ Simple Stream Control
                 --namespace ns01 \
                 --sourceconfigfile ./etc/source_dummy.yaml
 
+# watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name watch1 \
                 --destinationtopicname test/ns01/queue01 \
@@ -95,9 +71,35 @@ Simple Stream Control
 
 ```
 
-## Comandos Sink
+## Comandos CRUD de Functions
 ```bash
+# cria function para relar da fila inputs test/ns01/queue01 para test/ns01/queue02
+./ssc-admin.py functions create \
+                --name name01 \
+                --tenant test \
+                --namespace ns01 \
+                --py ./src/Relay.py \
+                --classname Relay.Relay \
+                --inputs test/ns01/queue01 \
+                --output test/ns01/queue02
 
+# listar 
+./ssc-admin.py functions list --tenant test --namespace ns01 --name none
+
+# pause 
+./ssc-admin.py functions pause --tenant test --namespace ns01 --name name01
+
+# resume 
+./ssc-admin.py functions resume --tenant test --namespace ns01 --name name01
+
+# remove 
+./ssc-admin.py functions delete --tenant test --namespace ns01 --name name01
+
+```
+
+## Comandos CRUD de Sink de dados
+```bash
+# pega os dados da test/ns01/queue02 e os envia para um json em arquivo pelo TinyDB
 ./ssc-admin.py sinks create \
                 --name tiny-teste \
                 --tenant test \
@@ -106,6 +108,17 @@ Simple Stream Control
                 --classname SinkTinydb.SinkTinydb \
                 --inputs test/ns01/queue02 \
                 --sinkconfigfile ./etc/sink_tinydb.yaml 
+
+# pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
+./ssc-admin.py sinks create \
+                --name csv-teste \
+                --tenant test \
+                --namespace ns01 \
+                --archive sinks/SinkCSV/SinkCSV.py \
+                --classname SinkCSV.SinkCSV \
+                --inputs test/ns01/queue02 \
+                --sinkconfigfile ./etc/sink_csv.yaml 
+
 
 # listar 
 ./ssc-admin.py sinks list --tenant test --namespace ns01 --name none
@@ -120,8 +133,6 @@ Simple Stream Control
 ./ssc-admin.py sinks delete --tenant test --namespace ns01 --name tiny-teste
 
 ```
-
-
 
 ## Running and debug local
 1. Set VENV:
@@ -193,9 +204,9 @@ docker exec -it server_SSC_dev /bin/sh
 - [x] Implementar plugin sources (file / rest-api)
 - [x] Implementar pause/resume sources
 - [x] Testar sources
-- [ ] Implementar plugin sinks (file / rest-api)
-- [ ] Implementar pause/resume sinks
-- [ ] Testar sinks
+- [x] Implementar plugin sinks (file / rest-api)
+- [x] Implementar pause/resume sinks
+- [x] Testar sinks
 
 
 refs: 
