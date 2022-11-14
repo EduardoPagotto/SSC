@@ -4,6 +4,7 @@ Update on 20221114
 @author: Eduardo Pagotto
 '''
 
+import json
 from typing import Any
 from tinydb import TinyDB
 from tinydb.table import Document
@@ -16,16 +17,21 @@ class SinkTinydb(Sink):
 
     def start(self, doc : Document) -> int:
         self.doc = doc
-        self.database =  TinyDB(doc['storage'] + '/' +doc['config']['sinktinydb']['file'])
+        self.config = doc['config']['sinktinydb']
 
-        return doc['config']['sinktinydb']['delay']
+        self.database =  TinyDB(doc['storage'] + '/' +self.config['file'])
+        return self.config['delay']
 
     def process(self, content : Any , topic : str) -> None:
         
         table_name = content['properties']['table'] if 'table' in content['properties'] else 'Default'
 
-        payload = content['payload'] if type(content['payload']) == dict else {'payload': str(content['payload'])}
-
-        with LockDB(self.database, table_name, True) as table:
-            table.insert(payload)
+        with LockDB(self.database, table_name, True) as table: # TODO: colocar conversao json no peyload por parametro no config ??
+            if self.config['fullmsg']:
+                table.insert(content)
+            else:
+                try:
+                    table.insert(json.loads(content['payload']))
+                except:
+                    table.insert( {'payload': str(content['payload'])})
 

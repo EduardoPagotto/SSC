@@ -41,8 +41,8 @@ Simple Stream Control
                 --name name01 \
                 --tenant test \
                 --namespace ns01 \
-                --py ./src/FuncAdd.py \
-                --classname FuncAdd.FuncAdd \
+                --py ./src/Relay.py \
+                --classname Relay.Relay \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
 
@@ -61,8 +61,7 @@ Simple Stream Control
 ```
 ## Comandos Sources
 ```bash
-# Cria
-# FuncAdd le queue01 e envia a queue02!!
+
 ./ssc-admin.py sources create \
                 --name dummy-teste \
                 --destinationtopicname test/ns01/queue01 \
@@ -98,8 +97,7 @@ Simple Stream Control
 
 ## Comandos Sink
 ```bash
-# Cria
-# FuncAdd le queue01 e envia a queue02!!
+
 ./ssc-admin.py sinks create \
                 --name tiny-teste \
                 --tenant test \

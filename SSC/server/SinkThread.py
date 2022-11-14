@@ -45,10 +45,8 @@ class SinkThread(EntThread):
             try:
                 res = self.consumer.receive(self.timeout)
                 if res:
-                    for k, v in res.items():
-                        self.esta.tot_ok += 1
+                    for k, v in res.items():          
                         content = json.loads(v)
-
                         try:
                             self.sink.process(content, k)
                             self.esta.tot_ok += 1

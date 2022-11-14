@@ -72,7 +72,7 @@ def main():
 
 
 
-        # classname: funcoes.externo.FuncAdd
+        # classname: funcoes.externo.Relay
         # input: qname
         # output: qname
         # --py /var/app/src/ConvertTxt2Dic.py ??? copiar ???

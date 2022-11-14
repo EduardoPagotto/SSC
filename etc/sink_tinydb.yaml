@@ -1,3 +1,4 @@
 sinktinydb:
   file: ./teste.json
   delay: 5
+  fullmsg : false
