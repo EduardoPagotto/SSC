@@ -24,7 +24,7 @@ class SinkThread(EntThread):
 
         data_in = create_queues(self.database ,params['inputs'])
         self.consumer = QueueConsumer(data_in['urlRedis'], data_in['queue'])
-        self.sink : Sink = self.load(pathlib.Path(params['py']), params['classname'])
+        self.sink : Sink = self.load(pathlib.Path(params['archive']), params['classname'])
 
     def run(self):
 

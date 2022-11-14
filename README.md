@@ -96,6 +96,34 @@ Simple Stream Control
 
 ```
 
+## Comandos Sink
+```bash
+# Cria
+# FuncAdd le queue01 e envia a queue02!!
+./ssc-admin.py sinks create \
+                --name tiny-teste \
+                --tenant test \
+                --namespace ns01 \
+                --archive sinks/SinkTinydb/SinkTinydb.py \
+                --classname SinkTinydb.SinkTinydb \
+                --inputs test/ns01/queue02 \
+                --sinkconfigfile ./etc/sink_tinydb.yaml 
+
+# listar 
+./ssc-admin.py sinks list --tenant test --namespace ns01 --name none
+
+# pause 
+./ssc-admin.py sinks pause --tenant test --namespace ns01 --name tiny-teste
+
+# resume
+./ssc-admin.py sinks resume --tenant test --namespace ns01 --name tiny-teste
+
+# remove 
+./ssc-admin.py sinks delete --tenant test --namespace ns01 --name tiny-teste
+
+```
+
+
 
 ## Running and debug local
 1. Set VENV:

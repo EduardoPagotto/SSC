@@ -285,7 +285,7 @@ def main():
                          'namespace' : args.namespace,
                          'archive': args.archive,
                          'classname':args.classname,
-                         'inputs' : args.inputs,
+                         'inputs' : args.inputs.replace(' ','').split(','),
                          'config': val,
                          'parallelism': args.parallelism}
 

@@ -5,6 +5,7 @@ Update on 20221114
 '''
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 from tinydb.table import Document
 
@@ -15,5 +16,5 @@ class Sink(ABC):
         pass
 
     @abstractmethod
-    def process(self, content : dict, topic : str) -> None:
+    def process(self, content : Any, topic : str) -> None:
         pass

@@ -96,20 +96,21 @@
 			},
 
 			{
-				"name": "Python: Admin connector",
+				"name": "Python: Admin sink",
 				"type": "python",
 				"request": "launch",
 				"program": "${workspaceFolder:SSC}/ssc-admin.py",
 				"console": "integratedTerminal",
 				"justMyCode": true,
 				"args": [
-					"sources", "create", 
-					"--name", "dummy-teste", 
-					"--tenant", "test", 
-					"--namespace", "ns01", 
-					"--archive", "connectors/Dummy.py",  
-					"--destinationtopicname", "test/ns01/queue01",
-					"--sourceconfigfile", "./etc/source_dummy.yaml"
+					"sinks", "create",
+					"--name", "tiny-teste",
+					"--tenant", "test",
+					"--namespace", "ns01",
+					"--archive", "sinks/SinkTinydb/SinkTinydb.py",
+					"--classname", "SinkTinydb.SinkTinydb",
+					"--inputs", "test/ns01/queue02",
+					"--sinkconfigfile", "./etc/sink_tinydb.yaml"
 				]
 			},
 
