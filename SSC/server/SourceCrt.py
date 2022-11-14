@@ -1,6 +1,6 @@
 '''
 Created on 20221108
-Update on 20221110
+Update on 20221114
 @author: Eduardo Pagotto
 '''
 
@@ -19,6 +19,8 @@ class SourceCrt(EnttCrt):
     def create(self, params : dict) -> str:
 
         self.log.debug(f"create {params['name']}")
+
+        params['storage'] = str(self.storage.resolve())
         with self.lock_func:
             for source in self.list_entt:
                 if (params['tenant'] == source.document['tenant']) and (params['namespace'] == source.document['namespace']) and (params['name'] == source.document['name']):

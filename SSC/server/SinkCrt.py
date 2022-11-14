@@ -19,6 +19,8 @@ class SinkCrt(EnttCrt):
     def create(self, params : dict) -> str:
 
         self.log.debug(f"create {params['name']}")
+
+        params['storage'] = str(self.storage.resolve())
         with self.lock_func:
             for func in self.list_entt:
                 if (params['tenant'] == func.document['tenant']) and (params['namespace'] == func.document['namespace']) and (params['name'] == func.document['name']):

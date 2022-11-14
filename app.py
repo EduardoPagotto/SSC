@@ -12,10 +12,6 @@ from flask import Flask
 from tinydb import TinyDB
 
 from SSC.server.DRegistry import DRegistry
-from SSC.server.FunctionCrt import FunctionCrt
-from SSC.server.SourceCrt import SourceCrt
-from SSC.server.Tenant import Tenant
-
 from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY
 

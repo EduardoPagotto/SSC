@@ -1,6 +1,6 @@
 '''
 Created on 20221111
-Update on 20221111
+Update on 20221114
 @author: Eduardo Pagotto
 '''
 
@@ -24,7 +24,7 @@ class Watchdogdir(Source):
         self.document : Document = Document({}, 0)
         self.serial : int = 0
         self.log = logging.getLogger('Watchdogdir')
-        self.input = pathlib.Path('./data/input')
+        self.input = pathlib.Path('./input')
         self.work : Optional[pathlib.Path] = None
         self.erro : Optional[pathlib.Path] = None
         self.pattern : List[str] = ['txt', 'json', 'yaml']
@@ -41,15 +41,15 @@ class Watchdogdir(Source):
 
         if 'watchdogdir' in self.document['config']: 
             if 'input' in self.document['config']['watchdogdir']:
-                self.input = pathlib.Path(self.document['config']['watchdogdir']['input'])
+                self.input = pathlib.Path(self.document['storage'] + '/' + self.document['config']['watchdogdir']['input'])
 
             if 'work' in self.document['config']['watchdogdir']:
-                self.work = pathlib.Path(self.document['config']['watchdogdir']['work'])
+                self.work = pathlib.Path(self.document['storage'] + '/' + self.document['config']['watchdogdir']['work'])
                 self.work.mkdir(parents=True, exist_ok=True)
                 self.log.info(f'work :{self.work.resolve()}')
 
             if 'erro' in self.document['config']['watchdogdir']:
-                self.erro = pathlib.Path(self.document['config']['watchdogdir']['erro'])
+                self.erro = pathlib.Path(self.document['storage'] + '/' + self.document['config']['watchdogdir']['erro'])
                 self.erro.mkdir(parents=True, exist_ok=True)
                 self.log.info(f'erro :{self.erro.resolve()}')
 

@@ -1,0 +1,3 @@
+sinktinydb:
+  file: ./teste.json
+  delay: 5

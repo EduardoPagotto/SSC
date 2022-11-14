@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221110
+Update on 20221114
 @author: Eduardo Pagotto
 '''
 
@@ -28,10 +28,13 @@ class DRegistry(RPC_Responser):
     def __init__(self, database : TinyDB , path : pathlib.Path, redis_url : str) -> None:
         super().__init__(self)
 
-        self.function_crt : FunctionCrt = FunctionCrt(database, str(path.resolve()))
-        self.source_crt : SourceCrt = SourceCrt(database, str(path.resolve()))
-        self.sink_crt : SinkCrt = SinkCrt(database, str(path.resolve()))
-        self.tenant : Tenant = Tenant(database, str(path.resolve()), redis_url)
+        self.path = path
+        path_str = str(self.path.resolve())
+
+        self.function_crt : FunctionCrt = FunctionCrt(database, path_str)
+        self.source_crt : SourceCrt = SourceCrt(database, path_str)
+        self.sink_crt : SinkCrt = SinkCrt(database, path_str)
+        self.tenant : Tenant = Tenant(database, path_str, redis_url)
 
         self.done : bool = False
         self.ticktack : int = 0

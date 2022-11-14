@@ -1,7 +1,7 @@
 watchdogdir:
-  input: ./data/input
-  work: ./data/work
-  erro: ./data/erro
+  input: opp/input
+  work: opp/work
+  erro: opp/erro
   delay: 5
   pattern:
   - txt
