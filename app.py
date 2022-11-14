@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221102
+Update on 20221114
 @author: Eduardo Pagotto
 '''
 
@@ -12,9 +12,6 @@ from flask import Flask
 from tinydb import TinyDB
 
 from SSC.server.DRegistry import DRegistry
-from SSC.server.FunctionCrt import FunctionCrt
-from SSC.server.Tenant import Tenant
-
 from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY
 
@@ -46,7 +43,7 @@ path2 = pathlib.Path(SSC_CFG_STORAGE)
 path2.mkdir(parents=True, exist_ok=True)
 
 database = TinyDB(str(path1) + '/master.json')
-rpc_registry = DRegistry(FunctionCrt(database, SSC_CFG_STORAGE), Tenant(database, SSC_CFG_STORAGE, REDIS_URL))
+rpc_registry = DRegistry(database, path2, REDIS_URL)
 
 app = Flask(__name__)
 app.secret_key = "secret key"

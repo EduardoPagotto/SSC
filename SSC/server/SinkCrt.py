@@ -1,5 +1,5 @@
 '''
-Created on 20221006
+Created on 20221114
 Update on 20221114
 @author: Eduardo Pagotto
 '''
@@ -7,13 +7,13 @@ Update on 20221114
 from tinydb import TinyDB
 
 from SSC.server.EnttCrt import EnttCrt
-from SSC.server.FuncCocoon import FuncCocoon
+from SSC.server.SinkCocoon import SinkCocoon
 from SSC.subsys.LockDB import LockDB
 
-class FunctionCrt(EnttCrt):
+class SinkCrt(EnttCrt):
 
     def __init__(self, database : TinyDB, path_storage : str) -> None:
-        super().__init__('functions', database, path_storage)
+        super().__init__('sinks', database, path_storage)
         self.load_funcs_db()
 
     def create(self, params : dict) -> str:
@@ -26,7 +26,7 @@ class FunctionCrt(EnttCrt):
                 if (params['tenant'] == func.document['tenant']) and (params['namespace'] == func.document['namespace']) and (params['name'] == func.document['name']):
                     raise Exception(f'topic {params["name"]} already exists')
 
-            cocoon : FuncCocoon = FuncCocoon(self.colection_name, params, self.database)
+            cocoon : SinkCocoon = SinkCocoon(self.colection_name, params, self.database)
             cocoon.start()
             self.list_entt.append(cocoon)
 
@@ -41,7 +41,7 @@ class FunctionCrt(EnttCrt):
             try:
                 with self.lock_func:
                     self.log.debug(f'load from db: {params["name"]}')
-                    cocoon : FuncCocoon = FuncCocoon(self.colection_name, params, self.database)
+                    cocoon : SinkCocoon = SinkCocoon(self.colection_name, params, self.database)
                     cocoon.start()
                     self.list_entt.append(cocoon)
             except:

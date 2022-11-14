@@ -1,5 +1,5 @@
 '''
-Created on 20221006
+Created on 20221108
 Update on 20221114
 @author: Eduardo Pagotto
 '''
@@ -7,14 +7,14 @@ Update on 20221114
 from tinydb import TinyDB
 
 from SSC.server.EnttCrt import EnttCrt
-from SSC.server.FuncCocoon import FuncCocoon
+from SSC.server.SourceCocoon import SourceCocoon
 from SSC.subsys.LockDB import LockDB
 
-class FunctionCrt(EnttCrt):
+class SourceCrt(EnttCrt):
 
     def __init__(self, database : TinyDB, path_storage : str) -> None:
-        super().__init__('functions', database, path_storage)
-        self.load_funcs_db()
+        super().__init__('sources', database, path_storage)
+        self.load_connectors_db()
 
     def create(self, params : dict) -> str:
 
@@ -22,17 +22,17 @@ class FunctionCrt(EnttCrt):
 
         params['storage'] = str(self.storage.resolve())
         with self.lock_func:
-            for func in self.list_entt:
-                if (params['tenant'] == func.document['tenant']) and (params['namespace'] == func.document['namespace']) and (params['name'] == func.document['name']):
+            for source in self.list_entt:
+                if (params['tenant'] == source.document['tenant']) and (params['namespace'] == source.document['namespace']) and (params['name'] == source.document['name']):
                     raise Exception(f'topic {params["name"]} already exists')
 
-            cocoon : FuncCocoon = FuncCocoon(self.colection_name, params, self.database)
+            cocoon : SourceCocoon = SourceCocoon(self.colection_name, params, self.database)
             cocoon.start()
             self.list_entt.append(cocoon)
 
         return f"success create {params['name']}"
 
-    def load_funcs_db(self):
+    def load_connectors_db(self):
 
         with LockDB(self.database, self.colection_name, False) as table:
             itens = table.all()
@@ -41,9 +41,8 @@ class FunctionCrt(EnttCrt):
             try:
                 with self.lock_func:
                     self.log.debug(f'load from db: {params["name"]}')
-                    cocoon : FuncCocoon = FuncCocoon(self.colection_name, params, self.database)
+                    cocoon : SourceCocoon = SourceCocoon(self.colection_name, params, self.database)
                     cocoon.start()
                     self.list_entt.append(cocoon)
             except:
                 pass
-

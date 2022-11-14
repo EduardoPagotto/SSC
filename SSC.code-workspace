@@ -96,6 +96,26 @@
 			},
 
 			{
+				"name": "Python: Admin sink",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/ssc-admin.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"sinks", "create",
+					"--name", "tiny-teste",
+					"--tenant", "test",
+					"--namespace", "ns01",
+					"--archive", "sinks/SinkTinydb/SinkTinydb.py",
+					"--classname", "SinkTinydb.SinkTinydb",
+					"--inputs", "test/ns01/queue02",
+					"--sinkconfigfile", "./etc/sink_tinydb.yaml"
+				]
+			},
+
+
+			{
 				"name": "Python: Client producer",
 				"type": "python",
 				"request": "launch",

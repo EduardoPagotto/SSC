@@ -1,0 +1,10 @@
+watchdogdir:
+  input: opp/input
+  work: opp/work
+  erro: opp/erro
+  delay: 5
+  pattern:
+  - txt
+  - json
+  - yaml
+  watermark: 2

@@ -1,47 +1,138 @@
 # SSC
 Simple Stream Control
 
-## Comandos 
+## Comando CRUD de filas 
 ```bash
 # Cria tenant/namespace/topic 
 ./ssc-admin.py tenants create test
 ./ssc-admin.py namespaces create test/ns01
 ./ssc-admin.py topics create test/ns01/queue01
 ./ssc-admin.py topics create test/ns01/queue02
+./ssc-admin.py topics create test/ns01/queue03
 
-# cria funcs
-./ssc-admin.py functions \
-                create \
+# lista filas em tenant test namespace ns01
+./ssc-admin.py topics list test/ns01
+
+# deleta fila queue03
+./ssc-admin.py topics delete test/ns01/queue03
+
+# lista namespaces em tenant test
+./ssc-admin.py namespaces list test
+
+# Lista tenants
+./ssc-admin.py tenants list none
+
+```
+
+## Envio e recebimento as filas via CLI
+```bash
+# envai 5 mensagens a filas 1
+./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 5
+
+# receber 2 mensagens de queue02
+./ssc-client.py consume -s app1 test/ns01/queue02 -n 2
+
+```
+
+## Comandos CRUD para Sources de dados
+```bash
+# gera mensagens sequenciais para debug na queue test/ns01/queue01
+./ssc-admin.py sources create \
+                --name dummy-teste \
+                --destinationtopicname test/ns01/queue01 \
+                --archive sources/Dummy/Dummy.py \
+                --classname Dummy.Dummy \
+                --tenant test \
+                --namespace ns01 \
+                --sourceconfigfile ./etc/source_dummy.yaml
+
+# watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
+./ssc-admin.py sources create \
+                --name watch1 \
+                --destinationtopicname test/ns01/queue01 \
+                --archive sources/Watchdogdir/Watchdogdir.py \
+                --classname Watchdogdir.Watchdogdir \
+                --tenant test \
+                --namespace ns01 \
+                --sourceconfigfile ./etc/watchdogdir_cfg.yaml
+
+
+# listar 
+./ssc-admin.py sources list --tenant test --namespace ns01 --name none
+
+# pause 
+./ssc-admin.py sources pause --tenant test --namespace ns01 --name dummy-teste
+
+# resume
+./ssc-admin.py sources resume --tenant test --namespace ns01 --name dummy-teste
+
+# remove 
+./ssc-admin.py sources delete --tenant test --namespace ns01 --name dummy-teste
+
+```
+
+## Comandos CRUD de Functions
+```bash
+# cria function para relar da fila inputs test/ns01/queue01 para test/ns01/queue02
+./ssc-admin.py functions create \
                 --name name01 \
                 --tenant test \
                 --namespace ns01 \
-                --py ./src/FuncAdd.py \
-                --classname FuncAdd.FuncAdd \
+                --py ./functions/Relay.py \
+                --classname Relay.Relay \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
 
-# pause function
+# listar 
+./ssc-admin.py functions list --tenant test --namespace ns01 --name none
+
+# pause 
 ./ssc-admin.py functions pause --tenant test --namespace ns01 --name name01
 
-# resume function
+# resume 
 ./ssc-admin.py functions resume --tenant test --namespace ns01 --name name01
 
-# envai dados de teste a filas 1
-./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 5
-
-# FuncAdd le queue01 e envia a queue02!!
-
-# receber dados em queue02
-./ssc-client.py consume -s app1 test/ns01/queue02 -n 2
-
-# remove a func named01
+# remove 
 ./ssc-admin.py functions delete --tenant test --namespace ns01 --name name01
 
-
-./ssc-admin.py functions list --tenant test --namespace ns01 --name none
 ```
 
+## Comandos CRUD de Sink de dados
+```bash
+# pega os dados da test/ns01/queue02 e os envia para um json em arquivo pelo TinyDB
+./ssc-admin.py sinks create \
+                --name tiny-teste \
+                --tenant test \
+                --namespace ns01 \
+                --archive sinks/SinkTinydb/SinkTinydb.py \
+                --classname SinkTinydb.SinkTinydb \
+                --inputs test/ns01/queue02 \
+                --sinkconfigfile ./etc/sink_tinydb.yaml 
 
+# pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
+./ssc-admin.py sinks create \
+                --name csv-teste \
+                --tenant test \
+                --namespace ns01 \
+                --archive sinks/SinkCSV/SinkCSV.py \
+                --classname SinkCSV.SinkCSV \
+                --inputs test/ns01/queue02 \
+                --sinkconfigfile ./etc/sink_csv.yaml 
+
+
+# listar 
+./ssc-admin.py sinks list --tenant test --namespace ns01 --name none
+
+# pause 
+./ssc-admin.py sinks pause --tenant test --namespace ns01 --name tiny-teste
+
+# resume
+./ssc-admin.py sinks resume --tenant test --namespace ns01 --name tiny-teste
+
+# remove 
+./ssc-admin.py sinks delete --tenant test --namespace ns01 --name tiny-teste
+
+```
 
 ## Running and debug local
 1. Set VENV:
@@ -110,12 +201,12 @@ docker exec -it server_SSC_dev /bin/sh
 - [x] Implementar payload com key, message_prop, timestamp
 - [ ] Remover classes de producer e subscribe abstratas
 - [ ] Implementar chamada de queue no RPC e limpeza de codigo
-- [ ] Implementar plugin connectors (file / rest-api)
-- [ ] Implementar pause/resume connectors
-- [ ] Testar connectors
-- [ ] Implementar plugin sinks (file / rest-api)
-- [ ] Implementar pause/resume sinks
-- [ ] Testar sinks
+- [x] Implementar plugin sources (file / rest-api)
+- [x] Implementar pause/resume sources
+- [x] Testar sources
+- [x] Implementar plugin sinks (file / rest-api)
+- [x] Implementar pause/resume sinks
+- [x] Testar sinks
 
 
 refs: 

@@ -1,6 +1,6 @@
 '''
 Created on 20221019
-Update on 20221108
+Update on 20221109
 @author: Eduardo Pagotto
 '''
 
@@ -30,6 +30,9 @@ class QueueProducer(Producer):
                       key = msg_key)
 
         return self.queue.enqueue(json.dumps(dataclasses.asdict(msg)))
+
+    def size(self) -> int:
+        return self.queue.qsize()
 
 class QueueConsumer(Consumer):
     def __init__(self, url : str, queues_name : List[str] | str) -> None:
