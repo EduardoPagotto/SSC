@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20221108
+Update on 20221120
 @author: Eduardo Pagotto
 '''
 
 import json
 from typing import List
 import requests
-from SSC.topic import Producer, Consumer
 from SSC.topic.QueueProdCons import QueueProducer, QueueConsumer
 
 from sJsonRpc.ConnectionControl import ConnectionControl
@@ -45,11 +44,11 @@ class ClientQueue(object):
 
         return ProxyObject(self.restAPI)
 
-    def create_producer(self, topic : str, producer : str = '') -> Producer:
+    def create_producer(self, topic : str, producer : str = '') -> QueueProducer:
         conn : dict = self.__rpc().create_producer(topic)
         return QueueProducer(conn['urlRedis'], conn['queue'], producer)
 
-    def subscribe(self, topics : List[str]) -> Consumer:
+    def subscribe(self, topics : List[str]) -> QueueConsumer:
         conn : dict = self.__rpc().create_subscribe(topics)
         return QueueConsumer(conn['urlRedis'], conn['queue'])
 

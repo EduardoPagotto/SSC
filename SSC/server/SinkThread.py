@@ -4,7 +4,6 @@ Update on 20221114
 @author: Eduardo Pagotto
 '''
 
-import json
 import pathlib
 import time
 
@@ -15,6 +14,7 @@ from SSC.server import create_queues
 from SSC.Sink import Sink
 from SSC.server.EntThread import EntThread
 from SSC.topic.QueueProdCons import QueueConsumer
+from SSC.topic.RedisQueue import Empty
 
   
 class SinkThread(EntThread):
@@ -35,36 +35,20 @@ class SinkThread(EntThread):
             self.timeout = 5
 
         while (not self.esta.done):
-            
-            outputs = 0
+            try:            
+                if self.is_paused():
+                    time.sleep(self.timeout)
+                    continue
 
-            if self.is_paused():
+                self.sink.process(self.consumer.receive(self.timeout))
+                self.esta.tot_ok += 1
+
+            except Empty:
                 time.sleep(self.timeout)
-                continue
-
-            try:
-                res = self.consumer.receive(self.timeout)
-                if res:
-                    for k, v in res.items():          
-                        content = json.loads(v)
-                        try:
-                            self.sink.process(content, k)
-                            self.esta.tot_ok += 1
-                            outputs += 1
-
-                        except Exception as exp:
-                            
-                            self.esta.tot_err += 1
-                            self.log.error(f'Sink {self.name} erro: ' + exp.args[0])
-                            time.sleep(1)
-
-                        continue
 
             except Exception as exp:
-                self.log.error(exp.args[0])
                 self.esta.tot_err += 1
-
-            if (outputs == 0):
-                time.sleep(self.timeout)
+                self.log.error(f'Sink {self.name} erro: ' + exp.args[0])
+                time.sleep(1)
 
         self.log.info(f'stopped {self.name}')

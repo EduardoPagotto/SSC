@@ -1,14 +1,11 @@
 '''
 Created on 20221019
-Update on 20221108
+Update on 20221120
 @author: Eduardo Pagotto
 '''
 
 from typing import List
 import redis
-
-from SSC.topic import Producer, Consumer
-from SSC.topic.PubSub import Publish, Subscribe
 from SSC.topic.QueueProdCons import QueueConsumer, QueueProducer
 
 class Connection(object):
@@ -20,14 +17,8 @@ class Connection(object):
         r = redis.Redis.from_url(self.url)
         return r.ping()
 
-    def create_publish(self, topic : str) -> Producer:
-        return Publish(self.url, topic)
-
-    def create_subscribe(self, topics : List[str]) -> Consumer:
-        return Subscribe(self.url, topics)
-
-    def create_producer(self, queue : str, producer : str = '')-> Producer:
+    def create_producer(self, queue : str, producer : str = '')-> QueueProducer:
         return QueueProducer(self.url, queue, producer)
 
-    def create_consumer(self, names : List[str]) -> Consumer:
+    def create_consumer(self, names : List[str]) -> QueueConsumer:
         return QueueConsumer(self.url, names)
