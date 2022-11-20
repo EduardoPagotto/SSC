@@ -1,20 +1,20 @@
 '''
 Created on 20221019
-Update on 20221109
+Update on 20221120
 @author: Eduardo Pagotto
 '''
 
-import dataclasses
 import json
 import redis
 
 from typing import Any, List
 
-from SSC.topic import Producer, Consumer
-from SSC.topic.RedisQueue import RedisQueue
+from SSC.topic.RedisQueue import Empty, RedisQueue
 from SSC.Message import Message
 
-class QueueProducer(Producer):
+import queue
+
+class QueueProducer(object):
     def __init__(self, url : str, queue_name : str, producer_name : str) -> None:
         self.topic = queue_name
         self.producer_name = producer_name
@@ -22,22 +22,26 @@ class QueueProducer(Producer):
 
     def send(self, content : Any, properties : dict  = {}, msg_key : str = '' ,sequence_id : int = 0) -> int:
 
-        msg = Message(seq_id=sequence_id,
-                      payload=content,
-                      topic=self.topic,
-                      properties=properties,
-                      producer=self.producer_name,
-                      key = msg_key)
+        msg = Message.create(seq_id=sequence_id,
+                                payload=content,
+                                topic=self.topic,
+                                properties=properties,
+                                producer=self.producer_name,
+                                key = msg_key)
 
-        return self.queue.enqueue(json.dumps(dataclasses.asdict(msg)))
+
+
+        return self.queue.enqueue(json.dumps(msg.to_dict()))
 
     def size(self) -> int:
         return self.queue.qsize()
 
-class QueueConsumer(Consumer):
+class QueueConsumer(object):
     def __init__(self, url : str, queues_name : List[str] | str) -> None:
 
         self.queues : List[RedisQueue] = []
+
+        self.pending : queue.Queue = queue.Queue()
 
         if type(queues_name) == list:         
             for item in queues_name:
@@ -47,24 +51,25 @@ class QueueConsumer(Consumer):
         else:
             raise Exception('topic name invalid ' + str(queues_name))
 
-    def receive(self, timeout : float = 0) -> Any:#dict[str, Any] | None:
+    def receive(self, timeout : float = 0) -> Message:
 
-        output = {}
+        if self.pending.qsize() > 0:
+            return self.pending.get()
+
         for item in self.queues:
             if timeout == 0:
                 val = item.dequeue()
                 if val:
-                    output[item.get_name()] = val.decode('utf8')
+                    self.pending.put(Message.from_dic(json.loads(val.decode('utf8'))))
             else:
                 val = item.bdequeue(timeout)
                 if val:
-                    qin = val[0].decode('utf8')
-                    output[qin.replace(':','/')] = val[1].decode('utf8')
+                    self.pending.put(Message.from_dic(json.loads(val[1].decode('utf8'))))
 
-        if not bool(output):
-            return None
+        if self.pending.qsize() > 0:
+            return self.pending.get()
 
-        return output
+        raise Empty
 
 
     def nack(self, queue_name : str, register : Any) -> int:

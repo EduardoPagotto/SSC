@@ -1,6 +1,6 @@
 '''
 Created on 20221007
-Update on 20221007
+Update on 20221120
 @author: Eduardo Pagotto
 '''
 
@@ -33,7 +33,7 @@ class LockDB(object):
             self.table_name : str = table_name
 
             self.log = logging.getLogger('SSC.DBLOCK')
-            self.log.debug('Transaction %d', self.count)
+            #self.log.debug('Transaction %d', self.count)
 
     def __enter__(self):
         
@@ -42,7 +42,7 @@ class LockDB(object):
 
         if LockDB.write_count > 0:
             LockDB.mutex_db.acquire()
-            self.log.debug('acquire %d', self.count)
+            #self.log.debug('acquire %d', self.count)
 
         return self.db.table(self.table_name)
 
@@ -50,7 +50,7 @@ class LockDB(object):
 
         if LockDB.write_count > 0:
             LockDB.mutex_db.release()
-            self.log.debug('release %d', self.count)
+            #self.log.debug('release %d', self.count)
 
         if self.rw:
             LockDB.write_count -= 1

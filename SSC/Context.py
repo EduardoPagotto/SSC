@@ -1,6 +1,6 @@
 '''
 Created on 20221007
-Update on 20221108
+Update on 20221120
 @author: Eduardo Pagotto
 '''
 
@@ -9,32 +9,32 @@ from typing import Any, List, Optional
 
 from tinydb.table import Document
 from tinydb import TinyDB
+from SSC.Message import Message
 
 from SSC.server import splitTopic, topic_by_namespace, topic_to_redis_queue
-from SSC.topic.QueueProdCons import Producer, QueueProducer
+from SSC.topic.QueueProdCons import QueueProducer
 
 
 class Context(object):
-    def __init__(self, msg : dict, extra : dict[str, Producer], params: Document, curr_topic : str, database : TinyDB, log : Logger) -> None:
+    def __init__(self, msg : Message, extra : dict[str, QueueProducer], params: Document, database : TinyDB, log : Logger) -> None:
         self.log : Logger = log
-        self.curr_topic : str = curr_topic
         self.database : TinyDB = database
         self.params : Document = params
 
-        self.extra : dict[str, Producer] = extra
-        self.msg = msg
+        self.extra : dict[str, QueueProducer] = extra
+        self.msg : Message = msg
 
     def get_message_id(self) -> int:
-        return self.msg['seq_id']
+        return self.msg.message_id()
 
     def get_message_properties(self) -> dict:
-        return self.msg['properties']
+        return self.msg.properties()
 
     def get_message_key(self) -> str:
-        return self.msg['key']
+        return self.msg.partition_key()
 
     def get_current_message_topic_name(self) -> str:
-        return self.curr_topic
+        return self.msg.topic_name()
 
     def get_function_name(self) -> str:
         return self.params['name']
@@ -60,7 +60,7 @@ class Context(object):
     def get_output_topic(self) -> str:
         return self.params['output']
 
-    def publish(self, topic : str, data : str):
+    def publish(self, topic : str, data : str, properties : dict  = {}, msg_key : str = '' ,sequence_id : int = 0):
 
         if topic not in self.extra:
             tenant_name, namespace, queue = splitTopic(topic)
@@ -71,4 +71,4 @@ class Context(object):
             else:
                 raise Exception(f'topic invalid im publish func ' + topic)
         
-        self.extra[topic].send(data)
+        self.extra[topic].send(data, properties, msg_key, sequence_id)

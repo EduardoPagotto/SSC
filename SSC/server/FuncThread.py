@@ -1,10 +1,9 @@
 '''
 Created on 20221102
-Update on 20221109
+Update on 20221120
 @author: Eduardo Pagotto
 '''
 
-import json
 import pathlib
 import time
 
@@ -18,8 +17,8 @@ from SSC.Context import Context
 from SSC.Function import Function
 from SSC.server.EntThread import EntThread
 from SSC.topic.QueueProdCons import QueueConsumer, QueueProducer
+from SSC.topic.RedisQueue import Empty
 
-  
 class FuncThread(EntThread):
     def __init__(self, index : int, params : Document, database : TinyDB) -> None:
 
@@ -53,27 +52,25 @@ class FuncThread(EntThread):
                 continue
 
             try:
-                res = self.consumer.receive(self.timeout)
-                if res:
-                    for k, v in res.items():
-                        inputs += 1
-                        self.esta.tot_ok += 1
-                        content = json.loads(v)
+                content = self.consumer.receive(self.timeout)
+                inputs += 1
+                self.esta.tot_ok += 1
 
-                        try:
-                            ret = self.function.process(content['payload'], Context(content, extra_map_puplish, self.document, k, self.database, self.log))
-                            if (self.producer) and (ret != None):
+                try:
+                    ret = self.function.process(content.data(), Context(content, extra_map_puplish, self.document, self.database, self.log))
+                    if (self.producer) and (ret != None):
+                        outputs += 1
+                        self.producer.send(ret)
 
-                                outputs += 1
-                                self.producer.send(ret)
+                except Exception as exp:   
+                    self.esta.tot_err += 1
+                    self.log.error(f'Function exec {self.name} erro: ' + exp.args[0])
+                    time.sleep(1)
 
-                        except Exception as exp:
-                            
-                            self.esta.tot_err += 1
-                            self.log.error(f'Function exec {self.name} erro: ' + exp.args[0])
-                            time.sleep(1)
+                continue
 
-                        continue
+            except Empty:
+                pass
 
             except Exception as exp:
                 self.log.error(exp.args[0])
