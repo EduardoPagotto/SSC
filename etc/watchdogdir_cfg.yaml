@@ -1,8 +1,8 @@
-watchdogdir:
+configs:
   input: opp/input
-  work: opp/work
+  output: opp/work
   erro: opp/erro
-  delay: 5
+  delay: 15
   pattern:
   - txt
   - json

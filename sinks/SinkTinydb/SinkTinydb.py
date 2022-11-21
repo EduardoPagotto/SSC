@@ -18,7 +18,7 @@ class SinkTinydb(Sink):
 
     def start(self, doc : Document) -> int:
         self.doc = doc
-        self.config = doc['config']['sinktinydb']
+        self.config = doc['config']['configs']
 
         self.database =  TinyDB(doc['storage'] + '/' +self.config['file'])
         return self.config['delay']

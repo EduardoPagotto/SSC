@@ -18,7 +18,7 @@ class SinkCSV(Sink):
 
     def start(self, doc : Document) -> int:
         self.doc = doc
-        self.config = doc['config']['sinkcsv']
+        self.config = doc['config']['configs']
 
         self.file =  doc['storage'] + '/' +self.config['file']
         return self.config['delay']

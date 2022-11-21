@@ -1,6 +1,6 @@
 '''
 Created on 20221108
-Update on 20221110
+Update on 20221121
 @author: Eduardo Pagotto
 '''
 
@@ -41,7 +41,7 @@ class SourceThread(EntThread):
                     continue
 
             except Exception as exp:
-                self.log.error(exp.args[0])
+                self.log.error(str(exp.args))
                 self.esta.tot_err += 1
 
             time.sleep(self.timeout)

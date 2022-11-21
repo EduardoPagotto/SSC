@@ -1,0 +1,6 @@
+configs:
+  output: opp/output
+  erro: opp/erro
+  others: opt/pdf
+  delay: 5
+  watermark: 2
