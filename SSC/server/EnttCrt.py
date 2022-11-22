@@ -20,7 +20,7 @@ class EnttCrt(object):
 
         self.colection_name = colection_name
         self.database = database
-        self.storage = pathlib.Path(path_storage, colection_name)
+        self.storage = pathlib.Path(path_storage)
         self.storage.mkdir(parents=True, exist_ok=True)
         self.log = logging.getLogger('SSC.crt')
         self.lock_func = Lock()

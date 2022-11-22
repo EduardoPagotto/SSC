@@ -1,7 +1,7 @@
 configs:
   output: opp/output
   erro: opp/erro
-  others: opt/pdf
+  others: opp/pdf
   delay: 5
   watermark: 2
-  ssf_url: http://127.0.0.1:5152
+  ssf_url: http://192.168.122.1:5152

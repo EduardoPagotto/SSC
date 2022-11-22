@@ -119,6 +119,15 @@ Simple Stream Control
                 --inputs test/ns01/queue02 \
                 --sinkconfigfile ./etc/sink_csv.yaml 
 
+# sink de gravacao de arquivos em diretorio
+./ssc-admin.py sinks create \
+                --name writer-test \
+                --tenant test \
+                --namespace ns01 \
+                --archive sinks/SinkWriterFiles/SinkWriterFiles.py \
+                --classname SinkWriterFiles.SinkWriterFiles \
+                --inputs test/ns01/queue03 \
+                --sinkconfigfile ./etc/sink_writerfiles.yaml 
 
 # listar 
 ./ssc-admin.py sinks list --tenant test --namespace ns01 --name none
