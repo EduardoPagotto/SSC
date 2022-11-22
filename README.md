@@ -2,14 +2,10 @@
 Simple Stream Control
 
 ## Comando CRUD de filas 
-```bash
-# Cria tenant/namespace/topic 
-./ssc-admin.py tenants create test
-./ssc-admin.py namespaces create test/ns01
-./ssc-admin.py topics create test/ns01/queue01
-./ssc-admin.py topics create test/ns01/queue02
-./ssc-admin.py topics create test/ns01/queue03
 
+[Criação topics](scripts/create_test.sh) : `./scripts/create_test.sh`
+
+```bash
 # lista filas em tenant test namespace ns01
 ./ssc-admin.py topics list test/ns01
 
@@ -35,28 +31,10 @@ Simple Stream Control
 ```
 
 ## Comandos CRUD para Sources de dados
+
+[Criação Sources](scripts/create_test.sh) : `./scripts/create_test.sh`
+
 ```bash
-# gera mensagens sequenciais para debug na queue test/ns01/queue01
-./ssc-admin.py sources create \
-                --name dummy-teste \
-                --destinationtopicname test/ns01/queue01 \
-                --archive sources/Dummy/Dummy.py \
-                --classname Dummy.Dummy \
-                --tenant test \
-                --namespace ns01 \
-                --sourceconfigfile ./etc/source_dummy.yaml
-
-# watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
-./ssc-admin.py sources create \
-                --name watch1 \
-                --destinationtopicname test/ns01/queue01 \
-                --archive sources/Watchdogdir/Watchdogdir.py \
-                --classname Watchdogdir.Watchdogdir \
-                --tenant test \
-                --namespace ns01 \
-                --sourceconfigfile ./etc/watchdogdir_cfg.yaml
-
-
 # listar 
 ./ssc-admin.py sources list --tenant test --namespace ns01 --name none
 
@@ -72,17 +50,10 @@ Simple Stream Control
 ```
 
 ## Comandos CRUD de Functions
-```bash
-# cria function para relar da fila inputs test/ns01/queue01 para test/ns01/queue02
-./ssc-admin.py functions create \
-                --name name01 \
-                --tenant test \
-                --namespace ns01 \
-                --py ./functions/Relay.py \
-                --classname Relay.Relay \
-                --inputs test/ns01/queue01 \
-                --output test/ns01/queue02
 
+[Criação Functions](scripts/create_test.sh) : `./scripts/create_test.sh`
+
+```bash
 # listar 
 ./ssc-admin.py functions list --tenant test --namespace ns01 --name none
 
@@ -98,37 +69,10 @@ Simple Stream Control
 ```
 
 ## Comandos CRUD de Sink de dados
+
+[Criação Sinks](scripts/create_test.sh) : `./scripts/create_test.sh`
+
 ```bash
-# pega os dados da test/ns01/queue02 e os envia para um json em arquivo pelo TinyDB
-./ssc-admin.py sinks create \
-                --name tiny-teste \
-                --tenant test \
-                --namespace ns01 \
-                --archive sinks/SinkTinydb/SinkTinydb.py \
-                --classname SinkTinydb.SinkTinydb \
-                --inputs test/ns01/queue02 \
-                --sinkconfigfile ./etc/sink_tinydb.yaml 
-
-# pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
-./ssc-admin.py sinks create \
-                --name csv-teste \
-                --tenant test \
-                --namespace ns01 \
-                --archive sinks/SinkCSV/SinkCSV.py \
-                --classname SinkCSV.SinkCSV \
-                --inputs test/ns01/queue02 \
-                --sinkconfigfile ./etc/sink_csv.yaml 
-
-# sink de gravacao de arquivos em diretorio
-./ssc-admin.py sinks create \
-                --name writer-test \
-                --tenant test \
-                --namespace ns01 \
-                --archive sinks/SinkWriterFiles/SinkWriterFiles.py \
-                --classname SinkWriterFiles.SinkWriterFiles \
-                --inputs test/ns01/queue03 \
-                --sinkconfigfile ./etc/sink_writerfiles.yaml 
-
 # listar 
 ./ssc-admin.py sinks list --tenant test --namespace ns01 --name none
 
