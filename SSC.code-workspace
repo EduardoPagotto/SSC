@@ -153,7 +153,10 @@
 				"env": {
 					"FLASK_APP": "main.py",
 					"FLASK_DEBUG": "1",
-					"REDIS_URL":"redis://:AAABBBCCC@192.168.122.1:6379/0"
+					"REDIS_URL":"redis://:AAABBBCCC@192.168.122.1:6379/0",
+					"FLASK_ENV" : "development",
+					"FLASK_RUN_PORT" : "5152",
+					"FLASK_RUN_HOST" : "0.0.0.0"
 				},
 				"args": [
 					"run",

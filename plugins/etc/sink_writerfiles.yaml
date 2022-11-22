@@ -4,4 +4,4 @@ configs:
   others: opp/pdf
   delay: 5
   watermark: 2
-  ssf_url: http://192.168.122.1:5152
+  ssf_url: http://192.168.122.1:5151

@@ -48,7 +48,7 @@ class SinkThread(EntThread):
 
             except Exception as exp:
                 self.esta.tot_err += 1
-                self.log.error(f'Sink {self.name} erro: ' + exp.args[0])
+                self.log.error(f'Sink {self.name} erro: ' + str(exp))
                 time.sleep(1)
 
         self.log.info(f'stopped {self.name}')

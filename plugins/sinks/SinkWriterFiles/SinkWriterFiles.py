@@ -62,7 +62,10 @@ class SinkWriterFiles(Sink):
                     if id > 0:
                         if self.ssf:
                             file_prop = self.ssf.info(id)
-                            file = pathlib.Path(self.others, file_prop)
+
+                            nf = pathlib.Path(file_prop['pathfile'])
+
+                            file = pathlib.Path(self.others, nf.name)
                             valid, msg = self.ssf.download(id, str(file.resolve()))
                             if not valid:
                                 raise Exception(msg)

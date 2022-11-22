@@ -2,7 +2,7 @@ configs:
   input: opp/input
   output: opp/work
   erro: opp/erro
-  delay: 15
+  delay: 5
   pattern:
   - txt
   - json

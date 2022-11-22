@@ -164,3 +164,6 @@ docker exec -it server_SSC_dev /bin/sh
 
 refs: 
 - https://roytuts.com/python-flask-rest-api-file-upload/
+
+- https://code.visualstudio.com/docs/containers/quickstart-python
+
