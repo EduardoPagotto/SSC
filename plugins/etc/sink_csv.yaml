@@ -1,3 +1,4 @@
 configs:
-  file: ./teste.csv
+  file_prefix: teste_dados
+  field: results
   delay: 5

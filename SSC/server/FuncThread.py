@@ -1,6 +1,6 @@
 '''
 Created on 20221102
-Update on 20221120
+Update on 20221123
 @author: Eduardo Pagotto
 '''
 
@@ -77,6 +77,6 @@ class FuncThread(EntThread):
                 self.esta.tot_err += 1
 
             if (inputs == 0) and (outputs == 0):
-                time.sleep(self.timeout)
+                time.sleep(1)
 
         self.log.info(f'stopped {self.name}')

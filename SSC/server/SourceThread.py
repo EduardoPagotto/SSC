@@ -1,6 +1,6 @@
 '''
 Created on 20221108
-Update on 20221121
+Update on 20221123
 @author: Eduardo Pagotto
 '''
 
@@ -44,6 +44,6 @@ class SourceThread(EntThread):
                 self.log.error(str(exp.args))
                 self.esta.tot_err += 1
 
-            time.sleep(self.timeout)
+            time.sleep(1)
 
         self.log.info(f'stopped {self.name}')

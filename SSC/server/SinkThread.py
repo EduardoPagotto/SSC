@@ -1,6 +1,6 @@
 '''
 Created on 20221114
-Update on 20221114
+Update on 20221123
 @author: Eduardo Pagotto
 '''
 
@@ -44,7 +44,7 @@ class SinkThread(EntThread):
                 self.esta.tot_ok += 1
 
             except Empty:
-                time.sleep(self.timeout)
+                time.sleep(1)
 
             except Exception as exp:
                 self.esta.tot_err += 1

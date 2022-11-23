@@ -1,0 +1,9 @@
+configs:
+  host: 10.11.10.254
+  port: 25
+  # auth:
+  #   user: aaa
+  #   pass: bbb
+  from: edupagotto@gmail.com
+  to: "edupagotto@gmail.com;eduardo.pagotto@newspace.com.br"
+  delay: 5

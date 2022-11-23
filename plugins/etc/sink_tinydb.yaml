@@ -1,4 +1,4 @@
 configs:
-  file: ./teste.json
+  file_prefix: db_dados
   delay: 5
   fullmsg : false
