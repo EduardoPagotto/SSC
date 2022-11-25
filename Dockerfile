@@ -22,10 +22,12 @@ COPY ./main.py .
 COPY ./setup.py .
 COPY ./ssc-admin.py .
 COPY ./ssc-client.py .
-ADD ./functions /var/app/functions/.
-ADD ./sources /var/app/sources/.
-ADD ./sinks /var/app/sinks/.
-ADD ./etc /var/app/etc/.
+
+ADD ./builtin /var/app/builtin
+#ADD ./functions /var/app/functions/.
+#ADD ./sources /var/app/sources/.
+#ADD ./sinks /var/app/sinks/.
+#ADD ./etc /var/app/etc/.
 ADD ./SSC /var/app/SSC/.
 
 

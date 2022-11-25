@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 /data
 /deploy/data
+
+/manifestacao
+/serpro_cnhcrv
