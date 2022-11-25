@@ -23,13 +23,12 @@ COPY ./setup.py .
 COPY ./ssc-admin.py .
 COPY ./ssc-client.py .
 
-ADD ./builtin /var/app/builtin
+ADD ./builtin /var/app/builtin/.
 #ADD ./functions /var/app/functions/.
 #ADD ./sources /var/app/sources/.
 #ADD ./sinks /var/app/sinks/.
 #ADD ./etc /var/app/etc/.
 ADD ./SSC /var/app/SSC/.
-
 
 RUN pip3 install -r requirements.txt && \
     pip3 install .
