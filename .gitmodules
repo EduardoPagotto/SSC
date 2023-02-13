@@ -1,0 +1,3 @@
+[submodule "sJsonRpc"]
+	path = sJsonRpc
+	url = git@github.com:EduardoPagotto/sJsonRpc.git
