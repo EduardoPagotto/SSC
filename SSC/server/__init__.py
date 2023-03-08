@@ -29,6 +29,15 @@ def splitTopic(topic : str) -> Tuple[str, str, str]:
     
     raise Exception(f'namespace {topic} is invalid')
 
+
+def splitQueue(q_fulll_name : str) -> Tuple[str, str]:
+    lista = q_fulll_name.split('/')
+    if len(lista) == 3:
+        return lista[0] + '/' + lista[1], lista[2] #TODO: implementar melhor
+    
+    raise Exception(f'queue name {q_fulll_name} is invalid')
+
+
 def splitNamespace(namespace_name : str) -> Tuple[str, str]:
 
     lista = namespace_name.split('/')
