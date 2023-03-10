@@ -1,6 +1,6 @@
 '''
 Created on 20221110
-Update on 20221114
+Update on 20230310
 @author: Eduardo Pagotto
 '''
 
@@ -84,17 +84,16 @@ class EnttCrt(object):
 
         raise Exception(f'{func_name} does not exist')
 
-    # def list_all(self, tenant_ns : str) -> List[str]:
-    #     with LockDB(self.ns.database, self.colection_name, False) as table:
-    #         itens = table.all()
+    def list_all(self, tenant_ns : str) -> List[str]:
+        with LockDB(self.ns.database, self.colection_name, False) as table:
+            itens = table.all()
 
-    #     lista : List[str] = []
-    #     for item in itens:
-    #         tenant, namespace = splitQueue(tenant_ns) # FIXME!!!!
-    #         if (tenant == item['tenant']) and (namespace == item['namespace']): 
-    #             lista.append(item['name'])
+        lista : List[str] = []
+        for item in itens:
+            if (tenant_ns == item['namespace']): 
+                lista.append(item['name'])
 
-    #     return lista
+        return lista
 
     def execute(self) -> Tuple[int, int]:
 

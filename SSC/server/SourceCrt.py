@@ -1,6 +1,6 @@
 '''
 Created on 20221108
-Update on 20221114
+Update on 20230310
 @author: Eduardo Pagotto
 '''
 
@@ -40,7 +40,7 @@ class SourceCrt(EnttCrt):
             try:
                 with self.lock_func:
                     self.log.debug(f'load from db: {params["name"]}')
-                    cocoon : SourceCocoon = SourceCocoon(self.colection_name, params, self.database)
+                    cocoon : SourceCocoon = SourceCocoon(self.colection_name, params, self.ns)
                     cocoon.start()
                     self.list_entt.append(cocoon)
             except:

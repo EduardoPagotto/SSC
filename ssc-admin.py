@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20221114
+Update on 20230310
 @author: Eduardo Pagotto
 '''
 
@@ -225,13 +225,13 @@ def main():
                 log.info(admin.source_create(param))
 
             elif args.opp == 'delete':
-                log.info(admin.source_delete(args.tenant + '/' + args.namespace + '/' +args.name)) 
+                log.info(admin.source_delete(args.namespace + '/' +args.name)) 
             elif args.opp == 'pause':
-                log.info(admin.source_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, True)) 
+                log.info(admin.source_pause_resume(args.namespace + '/' + args.name, True)) 
             elif args.opp == 'resume':
-                log.info(admin.source_pause_resume(args.tenant + '/' + args.namespace + '/' + args.name, False)) 
+                log.info(admin.source_pause_resume(args.namespace + '/' + args.name, False)) 
             elif args.opp == 'list':
-                log.info(admin.source_list(args.tenant + '/' + args.namespace)) 
+                log.info(admin.source_list(args.namespace)) 
 
 
         # elif args.command == 'functions':

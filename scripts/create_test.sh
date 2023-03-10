@@ -26,6 +26,8 @@
                 --namespace test/ns01 \
                 --sourceconfigfile ./builtin/etc/watchdogdir_cfg.yaml
 
+# list 
+./ssc-admin.py sources list --namespace test/ns01
 
 # -- Functions --
 
