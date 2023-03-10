@@ -21,8 +21,6 @@ SSC_CFG_IP : str  = '0.0.0.0' if getenv('SSC_CFG_IP') is None else getenv('SSC_C
 SSC_CFG_PORT : int  =  5152 if getenv('SSC_CFG_PORT') is None else int(getenv('SSC_CFG_PORT'))
 SSC_CFG_DB : str  = './data/db' if getenv('SSC_CFG_DB') is None else getenv('SSC_CFG_DB')
 SSC_CFG_STORAGE : str = './data/storage' if getenv('SSC_CFG_STORAGE') is None else getenv('SSC_CFG_STORAGE')
-#REDIS_URL : str = 'redis://localhost:6379/0' if getenv('REDIS_URL') is None else getenv('REDIS_URL') 
-REDIS_URL : str = 'redis://:AAABBBCCC@192.168.122.1:6379/0' if getenv('REDIS_URL') is None else getenv('REDIS_URL')
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -43,7 +41,7 @@ path2 = pathlib.Path(SSC_CFG_STORAGE)
 path2.mkdir(parents=True, exist_ok=True)
 
 database = TinyDB(str(path1) + '/master.json')
-rpc_registry = DRegistry(database, path2, REDIS_URL)
+rpc_registry = DRegistry(database, path2)
 
 app = Flask(__name__)
 app.secret_key = "secret key"

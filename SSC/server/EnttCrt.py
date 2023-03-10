@@ -9,20 +9,16 @@ import pathlib
 from threading import Lock
 from typing import Any, List, Tuple
 
-from tinydb import TinyDB
-
-from SSC.server import splitNamespace, splitTopic
+from SSC.server.Namespace import Namespace, splitQueue
 from SSC.server.Cocoon import Cocoon
 from SSC.subsys.LockDB import LockDB
 
 class EnttCrt(object):
-    def __init__(self, colection_name : str, database : TinyDB, path_storage : str) -> None:
+    def __init__(self, colection_name : str, namespace : Namespace) -> None:  
 
         self.colection_name = colection_name
-        self.database = database
-        self.storage = pathlib.Path(path_storage)
-        self.storage.mkdir(parents=True, exist_ok=True)
-        self.log = logging.getLogger('SSC.crt')
+        self.ns = namespace
+        self.log = logging.getLogger('SSC.EnttCrt')
         self.lock_func = Lock()
         self.list_entt : List[Cocoon] = []
 
@@ -48,10 +44,10 @@ class EnttCrt(object):
                 self.list_entt.remove(source)
 
     def pause_resume(self, func_name : str, is_pause : bool):
-        tenant, namespace, name = splitTopic(func_name)   
+        namespace, name = splitQueue(func_name)   
         with self.lock_func:
             for fun in self.list_entt:
-                if ((fun.document['tenant'] == tenant) and (fun.document['namespace'] == namespace) and (fun.document['name'] == name)):
+                if ((fun.document['namespace'] == namespace) and (fun.document['name'] == name)):
                     msg : str = ''
                     if is_pause:
                         msg = f'{name} paused'
@@ -69,36 +65,36 @@ class EnttCrt(object):
 
         self.log.debug(f'delete {func_name}')
 
-        tenant, namespace, name = splitTopic(func_name)
+        namespace, name = splitQueue(func_name)
         funcValid = None
 
         with self.lock_func:
             for source in self.list_entt:
-                if (tenant == source.document['tenant']) and (namespace == source.document['namespace']) and (name == source.document['name']):
+                if (namespace == source.document['namespace']) and (name == source.document['name']):
                     self.list_entt.remove(source)
                     funcValid = source
 
         if funcValid:            
             funcValid.stop()
             funcValid.join()
-            with LockDB(self.database, self.colection_name, True) as table:
+            with LockDB(self.ns.database, self.colection_name, True) as table:
                 table.remove(doc_ids=[funcValid.document.doc_id])
 
             return f'success delete {func_name}'
 
         raise Exception(f'{func_name} does not exist')
 
-    def list_all(self, tenant_ns : str) -> List[str]:
-        with LockDB(self.database, self.colection_name, False) as table:
-            itens = table.all()
+    # def list_all(self, tenant_ns : str) -> List[str]:
+    #     with LockDB(self.ns.database, self.colection_name, False) as table:
+    #         itens = table.all()
 
-        lista : List[str] = []
-        for item in itens:
-            tenant, namespace = splitNamespace(tenant_ns)
-            if (tenant == item['tenant']) and (namespace == item['namespace']): 
-                lista.append(item['name'])
+    #     lista : List[str] = []
+    #     for item in itens:
+    #         tenant, namespace = splitQueue(tenant_ns) # FIXME!!!!
+    #         if (tenant == item['tenant']) and (namespace == item['namespace']): 
+    #             lista.append(item['name'])
 
-        return lista
+    #     return lista
 
     def execute(self) -> Tuple[int, int]:
 

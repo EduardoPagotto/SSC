@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from tinydb.table import Document
 
 from SSC.server import EstatData
-from SSC.topic.QueueProdCons import QueueProducer
+from SSC.server.QueueProdCons import QueueProducer
 
 class Source(ABC):
 

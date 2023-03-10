@@ -1,11 +1,10 @@
-#!/bin/sh
+#!/bin/sh--namespace ns01
 
 # --- Cria tenant/namespace/topic 
-./ssc-admin.py tenants create test
 ./ssc-admin.py namespaces create test/ns01
-./ssc-admin.py topics create test/ns01/queue01
-./ssc-admin.py topics create test/ns01/queue02
-./ssc-admin.py topics create test/ns01/queue03
+./ssc-admin.py queues create test/ns01/queue01
+./ssc-admin.py queues create test/ns01/queue02
+./ssc-admin.py queues create test/ns01/queue03
 
 # -- Sources --
 
@@ -15,8 +14,7 @@
                 --destinationtopicname test/ns01/queue01 \
                 --archive ./builtin/sources/Dummy/Dummy.py \
                 --classname Dummy.Dummy \
-                --tenant test \
-                --namespace ns01 \
+                --namespace test/ns01 \
                 --sourceconfigfile ./builtin/etc/source_dummy.yaml
 
 # watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
@@ -25,8 +23,7 @@
                 --destinationtopicname test/ns01/queue01 \
                 --archive ./builtin/sources/Watchdogdir/Watchdogdir.py \
                 --classname Watchdogdir.Watchdogdir \
-                --tenant test \
-                --namespace ns01 \
+                --namespace test/ns01 \
                 --sourceconfigfile ./builtin/etc/watchdogdir_cfg.yaml
 
 
@@ -35,8 +32,7 @@
 # cria function para relar da fila inputs test/ns01/queue01 para test/ns01/queue02
 ./ssc-admin.py functions create \
                 --name name01 \
-                --tenant test \
-                --namespace ns01 \
+                --namespace test/ns01 \
                 --py ./builtin/functions/Relay.py \
                 --classname Relay.Relay \
                 --inputs test/ns01/queue01 \
@@ -48,7 +44,7 @@
 ./ssc-admin.py sinks create \
                 --name tiny-teste \
                 --tenant test \
-                --namespace ns01 \
+                --namespace test/ns01 \
                 --archive ./builtin/sinks/SinkTinydb/SinkTinydb.py \
                 --classname SinkTinydb.SinkTinydb \
                 --inputs test/ns01/queue02 \
@@ -58,7 +54,7 @@
 ./ssc-admin.py sinks create \
                 --name csv-teste \
                 --tenant test \
-                --namespace ns01 \
+                --namespace test/ns01 \
                 --archive ./builtin/sinks/SinkCSV/SinkCSV.py \
                 --classname SinkCSV.SinkCSV \
                 --inputs test/ns01/queue02 \
@@ -68,7 +64,7 @@
 ./ssc-admin.py sinks create \
                 --name writer-test \
                 --tenant test \
-                --namespace ns01 \
+                --namespace test/ns01 \
                 --archive ./builtin/sinks/SinkWriterFiles/SinkWriterFiles.py \
                 --classname SinkWriterFiles.SinkWriterFiles \
                 --inputs test/ns01/queue03 \

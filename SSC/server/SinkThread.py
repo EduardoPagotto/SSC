@@ -22,7 +22,7 @@ class SinkThread(EntThread):
 
         super().__init__('sinks',index, params, database)
 
-        data_in = create_queues(self.database ,params['inputs'])
+        data_in = create_queues(self.database ,params['inputs'])  # FIXME: retornar string do mapa de queues
         self.consumer = QueueConsumer(data_in['urlRedis'], data_in['queue'])
         self.sink : Sink = self.load(pathlib.Path(params['archive']), params['classname'])
 

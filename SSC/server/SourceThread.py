@@ -7,21 +7,20 @@ Update on 20221123
 import pathlib
 import time
 
-from tinydb import TinyDB
 from tinydb.table import Document
 from SSC.Source import Source
 
-from SSC.server import create_queue
+#from SSC.server import create_queue
+from SSC.server.Namespace import Namespace
 from SSC.server.EntThread import EntThread
-from SSC.topic.QueueProdCons import QueueProducer
+from SSC.server.QueueProdCons import QueueProducer
 
 class SourceThread(EntThread):
-    def __init__(self, index : int, params : Document, database : TinyDB) -> None:
+    def __init__(self, index : int, params : Document, namespace : Namespace) -> None:
 
-        super().__init__('src',index, params, database)
-
-        data_out = create_queue(self.database, params['output'])
-        self.producer = QueueProducer(data_out['urlRedis'], data_out['queue'], params['name'])
+        super().__init__('src',index, params)
+        self.ns = namespace
+        self.producer = QueueProducer(params['output'], namespace.queue_get(params['output']), params['name'])
         self.source : Source = self.load(pathlib.Path(params['archive']), params['classname'])
 
     def run(self):

@@ -8,20 +8,18 @@ import logging
 import pathlib
 from typing import List
 
-import redis
+
 
 from tinydb import TinyDB, Query
 from tinydb.table import Document
-from SSC.server import splitNamespace, splitTopic, topic_to_redis_queue, topic_by_namespace
+from SSC.server import splitNamespace, splitTopic, topic_by_namespace
 
 from SSC.subsys.LockDB import LockDB
-from SSC.topic.RedisQueue import RedisQueue
 
 class Tenant(object):
-    def __init__(self, database : TinyDB, path_storage : str, urlRedis : str) -> None:
+    def __init__(self, database : TinyDB, path_storage : str) -> None:
 
         self.database = database
-        self.redis_url = urlRedis
         self.storage = pathlib.Path(path_storage, 'tenant')
         self.storage.mkdir(parents=True, exist_ok=True)
         self.log = logging.getLogger('SSC.Tenant')
@@ -51,7 +49,6 @@ class Tenant(object):
 
         with LockDB(self.database, 'topics', True) as table:
             id = table.insert({'tenant': name,
-                               'redis':self.redis_url,
                                'namespace':None,
                                'queues':[]})
 
@@ -85,17 +82,17 @@ class Tenant(object):
     def sumario(self):
         results = []
 
-        try:
-            with LockDB(self.database, 'topics') as table:
-                    lista = table.all()
-                    for doc in lista:
-                        for q in doc['queues']:
-                            queue = RedisQueue(redis.Redis.from_url(doc['redis']), topic_to_redis_queue(doc['tenant'], doc['namespace'], q))
-                            results.append({'topic' : f"{doc['tenant']}/{doc['namespace']}/{q}", 'size': queue.qsize()})
+        # try:
+        #     with LockDB(self.database, 'topics') as table:
+        #             lista = table.all()
+        #             for doc in lista:
+        #                 for q in doc['queues']:
+        #                     queue = RedisQueue(redis.Redis.from_url(doc['redis']), topic_to_redis_queue(doc['tenant'], doc['namespace'], q))
+        #                     results.append({'topic' : f"{doc['tenant']}/{doc['namespace']}/{q}", 'size': queue.qsize()})
 
 
-        except Exception as exp:
-            self.log.error(exp.args[0])
+        # except Exception as exp:
+        #     self.log.error(exp.args[0])
 
         return results
 
@@ -137,7 +134,6 @@ class Tenant(object):
 
         with LockDB(self.database, 'topics', True) as table:
             id = table.insert({'tenant': tenant_name,
-                                'redis':self.redis_url,
                                 'namespace':namespace,
                                 'queues':[]})  
             return f'Success {name} id: {id}'

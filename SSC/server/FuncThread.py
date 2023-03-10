@@ -12,7 +12,7 @@ from typing import Optional
 from tinydb import TinyDB
 from tinydb.table import Document
 
-from SSC.server import create_queue, create_queues
+#from SSC.server import create_queue, create_queues
 from SSC.Context import Context
 from SSC.Function import Function
 from SSC.server.EntThread import EntThread
@@ -24,12 +24,12 @@ class FuncThread(EntThread):
 
         super().__init__('func',index, params, database)
 
-        data_in = create_queues(self.database ,params['inputs'])
+        data_in = create_queues(self.database ,params['inputs'])  # FIXME: retornar string do mapa de queues
         self.consumer : QueueConsumer = QueueConsumer(data_in['urlRedis'], data_in['queue'])
         self.producer : Optional[QueueProducer] = None
 
         if ('output' in params) and (params['output'] is not None):
-            data_out = create_queue(self.database, params['output'])
+            data_out = create_queue(self.database, params['output'])  # FIXME: retornar string do mapa de queues
             self.producer = QueueProducer(data_out['urlRedis'], data_out['queue'], params['name'])
 
         self.function : Function = self.load(pathlib.Path(params['py']), params['classname'])

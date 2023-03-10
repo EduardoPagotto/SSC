@@ -15,7 +15,7 @@ from tinydb.table import Document
 
 from SSC.Source import Source
 from SSC.server import EstatData
-from SSC.topic.QueueProdCons import QueueProducer
+from SSC.server.QueueProdCons import QueueProducer
 
 class Watchdogdir(Source):
     def __init__(self) -> None:

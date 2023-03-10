@@ -8,20 +8,17 @@ import importlib
 import logging
 import pathlib
 import threading
-
 from typing import Any
 
-from tinydb import TinyDB
 from tinydb.table import Document
 
 from SSC.server import EstatData
 
 class EntThread(threading.Thread):
-    def __init__(self, sufix : str,index : int, params : Document, database : TinyDB) -> None:
+    def __init__(self, sufix : str, index : int, params : Document) -> None:
         self.esta = EstatData()
         self.timeout = 5 # TODO: parame  
         self.log = logging.getLogger('SSC.EntThread')
-        self.database : TinyDB = database
         self.document = params
         self.is_running = True
 

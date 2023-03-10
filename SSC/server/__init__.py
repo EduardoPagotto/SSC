@@ -22,67 +22,71 @@ class EstatData(object):
         return {'ok' : self.tot_ok, 'err': self.tot_err, 'pause':str(self.pause)}
 
 
-def splitTopic(topic : str) -> Tuple[str, str, str]:
-    lista = topic.split('/')
-    if len(lista) == 3:
-        return lista[0], lista[1], lista[2]
+
+
+
+# def load_ns(database : TinyDB, ns : str) -> Document:
+
+#     with LockDB(database, 'namespaces') as table:
+#         q = Query()
+#         itens = table.search(q.ns == ns)
+#         if len(itens) > 0:
+#             return itens[0]
+
+#     raise Exception(f'namespace {ns} does not exist')    
+
+# def splitTopic(topic : str) -> Tuple[str, str, str]:
+#     lista = topic.split('/')
+#     if len(lista) == 3:
+#         return lista[0], lista[1], lista[2]
     
-    raise Exception(f'namespace {topic} is invalid')
+#     raise Exception(f'namespace {topic} is invalid')
+
+# def splitNamespace(namespace_name : str) -> Tuple[str, str]: # FIXME: Remover
+
+#     lista = namespace_name.split('/')
+#     if len(lista) == 2:
+#         return lista[0], lista[1]
+
+#     raise Exception(f'namespace {namespace_name} is invalid')
+
+# def topic_to_redis_queue(tenant : str, namespace : str, queue : str): # FIXME: Remover
+#     return f'{tenant}:{namespace}:{queue}'
 
 
-def splitQueue(q_fulll_name : str) -> Tuple[str, str]:
-    lista = q_fulll_name.split('/')
-    if len(lista) == 3:
-        return lista[0] + '/' + lista[1], lista[2] #TODO: implementar melhor
+# def topic_by_namespace(database : TinyDB, tenant : str, namespace : str) -> Document: #FIXME: remover
+#     with LockDB(database, 'topics') as table:
+#         q = Query()
+#         itens = table.search((q.tenant == tenant) & (q.namespace == namespace ))
+#         if len(itens) == 1:
+#             return itens[0]
+
+#     raise Exception(f'tenant ou namespace {tenant}/{namespace} does not exist')
+
+# def create_queue(database : TinyDB, topic_name : str) -> dict:
     
-    raise Exception(f'queue name {q_fulll_name} is invalid')
+#     tenant, namespace, queue = splitTopic(topic_name)
+#     doc = topic_by_namespace(database, tenant, namespace)
+#     if queue in doc['queues']:
+#         return {'urlRedis' : doc['redis'], 'queue' : topic_to_redis_queue(tenant, namespace, queue)}
 
+#     raise Exception(f'topic {topic_name} does not exist') 
 
-def splitNamespace(namespace_name : str) -> Tuple[str, str]:
+# def create_queues(database : TinyDB, topics_name : List[str]) -> dict:
 
-    lista = namespace_name.split('/')
-    if len(lista) == 2:
-        return lista[0], lista[1]
+#     redisUrl = ''
+#     lista_topics : List[str] = []
+#     for item in topics_name:
 
-    raise Exception(f'namespace {namespace_name} is invalid')
+#         tenant, namespace, queue = splitTopic(item)
 
-def topic_to_redis_queue(tenant : str, namespace : str, queue : str):
-    return f'{tenant}:{namespace}:{queue}'
+#         doc = topic_by_namespace(database, tenant, namespace)
+#         if redisUrl == '':
+#             redisUrl = doc['redis']
 
+#         if queue in doc['queues']:
+#             lista_topics.append(topic_to_redis_queue(tenant, namespace, queue))
+#         else:
+#             raise Exception(f'topic {item} does not exist') 
 
-def topic_by_namespace(database : TinyDB, tenant : str, namespace : str) -> Document:
-    with LockDB(database, 'topics') as table:
-        q = Query()
-        itens = table.search((q.tenant == tenant) & (q.namespace == namespace ))
-        if len(itens) == 1:
-            return itens[0]
-
-    raise Exception(f'tenant ou namespace {tenant}/{namespace} does not exist')
-
-def create_queue(database : TinyDB, topic_name : str) -> dict:
-    
-    tenant, namespace, queue = splitTopic(topic_name)
-    doc = topic_by_namespace(database, tenant, namespace)
-    if queue in doc['queues']:
-        return {'urlRedis' : doc['redis'], 'queue' : topic_to_redis_queue(tenant, namespace, queue)}
-
-    raise Exception(f'topic {topic_name} does not exist') 
-
-def create_queues(database : TinyDB, topics_name : List[str]) -> dict:
-
-    redisUrl = ''
-    lista_topics : List[str] = []
-    for item in topics_name:
-
-        tenant, namespace, queue = splitTopic(item)
-
-        doc = topic_by_namespace(database, tenant, namespace)
-        if redisUrl == '':
-            redisUrl = doc['redis']
-
-        if queue in doc['queues']:
-            lista_topics.append(topic_to_redis_queue(tenant, namespace, queue))
-        else:
-            raise Exception(f'topic {item} does not exist') 
-
-    return {'urlRedis': redisUrl, 'queue' : lista_topics}
+#     return {'urlRedis': redisUrl, 'queue' : lista_topics}

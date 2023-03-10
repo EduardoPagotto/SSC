@@ -94,7 +94,19 @@
 					"manifesto"
 				]
 			},
-
+			{
+				"name": "Admin namespaces List",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder:SSC}/ssc-admin.py",
+				"console": "integratedTerminal",
+				"justMyCode": true,
+				"args": [
+					"namespaces",
+					"list",
+					"None"
+				]
+			},
 			{
 				"name": "Python: Admin sink",
 				"type": "python",

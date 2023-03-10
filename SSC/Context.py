@@ -12,7 +12,7 @@ from tinydb import TinyDB
 from SSC.Message import Message
 
 from SSC.server import splitTopic, topic_by_namespace, topic_to_redis_queue
-from SSC.topic.QueueProdCons import QueueProducer
+from SSC.server.QueueProdCons import QueueProducer
 
 
 class Context(object):
