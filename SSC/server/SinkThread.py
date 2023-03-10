@@ -1,29 +1,38 @@
 '''
 Created on 20221114
-Update on 20221123
+Update on 20230310
 @author: Eduardo Pagotto
 '''
 
 import pathlib
 import time
 
-from tinydb import TinyDB
 from tinydb.table import Document
 
-from SSC.server import create_queues
+from SSC.server.Namespace import Namespace
 from SSC.Sink import Sink
 from SSC.server.EntThread import EntThread
-from SSC.topic.QueueProdCons import QueueConsumer
-from SSC.topic.RedisQueue import Empty
-
+from SSC.server.QueueProdCons import QueueConsumer
+from queue import Empty
   
 class SinkThread(EntThread):
-    def __init__(self, index : int, params : Document, database : TinyDB) -> None:
+    def __init__(self, index : int, params : Document,  namespace : Namespace) -> None:
 
-        super().__init__('sinks',index, params, database)
+        super().__init__('sinks',index, params)
 
-        data_in = create_queues(self.database ,params['inputs'])  # FIXME: retornar string do mapa de queues
-        self.consumer = QueueConsumer(data_in['urlRedis'], data_in['queue'])
+        novo : dict = {}
+        if type(params['inputs']) == list: 
+            for item in params['inputs']:
+                novo[item] = namespace.queue_get(item)
+
+        elif type(params['inputs']) == str:
+           novo[params['inputs']] = namespace.queue_get(params['inputs'])
+           
+        else:
+            raise Exception('queue name invalid ' + str(params['inputs']))
+
+        self.consumer = QueueConsumer(novo)
+
         self.sink : Sink = self.load(pathlib.Path(params['archive']), params['classname'])
 
     def run(self):

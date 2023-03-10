@@ -36,21 +36,9 @@ class QueueProducer(object):
         return self.queue.qsize()
 
 class QueueConsumer(object):
-    def __init__(self, map_queues : Dict[str, Queue], queues_name : List[str] | str) -> None:
-
+    def __init__(self, map_queues : Dict[str, Queue]) -> None:
         self.pending : Queue = Queue()
-        self.map : Dict[str, Queue] = {}
-
-        if type(queues_name) == list:        
-
-            for item in queues_name:
-                self.map[item] = map_queues[item]
-
-        elif type(queues_name) == str:
-            self.map[queues_name] = map_queues[queues_name]
-
-        else:
-            raise Exception('topic name invalid ' + str(queues_name))
+        self.map : Dict[str, Queue] = map_queues
 
     def receive(self, timeout : float = 0) -> Message:
 
@@ -65,9 +53,12 @@ class QueueConsumer(object):
                     self.pending.put(Message.from_dic(json.loads(val.decode('utf8'))))
                     
             else:
-                val = queue.get(block=True, timeout=timeout) 
-                if val:
-                    self.pending.put(Message.from_dic(json.loads(val[1].decode('utf8'))))
+                try:
+                    val = queue.get(block=True, timeout=timeout) 
+                    if val:
+                        self.pending.put(Message.from_dic(json.loads(val[1].decode('utf8'))))
+                except Empty:
+                    continue
 
         if self.pending.qsize() > 0:
             return self.pending.get()

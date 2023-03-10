@@ -29,6 +29,37 @@
 # list 
 ./ssc-admin.py sources list --namespace test/ns01
 
+# -- Sinks --
+
+# pega os dados da test/ns01/queue02 e os envia para um json em arquivo pelo TinyDB
+./ssc-admin.py sinks create \
+                --name tiny-teste \
+                --namespace test/ns01 \
+                --archive ./builtin/sinks/SinkTinydb/SinkTinydb.py \
+                --classname SinkTinydb.SinkTinydb \
+                --inputs test/ns01/queue02 \
+                --sinkconfigfile ./builtin/etc/sink_tinydb.yaml 
+
+# pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
+./ssc-admin.py sinks create \
+                --name csv-teste \
+                --namespace test/ns01 \
+                --archive ./builtin/sinks/SinkCSV/SinkCSV.py \
+                --classname SinkCSV.SinkCSV \
+                --inputs test/ns01/queue03 \
+                --sinkconfigfile ./builtin/etc/sink_csv.yaml 
+
+# sink de gravacao de arquivos em diretorio
+./ssc-admin.py sinks create \
+                --name writer-test \
+                --namespace test/ns01 \
+                --archive ./builtin/sinks/SinkWriterFiles/SinkWriterFiles.py \
+                --classname SinkWriterFiles.SinkWriterFiles \
+                --inputs test/ns01/queue04 \
+                --sinkconfigfile ./builtin/etc/sink_writerfiles.yaml 
+
+
+
 # -- Functions --
 
 # cria function para relar da fila inputs test/ns01/queue01 para test/ns01/queue02
@@ -39,35 +70,3 @@
                 --classname Relay.Relay \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
-
-# -- Sinks --
-
-# pega os dados da test/ns01/queue02 e os envia para um json em arquivo pelo TinyDB
-./ssc-admin.py sinks create \
-                --name tiny-teste \
-                --tenant test \
-                --namespace test/ns01 \
-                --archive ./builtin/sinks/SinkTinydb/SinkTinydb.py \
-                --classname SinkTinydb.SinkTinydb \
-                --inputs test/ns01/queue02 \
-                --sinkconfigfile ./builtin/etc/sink_tinydb.yaml 
-
-# pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
-./ssc-admin.py sinks create \
-                --name csv-teste \
-                --tenant test \
-                --namespace test/ns01 \
-                --archive ./builtin/sinks/SinkCSV/SinkCSV.py \
-                --classname SinkCSV.SinkCSV \
-                --inputs test/ns01/queue02 \
-                --sinkconfigfile ./builtin/etc/sink_csv.yaml 
-
-# sink de gravacao de arquivos em diretorio
-./ssc-admin.py sinks create \
-                --name writer-test \
-                --tenant test \
-                --namespace test/ns01 \
-                --archive ./builtin/sinks/SinkWriterFiles/SinkWriterFiles.py \
-                --classname SinkWriterFiles.SinkWriterFiles \
-                --inputs test/ns01/queue03 \
-                --sinkconfigfile ./builtin/etc/sink_writerfiles.yaml 

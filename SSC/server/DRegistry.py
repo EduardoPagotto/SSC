@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20221114
+Update on 20230310
 @author: Eduardo Pagotto
 '''
 
@@ -14,14 +14,12 @@ from typing import Any, List
 from tinydb import TinyDB
 
 from  sJsonRpc.RPC_Responser import RPC_Responser
-#from SSC.server import create_queue, create_queues
-
 
 from SSC.server.Namespace import Namespace
-#from SSC.server.Tenant import Tenant
 from SSC.server.SourceCrt import SourceCrt
+from SSC.server.SinkCrt import SinkCrt
 #from SSC.server.FunctionCrt import FunctionCrt
-#from SSC.server.SinkCrt import SinkCrt
+
 
 from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY
@@ -34,11 +32,10 @@ class DRegistry(RPC_Responser):
         path_str = str(self.path.resolve())
 
         self.namespace : Namespace = Namespace(database, path_str)
-        #self.function_crt : FunctionCrt = FunctionCrt(database, path_str)
         self.source_crt : SourceCrt = SourceCrt(self.namespace)
-        #self.sink_crt : SinkCrt = SinkCrt(database, path_str)
+        self.sink_crt : SinkCrt = SinkCrt(self.namespace)
+        #self.function_crt : FunctionCrt = FunctionCrt(database, path_str)
         #self.tenant : Tenant = Tenant(database, path_str)
-
 
         self.done : bool = False
         self.ticktack : int = 0
@@ -55,8 +52,7 @@ class DRegistry(RPC_Responser):
                 'queues': self.namespace.sumario(),
                 #'functions' : self.function_crt.summario(),
                 'sources' : self.source_crt.summario(),
-                #'sinks' : self.sink_crt.summario()
-                }
+                'sinks' : self.sink_crt.summario()}
 
     def cleanner(self) ->None:
         """[Garbage collector of files]
@@ -69,13 +65,14 @@ class DRegistry(RPC_Responser):
 
             # f_ok, f_err = self.function_crt.execute()
             s_ok, s_err = self.source_crt.execute()
-            # i_ok, i_err = self.sink_crt.execute()
+            i_ok, i_err = self.sink_crt.execute()
             # self.log.debug(f'on:{self.ticktack} fu:({f_ok}/{f_err}) so:({s_ok}/{s_err}) si:({i_ok}/{i_err})') 
 
             self.ticktack += 1
             time.sleep(5)
 
         # self.function_crt.stop_func_all()
+        self.sink_crt.stop_func_all()
         self.source_crt.stop_func_all()
         
         self.log.info('thread cleanner_files stop')
@@ -138,15 +135,18 @@ class DRegistry(RPC_Responser):
     def source_list(self, tenant_ns : str) -> List[str]:
         return self.source_crt.list_all(tenant_ns)
 
-    # # -- Tenants Admin
-    # def tenants_create(self, name : str) -> str:
-    #     return self.tenant.create(name)
+    # -- Sinks Admin
+    def sink_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.sink_crt.pause_resume(name, is_pause)
 
-    # def tenants_delete(self, name : str) -> str:
-    #     return self.tenant.delete(name)
+    def sink_create(self, params: dict) -> str:
+        return self.sink_crt.create(params)
 
-    # def tenants_list(self) -> List[str]:
-    #     return self.tenant.list_all()
+    def sink_delete(self, name: str) -> str:
+        return self.sink_crt.delete(name)
+
+    def sink_list(self, tenant_ns : str) -> List[str]:
+        return self.sink_crt.list_all(tenant_ns)
 
     # # -- Functions Admin
     # def function_pause_resume(self, name : str, is_pause : bool) -> str:
@@ -161,15 +161,13 @@ class DRegistry(RPC_Responser):
     # def functions_list(self, tenant_ns : str) -> List[str]:
     #     return self.function_crt.list_all(tenant_ns)
 
-    # # -- Sinks Admin
-    # def sink_pause_resume(self, name : str, is_pause : bool) -> str:
-    #     return self.sink_crt.pause_resume(name, is_pause)
 
-    # def sink_create(self, params: dict) -> str:
-    #     return self.sink_crt.create(params)
+    # # -- Tenants Admin
+    # def tenants_create(self, name : str) -> str:
+    #     return self.tenant.create(name)
 
-    # def sink_delete(self, name: str) -> str:
-    #     return self.sink_crt.delete(name)
+    # def tenants_delete(self, name : str) -> str:
+    #     return self.tenant.delete(name)
 
-    # def sink_list(self, tenant_ns : str) -> List[str]:
-    #     return self.sink_crt.list_all(tenant_ns)
+    # def tenants_list(self) -> List[str]:
+    #     return self.tenant.list_all()
