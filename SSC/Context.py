@@ -1,6 +1,6 @@
 '''
 Created on 20221007
-Update on 20221120
+Update on 20230310
 @author: Eduardo Pagotto
 '''
 
@@ -9,16 +9,16 @@ from typing import Any, List, Optional
 
 from tinydb.table import Document
 from tinydb import TinyDB
-from SSC.Message import Message
 
-from SSC.server import splitTopic, topic_by_namespace, topic_to_redis_queue
+from SSC.Message import Message
+from SSC.server.Namespace import Namespace
 from SSC.server.QueueProdCons import QueueProducer
 
 
 class Context(object):
-    def __init__(self, msg : Message, extra : dict[str, QueueProducer], params: Document, database : TinyDB, log : Logger) -> None:
+    def __init__(self, msg : Message, extra : dict[str, QueueProducer], params: Document, namespace : Namespace, log : Logger) -> None:
         self.log : Logger = log
-        self.database : TinyDB = database
+        self.namespace : Namespace = namespace
         self.params : Document = params
 
         self.extra : dict[str, QueueProducer] = extra
@@ -60,15 +60,9 @@ class Context(object):
     def get_output_topic(self) -> str:
         return self.params['output']
 
-    def publish(self, topic : str, data : str, properties : dict  = {}, msg_key : str = '' ,sequence_id : int = 0):
-
-        if topic not in self.extra:
-            tenant_name, namespace, queue = splitTopic(topic)
-
-            doc = topic_by_namespace(self.database, tenant_name, namespace) # FIXME!!!!! vou precisdar do DB!!!!
-            if queue in doc['queues']:
-                self.extra[topic] = QueueProducer(doc['redis'], topic_to_redis_queue(tenant_name, namespace, queue), self.params['name'])                
-            else:
-                raise Exception(f'topic invalid im publish func ' + topic)
+    def publish(self, queue_name_full : str, data : str, properties : dict  = {}, msg_key : str = '' ,sequence_id : int = 0):
         
-        self.extra[topic].send(data, properties, msg_key, sequence_id)
+        if queue_name_full not in self.extra:
+            self.extra[queue_name_full] = QueueProducer(queue_name_full, self.namespace.queue_get(queue_name_full), self.params['name']) 
+
+        self.extra[queue_name_full].send(data, properties, msg_key, sequence_id)

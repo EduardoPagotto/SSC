@@ -89,17 +89,17 @@ class Admin(object):
     def sink_list(self, tenant_ns : str) -> List[str]:
         return self.__rpc().sink_list(tenant_ns)
 
-    # def function_create(self, params) -> str:
-    #     return self.__rpc().function_create(params)
+    def function_create(self, params) -> str:
+        return self.__rpc().function_create(params)
 
-    # def function_delete(self, name : str) -> str:
-    #     return self.__rpc().function_delete(name)
+    def function_delete(self, name : str) -> str:
+        return self.__rpc().function_delete(name)
 
-    # def function_pause_resume(self, name : str, is_pause : bool) -> str:
-    #     return self.__rpc().function_pause_resume(name, is_pause)
+    def function_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.__rpc().function_pause_resume(name, is_pause)
 
-    # def functions_list(self, tenant_ns : str) -> List[str]:
-    #     return self.__rpc().functions_list(tenant_ns)
+    def functions_list(self, tenant_ns : str) -> List[str]:
+        return self.__rpc().functions_list(tenant_ns)
 
 def main():
 
@@ -148,18 +148,17 @@ def main():
         sinks.add_argument('--inputs', type=str, help='other config connectos', required=False, default="")
         sinks.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
 
-        # funcions = subparser.add_parser('functions')
-        # funcions.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
-        # #funcions.add_argument('--tenant', type=str, help='Tenant', required=True)
-        # funcions.add_argument('--namespace', type=str, help='Namespace', required=True)
-        # funcions.add_argument('--name', type=str, help='nome da thread', required=True)
-        # funcions.add_argument('--py', type=str, help='python script pathfile')
-        # funcions.add_argument('--classname', type=str, help='Nome da classe')
-        # funcions.add_argument('--inputs', type=str, help='queue input')
-        # funcions.add_argument('--output', type=str, help='queue output')
-        # funcions.add_argument('--userconfig', type=str, help='other config user', required=False, default="")
-        # funcions.add_argument('--userconfigfile', type=str, help='other file config user', required=False, default="")
-        # funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
+        funcions = subparser.add_parser('functions')
+        funcions.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        funcions.add_argument('--namespace', type=str, help='Namespace', required=True)
+        funcions.add_argument('--name', type=str, help='nome da thread', required=True)
+        funcions.add_argument('--py', type=str, help='python script pathfile')
+        funcions.add_argument('--classname', type=str, help='Nome da classe')
+        funcions.add_argument('--inputs', type=str, help='queue input')
+        funcions.add_argument('--output', type=str, help='queue output')
+        funcions.add_argument('--userconfig', type=str, help='other config user', required=False, default="")
+        funcions.add_argument('--userconfigfile', type=str, help='other file config user', required=False, default="")
+        funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
 
         args = parser.parse_args()
 
@@ -255,44 +254,43 @@ def main():
                 log.info(admin.sink_list(args.namespace)) 
 
 
-        # elif args.command == 'functions':
-        #     if args.opp == 'create':
+        elif args.command == 'functions':
+            if args.opp == 'create':
 
-        #         val : dict = {}
-        #         try:
-        #             if len(args.userconfig) > 0:
-        #                 # load cfg json string
-        #                 val = json.loads(args.userconfig)
-        #             elif len(args.userconfigfile) > 0:
-        #                 # load cfg yaml file
-        #                 val = yaml.safe_load(Path(args.userconfigfile).read_text())
-        #         except FileNotFoundError as err1:
-        #             raise Exception(f'{err1.filename} fail: {err1.strerror}')
-        #         except Exception as exp:
-        #             raise Exception(f'userconfig or userconfigfile is not a valid {str(exp.args[0])}')
+                val : dict = {}
+                try:
+                    if len(args.userconfig) > 0:
+                        # load cfg json string
+                        val = json.loads(args.userconfig)
+                    elif len(args.userconfigfile) > 0:
+                        # load cfg yaml file
+                        val = yaml.safe_load(Path(args.userconfigfile).read_text())
+                except FileNotFoundError as err1:
+                    raise Exception(f'{err1.filename} fail: {err1.strerror}')
+                except Exception as exp:
+                    raise Exception(f'userconfig or userconfigfile is not a valid {str(exp.args[0])}')
 
-        #         param = {'name': args.name, 
-        #                  'tenant': args.tenant,
-        #                  'namespace' : args.namespace,
-        #                  'py':args.py,
-        #                  'classname':args.classname,
-        #                  'inputs':args.inputs.replace(' ','').split(','),
-        #                  'output':args.output,
-        #                  'useConfig': val,
-        #                  'parallelism': args.parallelism}
+                param = {'name': args.name, 
+                         'namespace' : args.namespace,
+                         'py':args.py,
+                         'classname':args.classname,
+                         'inputs':args.inputs.replace(' ','').split(','),
+                         'output':args.output,
+                         'useConfig': val,
+                         'parallelism': args.parallelism}
 
-        #         log.info(admin.function_create(param))
+                log.info(admin.function_create(param))
 
-        #     elif args.opp == 'delete':
-        #         log.info(admin.function_delete(args.namespace + '/' +args.name)) 
-        #     elif args.opp == 'pause':
-        #         log.info(admin.function_pause_resume(args.namespace + '/' + args.name, True)) 
-        #     elif args.opp == 'resume':
-        #         log.info(admin.function_pause_resume(args.namespace + '/' + args.name, False)) 
-        #     elif args.opp == 'list':
-        #         log.info(admin.functions_list(args.namespace)) 
-        #     else:
-        #         log.error(f'Opp invalida: {args.opp}')
+            elif args.opp == 'delete':
+                log.info(admin.function_delete(args.namespace + '/' +args.name)) 
+            elif args.opp == 'pause':
+                log.info(admin.function_pause_resume(args.namespace + '/' + args.name, True)) 
+            elif args.opp == 'resume':
+                log.info(admin.function_pause_resume(args.namespace + '/' + args.name, False)) 
+            elif args.opp == 'list':
+                log.info(admin.functions_list(args.namespace)) 
+            else:
+                log.error(f'Opp invalida: {args.opp}')
 
         else:
             log.error(f'Comando invalido')

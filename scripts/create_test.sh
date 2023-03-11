@@ -59,12 +59,11 @@
                 --sinkconfigfile ./builtin/etc/sink_writerfiles.yaml 
 
 
-
 # -- Functions --
 
-# cria function para relar da fila inputs test/ns01/queue01 para test/ns01/queue02
+# cria function para Relay da fila inputs test/ns01/queue01 para test/ns01/queue02
 ./ssc-admin.py functions create \
-                --name name01 \
+                --name relay01 \
                 --namespace test/ns01 \
                 --py ./builtin/functions/Relay.py \
                 --classname Relay.Relay \

@@ -32,6 +32,13 @@ class Namespace(object):
 
         self.log = logging.getLogger('SSC.Namespace')
 
+    def summario(self) -> dict:
+        res = {}
+        for k, v in self.map_queues.items():
+            res[k] = v.qsize()
+
+        return res
+
     def load(self, ns : str) -> Document:
 
         self.log.info(f'namespace {ns} load')
@@ -175,3 +182,19 @@ class Namespace(object):
     def pop(self, queue_name : str, timeOut: int) -> Optional[Any]:  # FIXME: criar message antes como em QueueProdCons!!!!!
         return self.queue_get(queue_name).get(block=True, timeout=timeOut)
 
+    # def sumario(self):
+    #     results = []
+
+    #     # try:
+    #     #     with LockDB(self.database, 'topics') as table:
+    #     #             lista = table.all()
+    #     #             for doc in lista:
+    #     #                 for q in doc['queues']:
+    #     #                     queue = RedisQueue(redis.Redis.from_url(doc['redis']), topic_to_redis_queue(doc['tenant'], doc['namespace'], q))
+    #     #                     results.append({'topic' : f"{doc['tenant']}/{doc['namespace']}/{q}", 'size': queue.qsize()})
+
+
+    #     # except Exception as exp:
+    #     #     self.log.error(exp.args[0])
+
+    #     return results

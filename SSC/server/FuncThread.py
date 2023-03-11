@@ -1,6 +1,6 @@
 '''
 Created on 20221102
-Update on 20221123
+Update on 20230310
 @author: Eduardo Pagotto
 '''
 
@@ -9,28 +9,38 @@ import time
 
 from typing import Optional
 
-from tinydb import TinyDB
 from tinydb.table import Document
+from queue import Empty
 
-#from SSC.server import create_queue, create_queues
+from SSC.server.Namespace import Namespace
 from SSC.Context import Context
 from SSC.Function import Function
 from SSC.server.EntThread import EntThread
-from SSC.topic.QueueProdCons import QueueConsumer, QueueProducer
-from SSC.topic.RedisQueue import Empty
+from SSC.server.QueueProdCons import QueueConsumer, QueueProducer
 
 class FuncThread(EntThread):
-    def __init__(self, index : int, params : Document, database : TinyDB) -> None:
+    def __init__(self, index : int, params : Document, namespace : Namespace) -> None:
 
-        super().__init__('func',index, params, database)
+        super().__init__('func',index, params)
 
-        data_in = create_queues(self.database ,params['inputs'])  # FIXME: retornar string do mapa de queues
-        self.consumer : QueueConsumer = QueueConsumer(data_in['urlRedis'], data_in['queue'])
+        self.ns = namespace
+
+        novo : dict = {}
+        if type(params['inputs']) == list: 
+            for item in params['inputs']:
+                novo[item] = namespace.queue_get(item)
+
+        elif type(params['inputs']) == str:
+           novo[params['inputs']] = namespace.queue_get(params['inputs'])
+           
+        else:
+            raise Exception('queue name invalid ' + str(params['inputs']))
+
+        self.consumer = QueueConsumer(novo)
+
         self.producer : Optional[QueueProducer] = None
-
         if ('output' in params) and (params['output'] is not None):
-            data_out = create_queue(self.database, params['output'])  # FIXME: retornar string do mapa de queues
-            self.producer = QueueProducer(data_out['urlRedis'], data_out['queue'], params['name'])
+            self.producer = QueueProducer(params['output'], namespace.queue_get(params['output']), params['name'])
 
         self.function : Function = self.load(pathlib.Path(params['py']), params['classname'])
 
@@ -56,8 +66,8 @@ class FuncThread(EntThread):
                 inputs += 1
                 self.esta.tot_ok += 1
 
-                try:
-                    ret = self.function.process(content.data(), Context(content, extra_map_puplish, self.document, self.database, self.log))
+                try: # FIXME: Context tem que ser refeito!!!!!
+                    ret = self.function.process(content.data(), Context(content, extra_map_puplish, self.document, self.ns, self.log))
                     if (self.producer) and (ret != None):
                         outputs += 1
                         self.producer.send(ret)

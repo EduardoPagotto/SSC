@@ -50,13 +50,13 @@ class QueueConsumer(object):
             if timeout == 0:
                 val = queue.get_nowait()
                 if val:
-                    self.pending.put(Message.from_dic(json.loads(val.decode('utf8'))))
+                    self.pending.put(Message.from_dic(json.loads(val))) # .decode('utf8')
                     
             else:
                 try:
                     val = queue.get(block=True, timeout=timeout) 
                     if val:
-                        self.pending.put(Message.from_dic(json.loads(val[1].decode('utf8'))))
+                        self.pending.put(Message.from_dic(json.loads(val))) # val[1].decode('utf8')
                 except Empty:
                     continue
 

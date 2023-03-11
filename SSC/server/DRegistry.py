@@ -18,7 +18,7 @@ from  sJsonRpc.RPC_Responser import RPC_Responser
 from SSC.server.Namespace import Namespace
 from SSC.server.SourceCrt import SourceCrt
 from SSC.server.SinkCrt import SinkCrt
-#from SSC.server.FunctionCrt import FunctionCrt
+from SSC.server.FunctionCrt import FunctionCrt
 
 
 from SSC.__init__ import __version__ as VERSION
@@ -34,8 +34,7 @@ class DRegistry(RPC_Responser):
         self.namespace : Namespace = Namespace(database, path_str)
         self.source_crt : SourceCrt = SourceCrt(self.namespace)
         self.sink_crt : SinkCrt = SinkCrt(self.namespace)
-        #self.function_crt : FunctionCrt = FunctionCrt(database, path_str)
-        #self.tenant : Tenant = Tenant(database, path_str)
+        self.function_crt : FunctionCrt = FunctionCrt(self.namespace)
 
         self.done : bool = False
         self.ticktack : int = 0
@@ -48,9 +47,8 @@ class DRegistry(RPC_Responser):
 
         return {'app':{'name':'SSC', 'version':VERSION ,'deploy':DEPLOY},
                 'tictac': self.ticktack,
-                #'topics': self.tenant.sumario(),
-                'queues': self.namespace.sumario(),
-                #'functions' : self.function_crt.summario(),
+                'queues': self.namespace.summario(),
+                'functions' : self.function_crt.summario(),
                 'sources' : self.source_crt.summario(),
                 'sinks' : self.sink_crt.summario()}
 
@@ -63,15 +61,15 @@ class DRegistry(RPC_Responser):
 
         while self.done is False:
 
-            # f_ok, f_err = self.function_crt.execute()
+            f_ok, f_err = self.function_crt.execute()
             s_ok, s_err = self.source_crt.execute()
             i_ok, i_err = self.sink_crt.execute()
-            # self.log.debug(f'on:{self.ticktack} fu:({f_ok}/{f_err}) so:({s_ok}/{s_err}) si:({i_ok}/{i_err})') 
+            self.log.debug(f'on:{self.ticktack} fu:({f_ok}/{f_err}) so:({s_ok}/{s_err}) si:({i_ok}/{i_err})') 
 
             self.ticktack += 1
             time.sleep(5)
 
-        # self.function_crt.stop_func_all()
+        self.function_crt.stop_func_all()
         self.sink_crt.stop_func_all()
         self.source_crt.stop_func_all()
         
@@ -148,18 +146,18 @@ class DRegistry(RPC_Responser):
     def sink_list(self, tenant_ns : str) -> List[str]:
         return self.sink_crt.list_all(tenant_ns)
 
-    # # -- Functions Admin
-    # def function_pause_resume(self, name : str, is_pause : bool) -> str:
-    #     return self.function_crt.pause_resume(name, is_pause)
+    # -- Functions Admin
+    def function_pause_resume(self, name : str, is_pause : bool) -> str:
+        return self.function_crt.pause_resume(name, is_pause)
 
-    # def function_create(self, params: dict) -> str:
-    #     return self.function_crt.create(params)
+    def function_create(self, params: dict) -> str:
+        return self.function_crt.create(params)
 
-    # def function_delete(self, name: str) -> str:
-    #     return self.function_crt.delete(name)
+    def function_delete(self, name: str) -> str:
+        return self.function_crt.delete(name)
 
-    # def functions_list(self, tenant_ns : str) -> List[str]:
-    #     return self.function_crt.list_all(tenant_ns)
+    def functions_list(self, tenant_ns : str) -> List[str]:
+        return self.function_crt.list_all(tenant_ns)
 
 
     # # -- Tenants Admin
