@@ -22,7 +22,7 @@ class QueueProducer(object):
 
         msg = Message.create(seq_id = sequence_id,
                                 payload = content,
-                                topic = self.queue_name,
+                                queue = self.queue_name,
                                 properties = properties,
                                 producer = self.producer_name,
                                 key = msg_key)
