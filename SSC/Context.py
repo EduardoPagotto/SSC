@@ -50,10 +50,10 @@ class Context(object):
     def get_user_config_value(self, key : str) -> Any:
         return self.params['useConfig'][key]
 
-    def get_input_topics(self) -> List[str]:
+    def get_input_queues(self) -> List[str]:
         return [self.params['inputs']]
 
-    def get_output_topic(self) -> str:
+    def get_output_queue(self) -> str:
         return self.params['output']
 
     def publish(self, queue_name_full : str, data : str, properties : dict  = {}, msg_key : str = '' ,sequence_id : int = 0):

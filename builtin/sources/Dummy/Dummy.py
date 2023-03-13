@@ -44,7 +44,7 @@ class Dummy(Source):
             payload = f'msg {self.serial}'
             self.log.debug(payload)
 
-            producer.send(payload, properties={}, msg_key='', sequence_id=self.serial)
+            producer.send(payload, properties={}, msg_key='keyZZ', sequence_id=99)
             estat.tot_ok += 1
             return True
 

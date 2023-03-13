@@ -135,7 +135,7 @@ def main():
         sources.add_argument('--sourceconfig', type=str, help='other config connectos', required=False, default="")
         sources.add_argument('--archive', type=str, help='other config connectos', required=False, default="")
         sources.add_argument('--classname', type=str, help='Nome da classe')
-        sources.add_argument('--destinationtopicname', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--destinationqueue', type=str, help='other config connectos', required=False, default="")
 
         sinks = subparser.add_parser('sinks')
         sinks.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
@@ -203,7 +203,7 @@ def main():
                          'namespace' : args.namespace,
                          'archive': args.archive,
                          'classname':args.classname,
-                         'output' : args.destinationtopicname,
+                         'output' : args.destinationqueue,
                          'config': val}
 
                 log.info(admin.source_create(param))

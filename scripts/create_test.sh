@@ -1,6 +1,6 @@
 #!/bin/sh--namespace ns01
 
-# --- Cria namespace/topic 
+# --- Cria namespace e queues
 ./ssc-admin.py namespaces create test/ns01
 ./ssc-admin.py queues create test/ns01/queue01
 ./ssc-admin.py queues create test/ns01/queue02
@@ -10,7 +10,7 @@
 # gera mensagens sequenciais para debug na queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name dummy-teste \
-                --destinationtopicname test/ns01/queue01 \
+                --destinationqueue test/ns01/queue01 \
                 --archive ./builtin/sources/Dummy/Dummy.py \
                 --classname Dummy.Dummy \
                 --namespace test/ns01 \
@@ -19,7 +19,7 @@
 # watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name watch1 \
-                --destinationtopicname test/ns01/queue01 \
+                --destinationqueue test/ns01/queue01 \
                 --archive ./builtin/sources/Watchdogdir/Watchdogdir.py \
                 --classname Watchdogdir.Watchdogdir \
                 --namespace test/ns01 \

@@ -58,7 +58,7 @@ class FuncThread(EntThread):
                     ret = self.function.process(content.data(), Context(content, extra_map_puplish, self.document, self.ns, self.log))
                     if (self.producer) and (ret != None):
                         outputs += 1
-                        self.producer.send(ret)
+                        self.producer.send(content=ret, properties=content.properties(), msg_key=content.partition_key(), sequence_id=content.seq_id())
 
                 except Exception as exp:   
                     self.esta.tot_err += 1
