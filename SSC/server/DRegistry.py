@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20230310
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -9,7 +9,8 @@ import pathlib
 import time
 
 from threading import  Thread
-from typing import Any, List
+from typing import Any, List, Optional
+from queue import Empty
 
 from tinydb import TinyDB
 
@@ -75,20 +76,21 @@ class DRegistry(RPC_Responser):
         
         self.log.info('thread cleanner_files stop')
 
-    # # ClientQueue
-    # def create_producer(self, queue_name_full : str) -> dict:
-    #     return create_queue(self.tenant.database, queue_name_full) # FIXME: retornar string do mapa de queues
-  
-    # # ClientQueue
-    # def create_subscribe(self, queue_name_full : str | List[str]) -> dict:
+    # -- ClientQueue
+    def create_producer(self, queue_name_full : str) -> None:
+        self.namespace.queue_get(queue_name_full)
 
-    #     if type(queue_name_full) == list:
-    #         return create_queues(self.tenant.database, queue_name_full)  # FIXME: retornar string do mapa de queues
+    def create_subscribe(self, queue_name_full : str) -> None:
+        self.namespace.queue_get(queue_name_full)
+    
+    def send_producer(self, queue_name_full : str, msg : str):
+        self.namespace.push(queue_name_full, msg)
 
-    #     if type(queue_name_full) == str:
-    #         return create_queue(self.tenant.database, queue_name_full)  # FIXME: retornar string do mapa de queues
-
-    #     raise Exception('topic invalid ' + str(queue_name_full))
+    def subscribe_receive(self, queue_name_full: str, timeOut: int) -> Optional[Any]:
+        try:
+            return self.namespace.pop(queue_name_full, timeOut=timeOut)
+        except Empty:
+            return None
 
     # -- Namespaces Admin
     def namespaces_create(self, name : str) -> str:
@@ -158,14 +160,3 @@ class DRegistry(RPC_Responser):
 
     def functions_list(self, tenant_ns : str) -> List[str]:
         return self.function_crt.list_all(tenant_ns)
-
-
-    # # -- Tenants Admin
-    # def tenants_create(self, name : str) -> str:
-    #     return self.tenant.create(name)
-
-    # def tenants_delete(self, name : str) -> str:
-    #     return self.tenant.delete(name)
-
-    # def tenants_list(self) -> List[str]:
-    #     return self.tenant.list_all()

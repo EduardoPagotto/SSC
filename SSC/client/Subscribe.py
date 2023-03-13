@@ -31,10 +31,9 @@ class ConnectionRestApiSubscribe(ConnectionControl):
 
 
 class Subscribe(object):
-    def __init__(self, id : int, s_address : str, topic : str) -> None:
+    def __init__(self, s_address : str, queue_name_full : str) -> None:
         self.restAPI = ConnectionRestApiSubscribe(s_address)
-        self.topic = topic
-        self.id = id
+        self.queue_name_full = queue_name_full
 
     def __rpc(self):
         return ProxyObject(self.restAPI)
@@ -42,7 +41,7 @@ class Subscribe(object):
     def close(self):
         self.__rpc().close()
 
-    def receive(self, timeOut : int = 0): # se 0 bloqueia, maior raise quando estoura 
-        return self.__rpc().subscribe_receive(self.id, timeOut)
+    def receive(self, timeOut : int = 0):
+        return self.__rpc().subscribe_receive(self.queue_name_full, timeOut)
 
 

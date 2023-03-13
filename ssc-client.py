@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20221120
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -11,7 +11,6 @@ import time
 
 from SSC.client.ClientQueue import ClientQueue
 from SSC.subsys.GracefulKiller import GracefulKiller
-from SSC.topic.RedisQueue import Empty
 
 def main():
 
@@ -45,7 +44,7 @@ def main():
         args = parser.parse_args()
 
         if args.command == "produce":
-            producer = client.create_producer(args.queue_name, 'ssc-client')
+            producer = client.create_producer(args.queue_name)
             for i in range(0, args.number):
                 producer.send(args.message)
 
@@ -56,16 +55,15 @@ def main():
             consume = client.subscribe(args.queue_name)
             c = 0
             while killer.kill_now is False:
-                try:
-                    message = consume.receive()
-                    log.info(str(message.to_dict()))
+                val = consume.receive()
+                if val != None:
+                    log.info(str(val))
                     c += 1
-                    if c > args.number:
+                    if c == args.number:
                         break
 
                     continue
-
-                except Empty:
+                else:
                     time.sleep(5)
             
             #consume.close()            

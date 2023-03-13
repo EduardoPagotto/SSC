@@ -45,13 +45,13 @@ class ClientQueue(object):
 
         return ProxyObject(self.restAPI)
 
-    def create_producer(self, topic : str) -> Producer:
-        id : int = self.__rpc().create_producer(topic)
-        return Producer(id, self.restAPI.getUrl(), topic)
+    def create_producer(self, queue_name_full : str) -> Producer:
+        self.__rpc().create_producer(queue_name_full)
+        return Producer(self.restAPI.getUrl(), queue_name_full)
 
-    def subscribe(self, topic : str) -> Subscribe:
-        id : int = self.__rpc().subscribe(topic)
-        return Subscribe(id, self.restAPI.getUrl(), topic)
+    def subscribe(self, queue_name_full : str) -> Subscribe:
+        self.__rpc().create_subscribe(queue_name_full)
+        return Subscribe(self.restAPI.getUrl(), queue_name_full)
 
     def close(self):
         self.__rpc().close()

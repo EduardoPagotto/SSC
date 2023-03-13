@@ -26,11 +26,21 @@ class Namespace(object):
     def __init__(self,  database : TinyDB, path_storage : str) -> None:
         self.database = database
         self.path_storage = path_storage
-
+        self.table_name = 'namespaces'
         self.lock = Lock()
         self.map_queues : Dict[str, Queue] = {}
 
         self.log = logging.getLogger('SSC.Namespace')
+
+        with LockDB(self.database, self.table_name, False) as table:
+            itens = table.all()
+
+        with self.lock: 
+            for params in itens:
+                ns = params['ns']
+                self.log.debug(f'load from db {ns}: {params["queues"]}')
+                for q in params['queues']:
+                    self.map_queues[ns + '/' + q] = Queue()
 
     def summario(self) -> dict:
         res = {}
@@ -43,7 +53,7 @@ class Namespace(object):
 
         self.log.info(f'namespace {ns} load')
 
-        with LockDB(self.database, 'namespaces') as table:
+        with LockDB(self.database, self.table_name) as table:
             q = Query()
             itens = table.search(q.ns == ns)
             if len(itens) > 0:
@@ -57,7 +67,7 @@ class Namespace(object):
         try:
             self.load(ns)
         except:
-            with LockDB(self.database, 'namespaces', True) as table:
+            with LockDB(self.database, self.table_name, True) as table:
                 id = table.insert({'ns': ns, 'queues':[]})
 
             self.log.info(f'namespace {ns} created id: {id}')
@@ -74,7 +84,7 @@ class Namespace(object):
         if len(doc['queues']) > 0:
             raise Exception(f'namespace {namespace} has queues: {str(doc["queues"])}')
 
-        with LockDB(self.database, 'namespaces', True) as table:
+        with LockDB(self.database, self.table_name, True) as table:
             table.remove(doc_ids=[doc.doc_id])
             self.log.info(f'namespace {namespace} deleted')   
 
@@ -83,7 +93,7 @@ class Namespace(object):
         lista = []
 
         ns_list = []
-        with LockDB(self.database, 'namespaces') as table:
+        with LockDB(self.database, self.table_name) as table:
             ns_list = table.all()
 
         for val in ns_list:
@@ -120,7 +130,7 @@ class Namespace(object):
             raise Exception(f'queue {queue_name_full} already exists')
 
         doc['queues'].append(queue_name)
-        with LockDB(self.database, 'namespaces', True) as table:
+        with LockDB(self.database, self.table_name, True) as table:
             table.update({'queues' : doc['queues']}, doc_ids=[doc.doc_id])
 
         with self.lock:
@@ -145,7 +155,7 @@ class Namespace(object):
         if queue in doc['queues']:
             doc['queues'].remove(queue)
 
-            with LockDB(self.database, 'namespaces', True) as table:
+            with LockDB(self.database, self.table_name, True) as table:
                 table.update({'queues' : doc['queues']}, doc_ids=[doc.doc_id]) # TODO verificar se nao há functions anexado ao queue
                                 
             self.log.info(f'queue delete {queue_name_full} success')    

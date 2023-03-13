@@ -31,16 +31,15 @@ class ConnectionRestApiProducer(ConnectionControl):
 
 
 class Producer(object):
-    def __init__(self, id : int, s_address : str, queue : str) -> None:
+    def __init__(self, s_address : str, queue_name_full : str) -> None:
         self.restAPI = ConnectionRestApiProducer(s_address)
-        self.queue = queue
-        self.id = id
+        self.queue_name_full = queue_name_full
 
     def __rpc(self):
         return ProxyObject(self.restAPI)
 
     def send(self, data : str):
-        self.__rpc().send_producer(self.id, data)
+        self.__rpc().send_producer(self.queue_name_full, data)
 
     def close(self):
         self.__rpc().close()

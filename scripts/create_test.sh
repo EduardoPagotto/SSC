@@ -69,3 +69,8 @@
                 --classname Relay.Relay \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
+
+
+# Teste de client/producer
+#./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 2
+#./ssc-client.py consume -s appteste test/ns01/queue01 -n 1
