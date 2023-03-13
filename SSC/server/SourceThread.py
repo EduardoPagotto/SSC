@@ -1,6 +1,6 @@
 '''
 Created on 20221108
-Update on 20221123
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -10,7 +10,6 @@ import time
 from tinydb.table import Document
 from SSC.Source import Source
 
-#from SSC.server import create_queue
 from SSC.server.Namespace import Namespace
 from SSC.server.EntThread import EntThread
 from SSC.server.QueueProdCons import QueueProducer

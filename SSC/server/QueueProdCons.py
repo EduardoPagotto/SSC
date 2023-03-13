@@ -1,6 +1,6 @@
 '''
 Created on 20221019
-Update on 20230310
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -13,7 +13,6 @@ from SSC.Message import Message
 from queue import Queue, Empty
 
 class QueueProducer(object):
-    #def __init__(self, url : str, queue_name : str, producer_name : str) -> None:
     def __init__(self, queue_name : str, queue : Queue, producer_name : str) -> None:
         self.queue_name = queue_name
         self.producer_name = producer_name

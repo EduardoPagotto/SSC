@@ -1,6 +1,6 @@
 '''
 Created on 20230308
-Update on 20230308
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -152,6 +152,22 @@ class Namespace(object):
             return
 
         raise Exception(f'queue delete {queue_name_full} does not exist')  
+
+
+    def queues_get(self, field : str, params : Document) -> Dict[str, Queue]:
+
+        novo : Dict[str, Queue] = {}
+        if type(params[field]) == list: 
+            for item in params[field]:
+                novo[item] = self.queue_get(item)
+
+        elif type(params[field]) == str:
+           novo[params[field]] = self.queue_get(params[field])
+           
+        else:
+            raise Exception('queue name invalid ' + str(params[field]))
+        
+        return novo
 
     def queue_get(self, queue_name_full) -> Queue:
 

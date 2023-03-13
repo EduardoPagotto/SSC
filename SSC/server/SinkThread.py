@@ -1,6 +1,6 @@
 '''
 Created on 20221114
-Update on 20230310
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -20,19 +20,7 @@ class SinkThread(EntThread):
 
         super().__init__('sinks',index, params)
 
-        novo : dict = {}
-        if type(params['inputs']) == list: 
-            for item in params['inputs']:
-                novo[item] = namespace.queue_get(item)
-
-        elif type(params['inputs']) == str:
-           novo[params['inputs']] = namespace.queue_get(params['inputs'])
-           
-        else:
-            raise Exception('queue name invalid ' + str(params['inputs']))
-
-        self.consumer = QueueConsumer(novo)
-
+        self.consumer = QueueConsumer(namespace.queues_get('inputs', params))
         self.sink : Sink = self.load(pathlib.Path(params['archive']), params['classname'])
 
     def run(self):

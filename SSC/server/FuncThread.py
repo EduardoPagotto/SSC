@@ -1,6 +1,6 @@
 '''
 Created on 20221102
-Update on 20230310
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -23,20 +23,8 @@ class FuncThread(EntThread):
 
         super().__init__('func',index, params)
 
-        self.ns = namespace
-
-        novo : dict = {}
-        if type(params['inputs']) == list: 
-            for item in params['inputs']:
-                novo[item] = namespace.queue_get(item)
-
-        elif type(params['inputs']) == str:
-           novo[params['inputs']] = namespace.queue_get(params['inputs'])
-           
-        else:
-            raise Exception('queue name invalid ' + str(params['inputs']))
-
-        self.consumer = QueueConsumer(novo)
+        self.ns : Namespace = namespace
+        self.consumer : QueueConsumer = QueueConsumer(namespace.queues_get('inputs', params))
 
         self.producer : Optional[QueueProducer] = None
         if ('output' in params) and (params['output'] is not None):
