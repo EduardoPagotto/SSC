@@ -7,7 +7,6 @@
 ./ssc-admin.py queues create test/ns01/queue03
 
 # -- Sources --
-
 # gera mensagens sequenciais para debug na queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name dummy-teste \
@@ -30,7 +29,6 @@
 ./ssc-admin.py sources list --namespace test/ns01
 
 # -- Sinks --
-
 # pega os dados da test/ns01/queue02 e os envia para um json em arquivo pelo TinyDB
 ./ssc-admin.py sinks create \
                 --name tiny-teste \
@@ -60,7 +58,6 @@
 
 
 # -- Functions --
-
 # cria function para Relay da fila inputs test/ns01/queue01 para test/ns01/queue02
 ./ssc-admin.py functions create \
                 --name relay01 \
@@ -70,7 +67,6 @@
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
 
-
 # Teste de client/producer
-#./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 2
-#./ssc-client.py consume -s appteste test/ns01/queue01 -n 1
+./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 2 --key "0010201010" --properties "{\"val1\":\"aaa\"}"
+./ssc-client.py consume -s appteste test/ns01/queue01 -n 1

@@ -3,30 +3,26 @@ Simple Stream Control
 
 ## Comando CRUD de filas 
 
-[Criação topics](scripts/create_test.sh) : `./scripts/create_test.sh`
+[Criação queues](scripts/create_test.sh) : `./scripts/create_test.sh`
 
 ```bash
 # lista filas em tenant test namespace ns01
-./ssc-admin.py topics list test/ns01
+./ssc-admin.py queues list test/ns01
 
 # deleta fila queue03
-./ssc-admin.py topics delete test/ns01/queue03
+./ssc-admin.py queues delete test/ns01/queue03
 
 # lista namespaces em tenant test
-./ssc-admin.py namespaces list test
-
-# Lista tenants
-./ssc-admin.py tenants list none
-
+./ssc-admin.py namespaces list test/ns01
 ```
 
 ## Envio e recebimento as filas via CLI
 ```bash
 # envai 5 mensagens a filas 1
-./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 5
+./ssc-client.py produce test/ns01/queue01 -m "teste 123..." -n 5 --key "0010201010" --properties "{\"val1\":\"aaa\"}"
 
-# receber 2 mensagens de queue02
-./ssc-client.py consume -s app1 test/ns01/queue02 -n 2
+# receber 2 mensagens de queue01
+./ssc-client.py consume -s app1 test/ns01/queue01 -n 2
 
 ```
 
@@ -36,16 +32,16 @@ Simple Stream Control
 
 ```bash
 # listar 
-./ssc-admin.py sources list --tenant test --namespace ns01 --name none
+./ssc-admin.py sources list --namespace test/ns01 --name none
 
 # pause 
-./ssc-admin.py sources pause --tenant test --namespace ns01 --name dummy-teste
+./ssc-admin.py sources pause --namespace test/ns01 --name dummy-teste
 
 # resume
-./ssc-admin.py sources resume --tenant test --namespace ns01 --name dummy-teste
+./ssc-admin.py sources resume --namespace test/ns01 --name dummy-teste
 
 # remove 
-./ssc-admin.py sources delete --tenant test --namespace ns01 --name dummy-teste
+./ssc-admin.py sources delete --namespace test/ns01 --name dummy-teste
 
 ```
 
@@ -55,16 +51,16 @@ Simple Stream Control
 
 ```bash
 # listar 
-./ssc-admin.py functions list --tenant test --namespace ns01 --name none
+./ssc-admin.py functions list --namespace test/ns01 --name none
 
 # pause 
-./ssc-admin.py functions pause --tenant test --namespace ns01 --name name01
+./ssc-admin.py functions pause --namespace test/ns01 --name name01
 
 # resume 
-./ssc-admin.py functions resume --tenant test --namespace ns01 --name name01
+./ssc-admin.py functions resume --namespace test/ns01 --name name01
 
 # remove 
-./ssc-admin.py functions delete --tenant test --namespace ns01 --name name01
+./ssc-admin.py functions delete --namespace test/ns01 --name name01
 
 ```
 
@@ -74,16 +70,16 @@ Simple Stream Control
 
 ```bash
 # listar 
-./ssc-admin.py sinks list --tenant test --namespace ns01 --name none
+./ssc-admin.py sinks list --namespace test/ns01 --name none
 
 # pause 
-./ssc-admin.py sinks pause --tenant test --namespace ns01 --name tiny-teste
+./ssc-admin.py sinks pause --namespace test/ns01 --name tiny-teste
 
 # resume
-./ssc-admin.py sinks resume --tenant test --namespace ns01 --name tiny-teste
+./ssc-admin.py sinks resume --namespace test/ns01 --name tiny-teste
 
 # remove 
-./ssc-admin.py sinks delete --tenant test --namespace ns01 --name tiny-teste
+./ssc-admin.py sinks delete --namespace test/ns01 --name tiny-teste
 
 ```
 
@@ -142,12 +138,10 @@ docker exec -it server_SSC_dev /bin/sh
 ```
 
 ### TODO List
-- [x] Implementar tenants
-- [x] Testar tenants
 - [x] Implementar namespaces
 - [x] Testar namespaces
-- [x] Implementar topics
-- [x] Testar topics
+- [x] Implementar queues
+- [x] Testar queues
 - [x] Implementar plugin functions
 - [x] Implementar pause/resume functions
 - [x] Testar functions
