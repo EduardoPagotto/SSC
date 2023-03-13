@@ -6,14 +6,11 @@ Simple Stream Control
 [Criação queues](scripts/create_test.sh) : `./scripts/create_test.sh`
 
 ```bash
-# lista filas em tenant test namespace ns01
+# lista filas namespace ns01/ns01
 ./ssc-admin.py queues list test/ns01
 
 # deleta fila queue03
 ./ssc-admin.py queues delete test/ns01/queue03
-
-# lista namespaces em tenant test
-./ssc-admin.py namespaces list test/ns01
 ```
 
 ## Envio e recebimento as filas via CLI

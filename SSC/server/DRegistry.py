@@ -96,31 +96,25 @@ class DRegistry(RPC_Responser):
     def namespaces_create(self, name : str) -> str:
         self.namespace.create(name)
         return f'sucess namespace create {name}'
-        #return self.tenant.create_namespace(name)
 
     def namespaces_delete(self, name : str) -> str:
         self.namespace.delete(name)
         return f'sucess namespace delete {name}'
-        #return self.tenant.delete_namespace(name)
 
     def namespaces_list(self) -> List[str]:
         return self.namespace.list_all()
-        #return self.tenant.list_all_namespace(name)
 
     # -- Queues Admin
     def queues_create(self, queue_name_full : str) -> str:
         self.namespace.queue_create(queue_name_full)
         return f'success create {queue_name_full} '
-        #return self.tenant.create_topic(queue_name_full)
 
     def queues_delete(self, queue_name_full : str) -> str:
         self.namespace.queue_delete(queue_name_full)
         return f'sucess delete {queue_name_full}'
-        #return self.tenant.delete_topics(queue_name_full)
 
     def queues_list(self, ns : str) -> List[str]:
         return self.namespace.queue_list(ns)
-        #return self.tenant.list_topics(ns)
 
     # # -- Source Admin
     def source_pause_resume(self, name : str, is_pause : bool) -> str:
@@ -132,8 +126,8 @@ class DRegistry(RPC_Responser):
     def source_delete(self, name: str) -> str:
         return self.source_crt.delete(name)
 
-    def source_list(self, tenant_ns : str) -> List[str]:
-        return self.source_crt.list_all(tenant_ns)
+    def source_list(self, ns : str) -> List[str]:
+        return self.source_crt.list_all(ns)
 
     # -- Sinks Admin
     def sink_pause_resume(self, name : str, is_pause : bool) -> str:
@@ -145,8 +139,8 @@ class DRegistry(RPC_Responser):
     def sink_delete(self, name: str) -> str:
         return self.sink_crt.delete(name)
 
-    def sink_list(self, tenant_ns : str) -> List[str]:
-        return self.sink_crt.list_all(tenant_ns)
+    def sink_list(self, ns : str) -> List[str]:
+        return self.sink_crt.list_all(ns)
 
     # -- Functions Admin
     def function_pause_resume(self, name : str, is_pause : bool) -> str:
@@ -158,5 +152,5 @@ class DRegistry(RPC_Responser):
     def function_delete(self, name: str) -> str:
         return self.function_crt.delete(name)
 
-    def functions_list(self, tenant_ns : str) -> List[str]:
-        return self.function_crt.list_all(tenant_ns)
+    def functions_list(self, ns : str) -> List[str]:
+        return self.function_crt.list_all(ns)

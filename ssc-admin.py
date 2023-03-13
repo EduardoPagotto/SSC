@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20230310
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -74,8 +74,8 @@ class Admin(object):
     def source_pause_resume(self, name : str, is_pause : bool) -> str:
         return self.__rpc().source_pause_resume(name, is_pause)
 
-    def source_list(self, tenant_ns : str) -> List[str]:
-        return self.__rpc().source_list(tenant_ns)
+    def source_list(self, ns : str) -> List[str]:
+        return self.__rpc().source_list(ns)
 
     def sink_create(self, params) -> str:
         return self.__rpc().sink_create(params)
@@ -86,8 +86,8 @@ class Admin(object):
     def sink_pause_resume(self, name : str, is_pause : bool) -> str:
         return self.__rpc().sink_pause_resume(name, is_pause)
 
-    def sink_list(self, tenant_ns : str) -> List[str]:
-        return self.__rpc().sink_list(tenant_ns)
+    def sink_list(self, ns : str) -> List[str]:
+        return self.__rpc().sink_list(ns)
 
     def function_create(self, params) -> str:
         return self.__rpc().function_create(params)
@@ -98,8 +98,8 @@ class Admin(object):
     def function_pause_resume(self, name : str, is_pause : bool) -> str:
         return self.__rpc().function_pause_resume(name, is_pause)
 
-    def functions_list(self, tenant_ns : str) -> List[str]:
-        return self.__rpc().functions_list(tenant_ns)
+    def functions_list(self, ns : str) -> List[str]:
+        return self.__rpc().functions_list(ns)
 
 def main():
 

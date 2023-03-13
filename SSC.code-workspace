@@ -39,8 +39,7 @@
 					"functions", 
 					"create", 
 					"--name", "ConvertePDF2TXT", 
-					"--tenant", "rpa", 
-					"--namespace", "manifesto", 
+					"--namespace", "rpa/manifesto", 
 					"--py", "./src/ConvertePDF2TXT.py", 
 					"--classname", "ConvertePDF2TXT.ConvertePDF2TXT", 
 					"--inputs", "rpa/manifesto/q00DecodePDF", 
@@ -59,8 +58,7 @@
 					"functions", 
 					"pause", 
 					"--name", "InjectMongoData", 
-					"--tenant", "rpa", 
-					"--namespace", "manifesto"
+					"--namespace", "rpa/manifesto"
 				]
 			},
 			{
@@ -74,8 +72,7 @@
 					"functions", 
 					"resume", 
 					"--name", "InjectMongoData", 
-					"--tenant", "rpa", 
-					"--namespace", "manifesto"
+					"--namespace", "rpa/manifesto"
 				]
 			},
 			{
@@ -88,10 +85,8 @@
 				"args": [
 					"functions",
 					"list",
-					"--tenant",
-					"rpa",
 					"--namespace",
-					"manifesto"
+					"rpa/manifesto"
 				]
 			},
 			{
@@ -117,8 +112,7 @@
 				"args": [
 					"sinks", "create",
 					"--name", "tiny-teste",
-					"--tenant", "test",
-					"--namespace", "ns01",
+					"--namespace", "test/ns01",
 					"--archive", "sinks/SinkTinydb/SinkTinydb.py",
 					"--classname", "SinkTinydb.SinkTinydb",
 					"--inputs", "test/ns01/queue02",

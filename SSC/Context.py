@@ -20,7 +20,6 @@ class Context(object):
         self.log : Logger = log
         self.namespace : Namespace = namespace
         self.params : Document = params
-
         self.extra : dict[str, QueueProducer] = extra
         self.msg : Message = msg
 
@@ -33,14 +32,11 @@ class Context(object):
     def get_message_key(self) -> str:
         return self.msg.partition_key()
 
-    def get_current_message_topic_name(self) -> str:
-        return self.msg.topic_name()
+    def get_current_message_queue_name(self) -> str:
+        return self.msg.queue_name()
 
     def get_function_name(self) -> str:
         return self.params['name']
-
-    def get_function_tenant(self) -> str:
-        return self.params['tenant']
 
     def get_function_namespace(self) -> str:
         return self.params['namespace']

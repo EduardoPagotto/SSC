@@ -1,6 +1,6 @@
 #!/bin/sh--namespace ns01
 
-# --- Cria tenant/namespace/topic 
+# --- Cria namespace/topic 
 ./ssc-admin.py namespaces create test/ns01
 ./ssc-admin.py queues create test/ns01/queue01
 ./ssc-admin.py queues create test/ns01/queue02

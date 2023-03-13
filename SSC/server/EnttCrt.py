@@ -84,13 +84,13 @@ class EnttCrt(object):
 
         raise Exception(f'{func_name} does not exist')
 
-    def list_all(self, tenant_ns : str) -> List[str]:
+    def list_all(self, ns : str) -> List[str]:
         with LockDB(self.ns.database, self.colection_name, False) as table:
             itens = table.all()
 
         lista : List[str] = []
         for item in itens:
-            if (tenant_ns == item['namespace']): 
+            if (ns == item['namespace']): 
                 lista.append(item['name'])
 
         return lista
