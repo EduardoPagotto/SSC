@@ -38,8 +38,8 @@ class Producer(object):
     def __rpc(self):
         return ProxyObject(self.restAPI)
 
-    def send(self, data : str):
-        self.__rpc().send_producer(self.queue_name_full, data)
+    def send(self, key : str, prop : dict, data : str):
+        self.__rpc().send_producer(key, prop, self.queue_name_full, data)
 
     def close(self):
         self.__rpc().close()

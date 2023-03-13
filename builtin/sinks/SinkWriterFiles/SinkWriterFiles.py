@@ -1,6 +1,6 @@
 '''
 Created on 20221121
-Update on 20221121
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -48,9 +48,9 @@ class SinkWriterFiles(Sink):
 
     def process(self, content : Message ) -> None:
         
-        topic_name = content.topic_name()
+        queue_name = content.queue_name()
         prop = content.properties()
-        if 'erro' not in topic_name:
+        if 'erro' not in queue_name:
             if prop['valid'] is True:
                 src = pathlib.Path(prop['dst'])
                 dst = str(self.output.resolve()) + '/' +  prop['file']

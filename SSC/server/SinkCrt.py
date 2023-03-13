@@ -1,6 +1,6 @@
 '''
 Created on 20221114
-Update on 20230310
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -23,7 +23,7 @@ class SinkCrt(EnttCrt):
         with self.lock_func:
             for func in self.list_entt:
                 if (params['namespace'] == func.document['namespace']) and (params['name'] == func.document['name']):
-                    raise Exception(f'topic {params["name"]} already exists')
+                    raise Exception(f'Sink {params["name"]} already exists')
 
             cocoon : SinkCocoon = SinkCocoon(self.colection_name, params, self.ns)
             cocoon.start()

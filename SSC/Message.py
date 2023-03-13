@@ -1,6 +1,6 @@
 '''
 Created on 20221103
-Update on 20221120
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -26,7 +26,7 @@ class Generate:
 # class Message:
 #     seq_id : int
 #     payload : str
-#     topic : str
+#     queue : str
 #     producer : str = field(default_factory=str)
 #     key : str = field(default_factory=str)
 #     properties : dict = field(default_factory=dict)
@@ -44,7 +44,7 @@ class Message(object):
         
         self._seq_id : int = 0
         self._payload : str = ''
-        self._topic : str = ''
+        self._queue : str = ''
         self._producer : str = ''
         self._key : str = ''
         self._properties : dict = {}
@@ -55,13 +55,13 @@ class Message(object):
         self._redelivery : int = 0
 
     @staticmethod
-    def create(seq_id : int, payload : str, topic : str, properties : dict = {}, producer : str = '', key : str = ''):
+    def create(seq_id : int, payload : str, queue : str, properties : dict = {}, producer : str = '', key : str = ''):
 
         msg = Message()
 
         msg._seq_id = seq_id
         msg._payload = payload
-        msg._topic = topic
+        msg._queue = queue
         msg._producer = producer
         msg._key = key
         msg._properties = properties
@@ -80,7 +80,7 @@ class Message(object):
 
         msg._seq_id = data['seq_id']
         msg._payload = data['payload']
-        msg._topic = data['topic']
+        msg._queue = data['queue']
         msg._producer = data['producer']
         msg._key = data['key']
         msg._properties = data['properties']
@@ -117,8 +117,8 @@ class Message(object):
     def message_id(self) -> int:
         return self._msg_id
 
-    def topic_name(self) -> str:
-        return self._topic
+    def queue_name(self) -> str:
+        return self._queue
 
     def redelivery_count(self) -> int:
         return self._redelivery
@@ -130,7 +130,7 @@ class Message(object):
         
         return {'seq_id' : self._seq_id,
                 'payload' : self._payload,
-                'topic' : self._topic,
+                'queue' : self._queue,
                 'producer' : self._producer,
                 'key' : self._key, 
                 'properties' : self._properties,

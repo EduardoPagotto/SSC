@@ -6,6 +6,7 @@ Update on 20230313
 '''
 
 import argparse
+import json
 import logging
 import time
 
@@ -35,7 +36,9 @@ def main():
         produce = subparser.add_parser('produce')
         produce.add_argument('queue_name', type=str, help='Queue to process')
         produce.add_argument('--message', '-m', type=str, help='message a enviar', required=True)
-        produce.add_argument('--number', '-n', type=int, help='numero repeticoes', required=False, default=1)
+        produce.add_argument('--numproduce', '-n', type=int, help='numero repeticoes', required=False, default=1)
+        produce.add_argument('--key', '-k', type=str, help='numero repeticoes', required=False, default='')
+        produce.add_argument('--properties', '-p', type=str, help='numero repeticoes', required=False, default='{}')
         
         consume = subparser.add_parser('consume')
         consume.add_argument('--name_app', '-s',type=str, help='message a enviar', required=True)
@@ -45,8 +48,10 @@ def main():
 
         if args.command == "produce":
             producer = client.create_producer(args.queue_name)
-            for i in range(0, args.number):
-                producer.send(args.message)
+
+            properties = json.loads(args.properties)
+            for i in range(0, args.numproduce):
+                producer.send(args.key, properties, args.message)
 
             #producer.close()
 

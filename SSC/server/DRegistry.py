@@ -83,8 +83,8 @@ class DRegistry(RPC_Responser):
     def create_subscribe(self, queue_name_full : str) -> None:
         self.namespace.queue_get(queue_name_full)
     
-    def send_producer(self, queue_name_full : str, msg : str):
-        self.namespace.push(queue_name_full, msg)
+    def send_producer(self, key : str, prop: dict, queue_name_full : str, msg : str):
+        self.namespace.push(key, prop, queue_name_full, msg)
 
     def subscribe_receive(self, queue_name_full: str, timeOut: int) -> Optional[Any]:
         try:

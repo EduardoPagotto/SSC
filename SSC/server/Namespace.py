@@ -4,6 +4,7 @@ Update on 20230313
 @author: Eduardo Pagotto
 '''
 
+import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -12,6 +13,7 @@ from threading import Lock
 
 from tinydb import TinyDB, Query
 from tinydb.table import Document
+from SSC.Message import Message
 
 from SSC.subsys.LockDB import LockDB
 
@@ -202,25 +204,16 @@ class Namespace(object):
         raise Exception(f'queue {queue_name_full} not exist in DB')
 
         
-    def push(self, queue_name : str, msg : str): # FIXME: criar message antes como em QueueProdCons!!!!!
-        self.queue_get(queue_name).put(msg)
+    def push(self, key : str, prop: dict, queue_name : str, msg_str : str): # FIXME: criar message antes como em QueueProdCons!!!!!
+
+        msg = Message.create(seq_id = 0,
+                                payload = msg_str,
+                                queue = queue_name,
+                                properties = prop,
+                                producer = "client",
+                                key = key)
+
+        self.queue_get(queue_name).put(json.dumps(msg.to_dict()))
 
     def pop(self, queue_name : str, timeOut: int) -> Optional[Any]:  # FIXME: criar message antes como em QueueProdCons!!!!!
         return self.queue_get(queue_name).get(block=True, timeout=timeOut)
-
-    # def sumario(self):
-    #     results = []
-
-    #     # try:
-    #     #     with LockDB(self.database, 'topics') as table:
-    #     #             lista = table.all()
-    #     #             for doc in lista:
-    #     #                 for q in doc['queues']:
-    #     #                     queue = RedisQueue(redis.Redis.from_url(doc['redis']), topic_to_redis_queue(doc['tenant'], doc['namespace'], q))
-    #     #                     results.append({'topic' : f"{doc['tenant']}/{doc['namespace']}/{q}", 'size': queue.qsize()})
-
-
-    #     # except Exception as exp:
-    #     #     self.log.error(exp.args[0])
-
-    #     return results

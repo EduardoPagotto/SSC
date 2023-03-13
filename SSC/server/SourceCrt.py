@@ -1,6 +1,6 @@
 '''
 Created on 20221108
-Update on 20230310
+Update on 20230313
 @author: Eduardo Pagotto
 '''
 
@@ -23,7 +23,7 @@ class SourceCrt(EnttCrt):
         with self.lock_func:
             for source in self.list_entt:
                 if (params['namespace'] == source.document['namespace']) and (params['name'] == source.document['name']):
-                    raise Exception(f'topic {params["name"]} already exists')
+                    raise Exception(f'source {params["name"]} already exists')
 
             cocoon : SourceCocoon = SourceCocoon(self.colection_name, params, self.ns)
             cocoon.start()
