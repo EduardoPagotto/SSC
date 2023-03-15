@@ -10,20 +10,20 @@
 # gera mensagens sequenciais para debug na queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name dummy-teste \
-                --output test/ns01/queue01 \
-                --archive ./builtin/sources/Dummy/Dummy.py \
-                --classname Dummy.Dummy \
                 --namespace test/ns01 \
-                --configfile ./builtin/etc/source_dummy.yaml
+                --classname Dummy.Dummy \
+                --py ./builtin/sources/Dummy/Dummy.py \
+                --configfile ./builtin/etc/source_dummy.yaml \
+                --output test/ns01/queue01 
 
 # watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name watch1 \
-                --output test/ns01/queue01 \
-                --archive ./builtin/sources/Watchdogdir/Watchdogdir.py \
-                --classname Watchdogdir.Watchdogdir \
                 --namespace test/ns01 \
-                --configfile ./builtin/etc/watchdogdir_cfg.yaml
+                --classname Watchdogdir.Watchdogdir \
+                --py ./builtin/sources/Watchdogdir/Watchdogdir.py \
+                --configfile ./builtin/etc/watchdogdir_cfg.yaml \
+                --output test/ns01/queue01 
 
 # list 
 ./ssc-admin.py sources list --namespace test/ns01
@@ -33,28 +33,28 @@
 ./ssc-admin.py sinks create \
                 --name tiny-teste \
                 --namespace test/ns01 \
-                --archive ./builtin/sinks/SinkTinydb/SinkTinydb.py \
                 --classname SinkTinydb.SinkTinydb \
-                --inputs test/ns01/queue02 \
-                --configfile ./builtin/etc/sink_tinydb.yaml 
+                --py ./builtin/sinks/SinkTinydb/SinkTinydb.py \
+                --configfile ./builtin/etc/sink_tinydb.yaml \
+                --inputs test/ns01/queue02 
 
 # pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
 ./ssc-admin.py sinks create \
                 --name csv-teste \
                 --namespace test/ns01 \
-                --archive ./builtin/sinks/SinkCSV/SinkCSV.py \
                 --classname SinkCSV.SinkCSV \
-                --inputs test/ns01/queue03 \
-                --configfile ./builtin/etc/sink_csv.yaml 
+                --py ./builtin/sinks/SinkCSV/SinkCSV.py \
+                --configfile ./builtin/etc/sink_csv.yaml \
+                --inputs test/ns01/queue03 
 
 # sink de gravacao de arquivos em diretorio
 ./ssc-admin.py sinks create \
                 --name writer-test \
                 --namespace test/ns01 \
-                --archive ./builtin/sinks/SinkWriterFiles/SinkWriterFiles.py \
                 --classname SinkWriterFiles.SinkWriterFiles \
-                --inputs test/ns01/queue04 \
-                --configfile ./builtin/etc/sink_writerfiles.yaml 
+                --py ./builtin/sinks/SinkWriterFiles/SinkWriterFiles.py \
+                --configfile ./builtin/etc/sink_writerfiles.yaml \
+                --inputs test/ns01/queue04
 
 
 # -- Functions --
@@ -62,8 +62,8 @@
 ./ssc-admin.py functions create \
                 --name relay01 \
                 --namespace test/ns01 \
-                --py ./builtin/functions/Relay.py \
                 --classname Relay.Relay \
+                --py ./builtin/functions/Relay.py \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
 
