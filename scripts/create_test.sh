@@ -6,6 +6,7 @@
 ./ssc-admin.py queues create test/ns01/queue02
 ./ssc-admin.py queues create test/ns01/queue03
 ./ssc-admin.py queues create test/ns01/queue04
+./ssc-admin.py queues create test/ns01/queue05
 
 # -- Sources --
 # gera mensagens sequenciais para debug na queue test/ns01/queue01
@@ -14,7 +15,7 @@
                 --namespace test/ns01 \
                 --classname Dummy.Dummy \
                 --py ./builtin/sources/Dummy/Dummy.py \
-                --timeout 1.0 \
+                --timeout 5.0 \
                 --output test/ns01/queue01 
 
 # watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
@@ -26,6 +27,17 @@
                 --configfile ./builtin/etc/watchdogdir_cfg.yaml \
                 --timeout 5.0 \
                 --output test/ns01/queue01 
+
+Relay da queue test/ns01/queue03 para o redis
+./ssc-admin.py sources create \
+                --name source_relay_redis01 \
+                --namespace test/ns01 \
+                --classname SourceRedisQueue.SourceRedisQueue \
+                --py ./builtin/sources/RedisQueue/SourceRedisQueue.py \
+                --configfile ./builtin/etc/source_redis_queue.yaml \
+                --timeout 5.0 \
+                --output test/ns01/queue05
+
 
 # list 
 ./ssc-admin.py sources list --namespace test/ns01
@@ -60,6 +72,14 @@
                 --configfile ./builtin/etc/sink_writerfiles.yaml \
                 --inputs test/ns01/queue04
 
+# sink para redis queue
+./ssc-admin.py sinks create \
+                --name sink_redis_queue01 \
+                --namespace test/ns01 \
+                --classname SinkRedisQueue.SinkRedisQueue \
+                --py ./builtin/sinks/SinkRedisQueue/SinkRedisQueue.py \
+                --configfile ./builtin/etc/sink_redis_queue.yaml \
+                --inputs test/ns01/queue02
 
 # -- Functions --
 # cria function para Relay da fila inputs test/ns01/queue01 para test/ns01/queue02

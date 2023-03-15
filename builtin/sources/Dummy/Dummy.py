@@ -28,6 +28,7 @@ class Dummy(Function):
             if self.count % 2 == 0:
                 self.serial += 1
                 payload = f'msg {self.serial}'
+                #payload = {'nome':'eduardo', 'sexo' : True, 'serial':f'msg {self.serial}'}
                 self.log.debug(payload)
 
                 context.publish(context.get_output_queue(), payload, {}, '', self.count)

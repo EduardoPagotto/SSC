@@ -1,0 +1,2 @@
+queue_dst: rpa::queue_dst
+url: 'redis://:AAABBBCCC@192.168.122.1:6379/0'
