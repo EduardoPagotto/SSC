@@ -1,6 +1,6 @@
 '''
 Created on 20221114
-Update on 20221123
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
@@ -8,27 +8,32 @@ from datetime import datetime
 from pathlib import Path
 import csv
 import json
-from typing import Any
 from tinydb.table import Document
-from SSC.Message import Message
-from SSC.Sink import Sink
+from SSC.Function import Function
+from SSC.Context import Context
 
-class SinkCSV(Sink):
+class SinkCSV(Function):
     def __init__(self) -> None:
         super().__init__()
+        self.config : dict = {}
+        self.field : str = ''
+        self.file_prefix : str = ''
+        self.ready = False
 
-    def start(self, doc : Document) -> int:
-        self.doc = doc
-        self.config = doc['config']['configs']
+    def start(self, params : Document):
+        self.config = params['config']['configs']
         self.field = self.config['field'] if 'field' in self.config else 'field'
-        self.file_prefix =  self.doc['storage'] + '/' + self.config['file_prefix'] if 'file_prefix' in self.config else 'file'
-        return self.config['delay']
+        self.file_prefix =  params['storage'] + '/' + self.config['file_prefix'] if 'file_prefix' in self.config else 'file'
+        self.ready = True
 
-    def process(self, content : Message ) -> None:
+    def process(self, input : str, context : Context) -> None:
         
+        if not self.ready:
+            self.start(context.params)
+
         file_name = self.file_prefix + '_' + datetime.today().strftime('%Y%m%d') + '.csv'
 
-        payload =json.loads(content.data())
+        payload =json.loads(input)
 
         data : dict = {}
         final : dict = {}

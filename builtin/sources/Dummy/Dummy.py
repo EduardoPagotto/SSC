@@ -1,20 +1,20 @@
 '''
 Created on 20221109
-Update on 20221109
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
 import logging
-from typing import Optional
+from typing import Any
 
 from tinydb.table import Document
 
-from SSC.Source import Source
-from SSC.server import EstatData
+from SSC.Function import Function
+from SSC.Context import Context
 from SSC.server.QueueProdCons import QueueProducer
 
 
-class Dummy(Source):
+class Dummy(Function):
     def __init__(self) -> None:
         print('Dummy Constructor')
         self.document : Document = Document({}, 0)
@@ -24,29 +24,21 @@ class Dummy(Source):
         self.log = logging.getLogger('Dummy')
         super().__init__()
 
-    def start(self, doc : Document) -> int:
-        self.document = doc
-        try:
-            return self.document['config']['cfg']['delay']
-        except:
-            pass
+    def process(self, input : str, context : Context) -> Any:
+        
+        producer : QueueProducer = context.get_producer('default')
 
-        return 5
+        if producer.size() <= self.water_mark:
 
-    def process(self, producer : QueueProducer, estat : EstatData) -> bool:
+            self.count += 1
+            if self.count % 2 == 0:
+                self.serial += 1
+                payload = f'msg {self.serial}'
+                self.log.debug(payload)
 
-        if producer.size() > self.water_mark:
-            return False
+                producer.send(payload, {}, '', self.count)
 
-        self.count += 1
-        if self.count % 2 == 0:
-            self.serial += 1
-            payload = f'msg {self.serial}'
-            self.log.debug(payload)
-
-            producer.send(payload, properties={}, msg_key='keyZZ', sequence_id=99)
-            estat.tot_ok += 1
-            return True
-
-        return False
+                return 1
+        
+        return 0
 

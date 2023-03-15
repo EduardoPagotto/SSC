@@ -1,6 +1,6 @@
 '''
 Created on 20221114
-Update on 20221123
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
@@ -9,26 +9,30 @@ import logging
 from typing import Any
 from tinydb import TinyDB
 from tinydb.table import Document
-from SSC.Message import Message
-from SSC.Sink import Sink
+#from SSC.Message import Message
+from SSC.Function import Function
+from SSC.Context import Context
 
 from SSC.subsys.SenderSMTP import SenderSMTP
 
-class SinkEmail(Sink):
+class SinkEmail(Function):
     def __init__(self) -> None:
         super().__init__()
+        self.config : dict = {}
+        self.ready : bool = False
         self.log = logging.getLogger('SinkWriterFiles')
 
-    def start(self, doc : Document) -> int:
-        self.doc = doc
-        self.config = doc['config']['configs']
+    def start(self, params : Document):
+        self.config = params['config']['configs']
         self.email = SenderSMTP(self.config)
+        self.ready = True
 
-        return self.config['delay'] if 'delay' in self.config else 5
+    def process(self, input : str, context : Context) -> None:
 
-    def process(self, content : Message) -> None:
+        if not self.ready:
+            self.start(context.params)
 
-        prop = content.properties()
+        prop = context.get_message_properties() #content.properties()
 
         if 'subject' not in prop:
             raise Exception('Missing subject in properties')

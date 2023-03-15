@@ -1,6 +1,6 @@
 '''
 Created on 20221019
-Update on 20230313
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
@@ -38,6 +38,7 @@ class QueueConsumer(object):
     def __init__(self, map_queues : Dict[str, Queue]) -> None:
         self.pending : Queue = Queue()
         self.map : Dict[str, Queue] = map_queues
+        self.tot : float = float(len(self.map))
 
     def receive(self, timeout : float = 0) -> Message:
 
@@ -53,7 +54,7 @@ class QueueConsumer(object):
                     
             else:
                 try:
-                    val = queue.get(block=True, timeout=timeout) 
+                    val = queue.get(block=True, timeout= (timeout / self.tot)) 
                     if val:
                         self.pending.put(Message.from_dic(json.loads(val))) # val[1].decode('utf8')
                 except Empty:

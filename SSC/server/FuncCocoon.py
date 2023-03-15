@@ -1,6 +1,6 @@
 '''
 Created on 20221101
-Update on 20230310
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
@@ -18,7 +18,7 @@ class FuncCocoon(Cocoon):
 
         try:
             for c in range(0, params['parallelism']):
-                th = FuncThread(c, self.document, namespace)
+                th = FuncThread(colection_name, c, self.document, namespace)
                 self.list_t.append(th)
         except Exception as exp:
             self.log.critical(f'start func error {exp.args[0]}')

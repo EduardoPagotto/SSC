@@ -1,6 +1,6 @@
 '''
 Created on 20221111
-Update on 20221121
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
@@ -9,18 +9,17 @@ import json
 import logging
 import pathlib
 import time
-from typing import List, Optional
+from typing import Any, List, Optional
 from configparser import ConfigParser
 from tinydb.table import Document
 
-from SSC.Source import Source
-from SSC.server import EstatData
+from SSC.Function import Function
+from SSC.Context import Context
 from SSC.server.QueueProdCons import QueueProducer
 
-class Watchdogdir(Source):
+class Watchdogdir(Function):
     def __init__(self) -> None:
         print('Watchdogdir Constructor')
-        self.document : Document = Document({}, 0)
         self.serial : int = 0
         self.log = logging.getLogger('Watchdogdir')
         self.input = pathlib.Path('./input')
@@ -28,38 +27,37 @@ class Watchdogdir(Source):
         self.erro : Optional[pathlib.Path] = None
         self.pattern : List[str] = ['txt', 'json', 'yaml']
         self.watermark : int = 2
-        self.delay = 10
         self.peeding_file = None
+        self.ready : bool = False
 
         super().__init__()
 
-    def start(self, doc : Document) -> int:
-        self.document = doc
+    def start(self, params : Document):
+        
+        self.log.info(f'Watchdogdir {params["name"]}') 
 
-        self.log.info(f'Watchdogdir {doc["name"]}') 
+        if 'configs' in params['config']: 
+            if 'input' in params['config']['configs']:
+                self.input = pathlib.Path(params['storage'] + '/' + params['config']['configs']['input'])
 
-        if 'configs' in self.document['config']: 
-            if 'input' in self.document['config']['configs']:
-                self.input = pathlib.Path(self.document['storage'] + '/' + self.document['config']['configs']['input'])
-
-            if 'output' in self.document['config']['configs']:
-                self.output = pathlib.Path(self.document['storage'] + '/' + self.document['config']['configs']['output'])
+            if 'output' in params['config']['configs']:
+                self.output = pathlib.Path(params['storage'] + '/' + params['config']['configs']['output'])
                 self.output.mkdir(parents=True, exist_ok=True)
                 self.log.info(f'output :{self.output.resolve()}')
 
-            if 'erro' in self.document['config']['configs']:
-                self.erro = pathlib.Path(self.document['storage'] + '/' + self.document['config']['configs']['erro'])
+            if 'erro' in params['config']['configs']:
+                self.erro = pathlib.Path(params['storage'] + '/' + params['config']['configs']['erro'])
                 self.erro.mkdir(parents=True, exist_ok=True)
                 self.log.info(f'erro :{self.erro.resolve()}')
 
-            if 'pattern' in self.document['config']['configs']:
-                self.pattern = self.document['config']['configs']['pattern']
+            if 'pattern' in params['config']['configs']:
+                self.pattern = params['config']['configs']['pattern']
 
-            if 'watermark' in self.document['config']['configs']:
-                self.watermark = self.document['config']['configs']['watermark']
+            if 'watermark' in params['config']['configs']:
+                self.watermark = params['config']['configs']['watermark']
 
-            if 'delay' in self.document['config']['configs']:
-                self.delay = self.document['config']['configs']['delay']
+            if 'delay' in params['config']['configs']:
+                self.delay = params['config']['configs']['delay']
 
         self.input.mkdir(parents=True, exist_ok=True)
 
@@ -68,7 +66,7 @@ class Watchdogdir(Source):
         self.log.info(f'watermark :{str(self.watermark)}')
         self.log.info(f'delay :{str(self.delay)}')
 
-        return self.delay
+        self.ready = True
 
     def exec_error(self, producer : QueueProducer, item : pathlib.Path):
 
@@ -104,10 +102,16 @@ class Watchdogdir(Source):
 
         self.log.info(f'parse ok {item.name}')
 
-    def process(self, producer : QueueProducer, estat : EstatData) -> bool:
+    
+    def process(self, input : str, context : Context) -> Any:
+
+        if not self.ready:
+            self.start(context.params)
+
+        producer : QueueProducer = context.get_producer('default')
 
         if producer.size() >= self.watermark:
-            return False
+            return 0
 
         lista_arquivos : List[pathlib.Path] = []
         count = 0
@@ -159,9 +163,5 @@ class Watchdogdir(Source):
             else:
                 self.exec_error(producer, item)
                 
-            estat.tot_ok += 1
+        return len(lista_arquivos)
 
-        if len(lista_arquivos) > 0:
-            return True
-
-        return False

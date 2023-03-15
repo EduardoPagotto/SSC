@@ -1,11 +1,11 @@
 '''
 Created on 20221007
-Update on 20230310
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
 from logging import Logger
-from typing import Any, List, Optional
+from typing import Any, List
 
 from tinydb.table import Document
 from tinydb import TinyDB
@@ -16,11 +16,11 @@ from SSC.server.QueueProdCons import QueueProducer
 
 
 class Context(object):
-    def __init__(self, msg : Message, extra : dict[str, QueueProducer], params: Document, namespace : Namespace, log : Logger) -> None:
+    def __init__(self, msg : Message, map_producer : dict[str, QueueProducer], params: Document, namespace : Namespace, log : Logger) -> None:
         self.log : Logger = log
         self.namespace : Namespace = namespace
         self.params : Document = params
-        self.extra : dict[str, QueueProducer] = extra
+        self.map_producer : dict[str, QueueProducer] = map_producer
         self.msg : Message = msg
 
     def get_message_id(self) -> int:
@@ -51,14 +51,17 @@ class Context(object):
         return self.params['useConfig'][key]
 
     def get_input_queues(self) -> List[str]:
-        return [self.params['inputs']]
+        return [self.params['inputs']] # FIXME: ajustar corretamente
 
     def get_output_queue(self) -> str:
         return self.params['output']
 
+    def get_producer(self, queue_full_name) -> QueueProducer:
+        return self.map_producer[queue_full_name]
+
     def publish(self, queue_name_full : str, data : str, properties : dict  = {}, msg_key : str = '' ,sequence_id : int = 0):
         
-        if queue_name_full not in self.extra:
-            self.extra[queue_name_full] = QueueProducer(queue_name_full, self.namespace.queue_get(queue_name_full), self.params['name']) 
+        if queue_name_full not in self.map_producer:
+            self.map_producer[queue_name_full] = QueueProducer(queue_name_full, self.namespace.queue_get(queue_name_full), self.params['name']) 
 
-        self.extra[queue_name_full].send(data, properties, msg_key, sequence_id)
+        self.map_producer[queue_name_full].send(data, properties, msg_key, sequence_id)

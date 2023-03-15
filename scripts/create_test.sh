@@ -10,20 +10,20 @@
 # gera mensagens sequenciais para debug na queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name dummy-teste \
-                --destinationqueue test/ns01/queue01 \
+                --output test/ns01/queue01 \
                 --archive ./builtin/sources/Dummy/Dummy.py \
                 --classname Dummy.Dummy \
                 --namespace test/ns01 \
-                --sourceconfigfile ./builtin/etc/source_dummy.yaml
+                --configfile ./builtin/etc/source_dummy.yaml
 
 # watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
 ./ssc-admin.py sources create \
                 --name watch1 \
-                --destinationqueue test/ns01/queue01 \
+                --output test/ns01/queue01 \
                 --archive ./builtin/sources/Watchdogdir/Watchdogdir.py \
                 --classname Watchdogdir.Watchdogdir \
                 --namespace test/ns01 \
-                --sourceconfigfile ./builtin/etc/watchdogdir_cfg.yaml
+                --configfile ./builtin/etc/watchdogdir_cfg.yaml
 
 # list 
 ./ssc-admin.py sources list --namespace test/ns01
@@ -36,7 +36,7 @@
                 --archive ./builtin/sinks/SinkTinydb/SinkTinydb.py \
                 --classname SinkTinydb.SinkTinydb \
                 --inputs test/ns01/queue02 \
-                --sinkconfigfile ./builtin/etc/sink_tinydb.yaml 
+                --configfile ./builtin/etc/sink_tinydb.yaml 
 
 # pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
 ./ssc-admin.py sinks create \
@@ -45,7 +45,7 @@
                 --archive ./builtin/sinks/SinkCSV/SinkCSV.py \
                 --classname SinkCSV.SinkCSV \
                 --inputs test/ns01/queue03 \
-                --sinkconfigfile ./builtin/etc/sink_csv.yaml 
+                --configfile ./builtin/etc/sink_csv.yaml 
 
 # sink de gravacao de arquivos em diretorio
 ./ssc-admin.py sinks create \
@@ -54,7 +54,7 @@
                 --archive ./builtin/sinks/SinkWriterFiles/SinkWriterFiles.py \
                 --classname SinkWriterFiles.SinkWriterFiles \
                 --inputs test/ns01/queue04 \
-                --sinkconfigfile ./builtin/etc/sink_writerfiles.yaml 
+                --configfile ./builtin/etc/sink_writerfiles.yaml 
 
 
 # -- Functions --

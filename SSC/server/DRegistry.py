@@ -33,9 +33,9 @@ class DRegistry(RPC_Responser):
         path_str = str(self.path.resolve())
 
         self.namespace : Namespace = Namespace(database, path_str)
-        self.source_crt : SourceCrt = SourceCrt(self.namespace)
-        self.sink_crt : SinkCrt = SinkCrt(self.namespace)
-        self.function_crt : FunctionCrt = FunctionCrt(self.namespace)
+        self.source_crt : FunctionCrt = FunctionCrt('source', self.namespace)
+        self.sink_crt : FunctionCrt = FunctionCrt('sink', self.namespace)
+        self.function_crt : FunctionCrt = FunctionCrt('function', self.namespace)
 
         self.done : bool = False
         self.ticktack : int = 0

@@ -44,7 +44,7 @@
 					"--classname", "ConvertePDF2TXT.ConvertePDF2TXT", 
 					"--inputs", "rpa/manifesto/q00DecodePDF", 
 					"--output", "rpa/manifesto/q01DecodeTxt",
-					"--userconfigfile", "./etc/funcs_cfg.yaml"
+					"--configfilefile", "./etc/funcs_cfg.yaml"
 				]
 			},
 			{
@@ -116,7 +116,7 @@
 					"--archive", "sinks/SinkTinydb/SinkTinydb.py",
 					"--classname", "SinkTinydb.SinkTinydb",
 					"--inputs", "test/ns01/queue02",
-					"--sinkconfigfile", "./etc/sink_tinydb.yaml"
+					"--configfile", "./etc/sink_tinydb.yaml"
 				]
 			},
 

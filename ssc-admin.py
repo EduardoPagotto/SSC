@@ -131,19 +131,20 @@ def main():
         sources.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
         sources.add_argument('--name', type=str, help='nome da thread', required=False)
         sources.add_argument('--namespace', type=str, help='Namespace', required=False)
-        sources.add_argument('--sourceconfigfile', type=str, help='other config connectos', required=False, default="")
-        sources.add_argument('--sourceconfig', type=str, help='other config connectos', required=False, default="")
-        sources.add_argument('--archive', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--configfile', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--config', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--py', type=str, help='other config connectos', required=False, default="")
         sources.add_argument('--classname', type=str, help='Nome da classe')
-        sources.add_argument('--destinationqueue', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--output', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
 
         sinks = subparser.add_parser('sinks')
         sinks.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
         sinks.add_argument('--name', type=str, help='nome da thread', required=False)
         sinks.add_argument('--namespace', type=str, help='Namespace', required=False)
-        sinks.add_argument('--sinkconfigfile', type=str, help='other config connectos', required=False, default="")
-        sinks.add_argument('--sinkconfig', type=str, help='other config connectos', required=False, default="")
-        sinks.add_argument('--archive', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--configfile', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--config', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--py', type=str, help='other config connectos', required=False, default="")
         sinks.add_argument('--classname', type=str, help='Nome da classe')
         sinks.add_argument('--inputs', type=str, help='other config connectos', required=False, default="")
         sinks.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
@@ -156,8 +157,8 @@ def main():
         funcions.add_argument('--classname', type=str, help='Nome da classe')
         funcions.add_argument('--inputs', type=str, help='queue input')
         funcions.add_argument('--output', type=str, help='queue output')
-        funcions.add_argument('--userconfig', type=str, help='other config user', required=False, default="")
-        funcions.add_argument('--userconfigfile', type=str, help='other file config user', required=False, default="")
+        funcions.add_argument('--config', type=str, help='other config user', required=False, default="")
+        funcions.add_argument('--configfile', type=str, help='other file config user', required=False, default="")
         funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
 
         args = parser.parse_args()
@@ -188,23 +189,24 @@ def main():
 
                 val : dict = {}
                 try:
-                    if len(args.sourceconfig) > 0:
+                    if len(args.config) > 0:
                         # load cfg json string
-                        val = json.loads(args.sourceconfig)
-                    elif len(args.sourceconfigfile) > 0:
+                        val = json.loads(args.config)
+                    elif len(args.configfile) > 0:
                         # load cfg yaml file
-                        val = yaml.safe_load(Path(args.sourceconfigfile).read_text())
+                        val = yaml.safe_load(Path(args.configfile).read_text())
                 except FileNotFoundError as err1:
                     raise Exception(f'{err1.filename} fail: {err1.strerror}')
                 except Exception as exp:
-                    raise Exception(f'userconfig or sourceconfigfile is not a valid {str(exp.args[0])}')
+                    raise Exception(f'configfile or configfile is not a valid {str(exp.args[0])}')
 
                 param = {'name': args.name, 
                          'namespace' : args.namespace,
-                         'archive': args.archive,
+                         'py': args.py,
                          'classname':args.classname,
-                         'output' : args.destinationqueue,
-                         'config': val}
+                         'output' : args.output,
+                         'config': val,
+                         'parallelism': args.parallelism}
 
                 log.info(admin.source_create(param))
 
@@ -223,20 +225,20 @@ def main():
 
                 val : dict = {}
                 try:
-                    if len(args.sinkconfig) > 0:
+                    if len(args.config) > 0:
                         # load cfg json string
-                        val = json.loads(args.sinkconfig)
-                    elif len(args.sinkconfigfile) > 0:
+                        val = json.loads(args.config)
+                    elif len(args.configfile) > 0:
                         # load cfg yaml file
-                        val = yaml.safe_load(Path(args.sinkconfigfile).read_text())
+                        val = yaml.safe_load(Path(args.configfile).read_text())
                 except FileNotFoundError as err1:
                     raise Exception(f'{err1.filename} fail: {err1.strerror}')
                 except Exception as exp:
-                    raise Exception(f'userconfig or sinkconfigfile is not a valid {str(exp.args[0])}')
+                    raise Exception(f'configfile or configfile is not a valid {str(exp.args[0])}')
 
                 param = {'name': args.name, 
                          'namespace' : args.namespace,
-                         'archive': args.archive,
+                         'py': args.py,
                          'classname':args.classname,
                          'inputs' : args.inputs.replace(' ','').split(','),
                          'config': val,
@@ -259,16 +261,16 @@ def main():
 
                 val : dict = {}
                 try:
-                    if len(args.userconfig) > 0:
+                    if len(args.configfile) > 0:
                         # load cfg json string
-                        val = json.loads(args.userconfig)
-                    elif len(args.userconfigfile) > 0:
+                        val = json.loads(args.configfile)
+                    elif len(args.configfilefile) > 0:
                         # load cfg yaml file
-                        val = yaml.safe_load(Path(args.userconfigfile).read_text())
+                        val = yaml.safe_load(Path(args.configfilefile).read_text())
                 except FileNotFoundError as err1:
                     raise Exception(f'{err1.filename} fail: {err1.strerror}')
                 except Exception as exp:
-                    raise Exception(f'userconfig or userconfigfile is not a valid {str(exp.args[0])}')
+                    raise Exception(f'configfile or configfilefile is not a valid {str(exp.args[0])}')
 
                 param = {'name': args.name, 
                          'namespace' : args.namespace,
@@ -276,7 +278,7 @@ def main():
                          'classname':args.classname,
                          'inputs':args.inputs.replace(' ','').split(','),
                          'output':args.output,
-                         'useConfig': val,
+                         'config': val,
                          'parallelism': args.parallelism}
 
                 log.info(admin.function_create(param))

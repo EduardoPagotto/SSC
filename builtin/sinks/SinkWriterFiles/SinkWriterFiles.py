@@ -1,6 +1,6 @@
 '''
 Created on 20221121
-Update on 20230313
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
@@ -9,53 +9,57 @@ import pathlib
 from tinydb.table import Document
 
 from SSC.Message import Message
-from SSC.Sink import Sink
+from SSC.Function import Function
+from SSC.Context import Context
 
 from SSF.ClientSSF import ClientSSF
 
-class SinkWriterFiles(Sink):
+class SinkWriterFiles(Function):
     def __init__(self) -> None:
         super().__init__()
         self.output = pathlib.Path('./output')
         self.erro = pathlib.Path('./erro')
         self.others = pathlib.Path('./others')
-        self.delay = 5
         self.watermark = 5
         self.ssf : ClientSSF | None = None
+        self.ready : bool = False
         self.log = logging.getLogger('SinkWriterFiles')
 
-    def start(self, doc : Document) -> int:
-        self.doc = doc
-        self.config = doc['config']['configs']
+    def start(self, params : Document):
 
-        self.log.info(f'{doc["name"]} start ')
+        self.log.info(f'{params["name"]} start ')
 
-        self.output = pathlib.Path(self.doc['storage'] + '/' + self.doc['config']['configs']['output'])
+        self.config = params['config']['configs']
+
+        self.output = pathlib.Path(params['storage'] + '/' + params['config']['configs']['output'])
         self.output.mkdir(parents=True, exist_ok=True)
 
-        self.erro = pathlib.Path(self.doc['storage'] + '/' + self.doc['config']['configs']['erro'])
+        self.erro = pathlib.Path(params['storage'] + '/' + params['config']['configs']['erro'])
         self.erro.mkdir(parents=True, exist_ok=True)
 
-        self.others = pathlib.Path(self.doc['storage'] + '/' + self.doc['config']['configs']['others'])
+        self.others = pathlib.Path(params['storage'] + '/' + params['config']['configs']['others'])
         self.others.mkdir(parents=True, exist_ok=True)
 
-        self.delay = self.config['delay'] if 'delay' in self.config else 5
         self.watermark = self.config['watermark'] if 'watermark' in self.config else 2
 
         self.ssf = ClientSSF(self.config['ssf_url']) 
 
-        return self.delay
+        self.ready = True
 
-    def process(self, content : Message ) -> None:
-        
-        queue_name = content.queue_name()
-        prop = content.properties()
+    # def process(self, content : Message ) -> None:
+    def process(self, input : str, context : Context) -> None:
+
+        if not self.ready:
+            self.start(context.params)
+
+        queue_name = context.get_current_message_queue_name() #content.queue_name()
+        prop = context.get_message_properties() #.properties()
         if 'erro' not in queue_name:
             if prop['valid'] is True:
                 src = pathlib.Path(prop['dst'])
                 dst = str(self.output.resolve()) + '/' +  prop['file']
                 src.replace(dst)
-                self.log.info(f'{self.doc["name"]} save {dst}')
+                self.log.info(f'{context.get_function_name()} save {dst}')
 
                 for extra in prop['extras']:
                     id = extra['id']
@@ -70,7 +74,7 @@ class SinkWriterFiles(Sink):
                             if not valid:
                                 raise Exception(msg)
                             else:
-                                self.log.info(f'{self.doc["name"]} save extra {msg}')
+                                self.log.info(f'{context.get_function_name()} save extra {msg}')
 
                         else:
                             self.log.error(f'Critico falta cfg de ssf no arguivo de configuracao')
@@ -83,6 +87,6 @@ class SinkWriterFiles(Sink):
                 src = pathlib.Path(prop['dst'])
                 dst = str(self.erro.resolve()) + '/' +  prop['file']
                 src.replace(dst)
-                self.log.warning(f'{self.doc["name"]} save fail {dst}')
+                self.log.warning(f'{context.get_function_name()} save fail {dst}')
             else:
-                self.log.error(f'{self.doc["name"]} registro invalido {prop["dst"]}')
+                self.log.error(f'{context.get_function_name()} registro invalido {prop["dst"]}')

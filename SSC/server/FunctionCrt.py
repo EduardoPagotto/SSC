@@ -11,8 +11,8 @@ from SSC.subsys.LockDB import LockDB
 
 class FunctionCrt(EnttCrt):
 
-    def __init__(self, namespace : Namespace) -> None:
-        super().__init__('functions', namespace)
+    def __init__(self, sufix : str, namespace : Namespace) -> None:
+        super().__init__(sufix, namespace)
         self.load_funcs_db()
 
     def create(self, params : dict) -> str:
