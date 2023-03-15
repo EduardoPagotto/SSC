@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20230313
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
@@ -17,10 +17,7 @@ from tinydb import TinyDB
 from  sJsonRpc.RPC_Responser import RPC_Responser
 
 from SSC.server.Namespace import Namespace
-from SSC.server.SourceCrt import SourceCrt
-from SSC.server.SinkCrt import SinkCrt
 from SSC.server.FunctionCrt import FunctionCrt
-
 
 from SSC.__init__ import __version__ as VERSION
 from SSC.__init__ import __date_deploy__ as DEPLOY

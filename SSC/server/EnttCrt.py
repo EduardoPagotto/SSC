@@ -1,16 +1,15 @@
 '''
 Created on 20221110
-Update on 20230310
+Update on 20230314
 @author: Eduardo Pagotto
 '''
 
 import logging
-import pathlib
 from threading import Lock
 from typing import Any, List, Tuple
 
 from SSC.server.Namespace import Namespace, splitQueue
-from SSC.server.Cocoon import Cocoon
+from SSC.server.FuncCocoon import FuncCocoon
 from SSC.subsys.LockDB import LockDB
 
 class EnttCrt(object):
@@ -20,7 +19,7 @@ class EnttCrt(object):
         self.ns = namespace
         self.log = logging.getLogger('SSC.EnttCrt')
         self.lock_func = Lock()
-        self.list_entt : List[Cocoon] = []
+        self.list_entt : List[FuncCocoon] = []
 
     def summario(self) ->dict:
         
