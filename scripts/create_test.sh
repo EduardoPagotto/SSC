@@ -5,6 +5,7 @@
 ./ssc-admin.py queues create test/ns01/queue01
 ./ssc-admin.py queues create test/ns01/queue02
 ./ssc-admin.py queues create test/ns01/queue03
+./ssc-admin.py queues create test/ns01/queue04
 
 # -- Sources --
 # gera mensagens sequenciais para debug na queue test/ns01/queue01

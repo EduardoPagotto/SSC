@@ -264,7 +264,7 @@ def main():
                     if len(args.configfile) > 0:
                         # load cfg json string
                         val = json.loads(args.configfile)
-                    elif len(args.configfilefile) > 0:
+                    elif len(args.configfile) > 0:
                         # load cfg yaml file
                         val = yaml.safe_load(Path(args.configfilefile).read_text())
                 except FileNotFoundError as err1:
