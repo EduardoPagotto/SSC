@@ -29,12 +29,36 @@ class SinkCSV(Function):
         self.spliter_file = self.config['spliter_file'] if 'spliter_file' in self.config else None 
         self.ready = True
 
+    def log_erro_arquivo(self, prop):
+
+        file_name = self.file_prefix + '_erro_' + datetime.today().strftime('%Y%m%d') + '.csv'
+        final = {'arquivo' : prop['file']}
+
+        path = Path(file_name)
+        if path.is_file():
+            with open(file_name, 'a') as f:
+                w = csv.writer(f)
+                w.writerow(final.values())
+        else:
+            with open(file_name, 'w') as f:
+                w = csv.writer(f)
+                w.writerow(final.keys())
+                w.writerow(final.values()) 
+
+
+
     def process(self, input : str, context : Context) -> int:
         
         if not self.ready:
             self.start(context.params)
 
         file_name = self.file_prefix + '_' + datetime.today().strftime('%Y%m%d') + '.csv'
+
+        prop = context.get_message_properties()
+        if 'valid' in prop:
+            if prop['valid'] == False:
+                self.log_erro_arquivo(prop)
+                return 1
 
         payload =json.loads(input)
 
