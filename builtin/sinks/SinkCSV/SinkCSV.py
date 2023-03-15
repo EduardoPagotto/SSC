@@ -26,6 +26,7 @@ class SinkCSV(Function):
         self.config = params['config']
         self.field = self.config['field'] if 'field' in self.config else 'field'
         self.file_prefix =  params['storage'] + '/' + self.config['file_prefix'] if 'file_prefix' in self.config else 'file'
+        self.spliter_file = self.config['spliter_file'] if 'spliter_file' in self.config else None 
         self.ready = True
 
     def process(self, input : str, context : Context) -> int:
@@ -58,6 +59,12 @@ class SinkCSV(Function):
                         final[field_name] = v
                     else:
                         raise Exception('Dado formatado de form incorreta missing("field/value")')
+                    
+        elif type(data) == dict:
+            final = data
+            if self.spliter_file:
+                if self.spliter_file in final:
+                    file_name = self.file_prefix + '_' + final[self.spliter_file]  + '_' + datetime.today().strftime('%Y%m%d') + '.csv'
 
         path = Path(file_name)
         if path.is_file():

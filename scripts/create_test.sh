@@ -38,6 +38,7 @@
                 --classname SinkTinydb.SinkTinydb \
                 --py ./builtin/sinks/SinkTinydb/SinkTinydb.py \
                 --configfile ./builtin/etc/sink_tinydb.yaml \
+                --timeout 5.0 \
                 --inputs test/ns01/queue02 
 
 # pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
@@ -47,6 +48,7 @@
                 --classname SinkCSV.SinkCSV \
                 --py ./builtin/sinks/SinkCSV/SinkCSV.py \
                 --configfile ./builtin/etc/sink_csv.yaml \
+                --timeout 5.0 \
                 --inputs test/ns01/queue03 
 
 # sink de gravacao de arquivos em diretorio

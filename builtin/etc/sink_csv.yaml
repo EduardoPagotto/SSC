@@ -1,3 +1,3 @@
 file_prefix: teste_dados
-field: results
-delay: 5
+field: dados
+spliter_file: tipoconsulta

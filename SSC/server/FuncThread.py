@@ -75,7 +75,7 @@ class FuncThread(threading.Thread):
             except Exception as exp:   
                 self.esta.tot_err += 1
                 self.log.error(f'{self.name} exec erro: ' + exp.args[0])
-                time.sleep(5.0)
+                time.sleep(1.0)
 
         self.log.info(f'{self.name} stopped')
 
