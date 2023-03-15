@@ -1,6 +1,6 @@
 '''
 Created on 20220924
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
@@ -10,5 +10,5 @@ from SSC.Context import Context
 
 class Function(ABC):
     @abstractmethod
-    def process(self, input : str, context : Context) -> Any:
+    def process(self, input : str, context : Context) -> int:
         pass

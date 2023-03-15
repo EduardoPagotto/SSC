@@ -14,7 +14,7 @@
                 --namespace test/ns01 \
                 --classname Dummy.Dummy \
                 --py ./builtin/sources/Dummy/Dummy.py \
-                --configfile ./builtin/etc/source_dummy.yaml \
+                --timeout 1.0 \
                 --output test/ns01/queue01 
 
 # watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
@@ -24,6 +24,7 @@
                 --classname Watchdogdir.Watchdogdir \
                 --py ./builtin/sources/Watchdogdir/Watchdogdir.py \
                 --configfile ./builtin/etc/watchdogdir_cfg.yaml \
+                --timeout 5.0 \
                 --output test/ns01/queue01 
 
 # list 
@@ -65,6 +66,7 @@
                 --namespace test/ns01 \
                 --classname Relay.Relay \
                 --py ./builtin/functions/Relay.py \
+                --timeout 10.0 \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
 

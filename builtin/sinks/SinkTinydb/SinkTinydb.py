@@ -1,15 +1,13 @@
 '''
 Created on 20221114
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
 from datetime import datetime
 import json
-from typing import Any
 from tinydb import TinyDB
 from tinydb.table import Document
-from SSC.Message import Message
 from SSC.Context import Context
 from SSC.Function import Function
 from SSC.subsys.LockDB import LockDB
@@ -22,11 +20,11 @@ class SinkTinydb(Function):
         self.ready = False
 
     def start(self, params : Document):
-        self.config = params['config']['configs']
+        self.config = params['config']
         self.file_prefix =  params['storage'] + '/' + self.config['file_prefix'] if 'file_prefix' in self.config else 'file'
         self.ready = True
         
-    def process(self, input : str, context : Context) -> None:
+    def process(self, input : str, context : Context) -> int:
 
         if not self.ready:
             self.start(context.params)
@@ -45,3 +43,5 @@ class SinkTinydb(Function):
                     table.insert(json.loads(input))
                 except:
                     table.insert( {'payload': str(input)})
+
+        return 1

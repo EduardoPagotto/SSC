@@ -1,18 +1,14 @@
 '''
 Created on 20221109
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
 import logging
-from typing import Any
-
 from tinydb.table import Document
 
 from SSC.Function import Function
 from SSC.Context import Context
-from SSC.server.QueueProdCons import QueueProducer
-
 
 class Dummy(Function):
     def __init__(self) -> None:
@@ -24,11 +20,9 @@ class Dummy(Function):
         self.log = logging.getLogger('Dummy')
         super().__init__()
 
-    def process(self, input : str, context : Context) -> Any:
+    def process(self, input : str, context : Context) -> int:
         
-        producer : QueueProducer = context.get_producer('default')
-
-        if producer.size() <= self.water_mark:
+        if context.get_producer_size(context.get_output_queue()) <= self.water_mark:
 
             self.count += 1
             if self.count % 2 == 0:
@@ -36,8 +30,7 @@ class Dummy(Function):
                 payload = f'msg {self.serial}'
                 self.log.debug(payload)
 
-                producer.send(payload, {}, '', self.count)
-
+                context.publish(context.get_output_queue(), payload, {}, '', self.count)
                 return 1
         
         return 0

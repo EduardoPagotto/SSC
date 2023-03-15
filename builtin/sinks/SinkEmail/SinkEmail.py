@@ -1,15 +1,12 @@
 '''
 Created on 20221114
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
-import json
 import logging
-from typing import Any
-from tinydb import TinyDB
 from tinydb.table import Document
-#from SSC.Message import Message
+
 from SSC.Function import Function
 from SSC.Context import Context
 
@@ -23,11 +20,11 @@ class SinkEmail(Function):
         self.log = logging.getLogger('SinkWriterFiles')
 
     def start(self, params : Document):
-        self.config = params['config']['configs']
+        self.config = params['config']
         self.email = SenderSMTP(self.config)
         self.ready = True
 
-    def process(self, input : str, context : Context) -> None:
+    def process(self, input : str, context : Context) -> int:
 
         if not self.ready:
             self.start(context.params)
@@ -48,4 +45,5 @@ class SinkEmail(Function):
         else:
             self.log.error(msg)
 
+        return 1
 

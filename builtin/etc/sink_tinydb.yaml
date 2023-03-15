@@ -1,4 +1,2 @@
-configs:
-  file_prefix: db_dados
-  delay: 5
-  fullmsg : false
+file_prefix: db_dados
+fullmsg : false

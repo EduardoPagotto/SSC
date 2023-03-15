@@ -1,6 +1,6 @@
 '''
 Created on 20221111
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
@@ -15,7 +15,6 @@ from tinydb.table import Document
 
 from SSC.Function import Function
 from SSC.Context import Context
-from SSC.server.QueueProdCons import QueueProducer
 
 class Watchdogdir(Function):
     def __init__(self) -> None:
@@ -36,28 +35,27 @@ class Watchdogdir(Function):
         
         self.log.info(f'Watchdogdir {params["name"]}') 
 
-        if 'configs' in params['config']: 
-            if 'input' in params['config']['configs']:
-                self.input = pathlib.Path(params['storage'] + '/' + params['config']['configs']['input'])
+        if 'input' in params['config']:
+            self.input = pathlib.Path(params['storage'] + '/' + params['config']['input'])
 
-            if 'output' in params['config']['configs']:
-                self.output = pathlib.Path(params['storage'] + '/' + params['config']['configs']['output'])
-                self.output.mkdir(parents=True, exist_ok=True)
-                self.log.info(f'output :{self.output.resolve()}')
+        if 'output' in params['config']:
+            self.output = pathlib.Path(params['storage'] + '/' + params['config']['output'])
+            self.output.mkdir(parents=True, exist_ok=True)
+            self.log.info(f'output :{self.output.resolve()}')
 
-            if 'erro' in params['config']['configs']:
-                self.erro = pathlib.Path(params['storage'] + '/' + params['config']['configs']['erro'])
-                self.erro.mkdir(parents=True, exist_ok=True)
-                self.log.info(f'erro :{self.erro.resolve()}')
+        if 'erro' in params['config']:
+            self.erro = pathlib.Path(params['storage'] + '/' + params['config']['erro'])
+            self.erro.mkdir(parents=True, exist_ok=True)
+            self.log.info(f'erro :{self.erro.resolve()}')
 
-            if 'pattern' in params['config']['configs']:
-                self.pattern = params['config']['configs']['pattern']
+        if 'pattern' in params['config']:
+            self.pattern = params['config']['pattern']
 
-            if 'watermark' in params['config']['configs']:
-                self.watermark = params['config']['configs']['watermark']
+        if 'watermark' in params['config']:
+            self.watermark = params['config']['watermark']
 
-            if 'delay' in params['config']['configs']:
-                self.delay = params['config']['configs']['delay']
+        if 'delay' in params['config']:
+            self.delay = params['config']['delay']
 
         self.input.mkdir(parents=True, exist_ok=True)
 
@@ -68,49 +66,47 @@ class Watchdogdir(Function):
 
         self.ready = True
 
-    def exec_error(self, producer : QueueProducer, item : pathlib.Path):
+    def exec_error(self, context :Context , item : pathlib.Path):
 
         if self.erro:
-
             dst = str(self.erro.resolve()) + '/' + item.name
             item.replace(dst)
             properties = {'valid': False, 'file': item.name, 'src': str(item.resolve()), 'dst': dst}
-            producer.send('', properties=properties, msg_key=dst, sequence_id=self.serial)
+            context.publish(context.get_output_queue(), '', properties=properties, msg_key=dst, sequence_id=self.serial)
 
         else:
-
             item.unlink()
             properties = {'valid': False, 'file': item.name, 'src': str(item.resolve())}
-            producer.send('', properties=properties, msg_key='', sequence_id=self.serial)  
+            context.publish(context.get_output_queue(), '', properties=properties, msg_key='', sequence_id=self.serial)  
 
         self.log.warn(f'parse fail {item.name}')
 
-    def exec_ok(self, payload : str, producer : QueueProducer, item : pathlib.Path):
+    def exec_ok(self, payload : str, context : Context, item : pathlib.Path):
 
-        if self.output:
+        try:     
+            if self.output:
+                dst = str(self.output.resolve()) + '/' + item.name
+                item.replace(dst)
+                properties = {'valid': True, 'file': item.name, 'src': str(item.resolve()), 'dst': dst}
+                context.publish(context.get_output_queue(), payload, properties=properties, msg_key=dst, sequence_id=self.serial)
 
-            dst = str(self.output.resolve()) + '/' + item.name
-            item.replace(dst)
-            properties = {'valid': True, 'file': item.name, 'src': str(item.resolve()), 'dst': dst}
-            producer.send(payload, properties=properties, msg_key=dst, sequence_id=self.serial)
+            else:
+                item.unlink()
+                properties = {'valid': True, 'file': item.name, 'src': str(item.resolve())}
+                context.publish(context.get_output_queue(), payload, properties=properties, msg_key='', sequence_id=self.serial)
 
-        else:
+            self.log.info(f'parse ok {item.name}')
 
-            item.unlink()
-            properties = {'valid': True, 'file': item.name, 'src': str(item.resolve())}
-            producer.send(payload, properties=properties, msg_key='', sequence_id=self.serial)
-
-        self.log.info(f'parse ok {item.name}')
-
+        except Exception as exp:
+            self.log.debug(f'fail {item.resolve()} err: {exp.args[0]}')
+            self.exec_error(context, item)
     
     def process(self, input : str, context : Context) -> Any:
 
         if not self.ready:
             self.start(context.params)
 
-        producer : QueueProducer = context.get_producer('default')
-
-        if producer.size() >= self.watermark:
+        if context.get_producer_size(context.get_output_queue()) >= self.watermark:
             return 0
 
         lista_arquivos : List[pathlib.Path] = []
@@ -132,36 +128,22 @@ class Watchdogdir(Function):
             payload : str = ''
 
             if ext == '.json': # 
-
-                try:
-                    self.exec_ok(json.dumps(json.loads(item.read_text())), producer, item)
-
-                except Exception as exp:
-                    #self.log.debug(f'Json fail {item.resolve()} err: {exp.args[0]}')
-                    self.exec_error(producer, item)
+                self.exec_ok(json.dumps(json.loads(item.read_text())), context, item)
 
             elif ext == '.yaml':
-
-                try:
-                    self.exec_ok(json.dumps(yaml.safe_load(item.read_text())), producer, item)
-
-                except Exception as exp:
-                    #self.log.debug(f'YAML fail {item.resolve()} err: {exp.args[0]}')
-                    self.exec_error(producer, item)
+                self.exec_ok(json.dumps(yaml.safe_load(item.read_text())), context, item)
 
             elif ext == '.txt' or ext == '.ini':
-                
                 try:
                     parser = ConfigParser()
                     parser.read(item.resolve())
-                    self.exec_ok(json.dumps({section: dict(parser.items(section)) for section in parser.sections()}), producer, item)
+                    self.exec_ok(json.dumps({section: dict(parser.items(section)) for section in parser.sections()}), context, item)
 
                 except Exception as exp:
-                    #self.log.debug(f'INI fail {item.resolve()} err: {exp.args[0]}')
-                    self.exec_error(producer, item)
+                    self.exec_error(context, item)
 
             else:
-                self.exec_error(producer, item)
+                self.exec_error(context, item)
                 
         return len(lista_arquivos)
 

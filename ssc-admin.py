@@ -120,7 +120,7 @@ def main():
         subparser = parser.add_subparsers(dest='command')
 
         namespaces = subparser.add_parser('namespaces')
-        namespaces.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
+        namespaces.add_argument('opp', type=str, help='Comando tipo (create|delete|list|pause|resume)')
         namespaces.add_argument('name', type=str, help='Nome do namespace')
 
         queue = subparser.add_parser('queues')
@@ -129,37 +129,40 @@ def main():
 
         sources = subparser.add_parser('sources')
         sources.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
-        sources.add_argument('--name', type=str, help='nome da thread', required=False)
-        sources.add_argument('--namespace', type=str, help='Namespace', required=False)
-        sources.add_argument('--configfile', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--name', type=str, help='nome da thread', required=False, default="")
+        sources.add_argument('--namespace', type=str, help='Namespace', required=False, default="")
         sources.add_argument('--config', type=str, help='other config connectos', required=False, default="")
+        sources.add_argument('--configfile', type=str, help='other config connectos', required=False, default="")
         sources.add_argument('--py', type=str, help='other config connectos', required=False, default="")
-        sources.add_argument('--classname', type=str, help='Nome da classe')
+        sources.add_argument('--classname', type=str, help='Nome da classe', required=False, default="")
         sources.add_argument('--output', type=str, help='other config connectos', required=False, default="")
         sources.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
-
+        sources.add_argument('--timeout', type=float,  help='num of threads', required=False, default=5.0)
+        
         sinks = subparser.add_parser('sinks')
         sinks.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
-        sinks.add_argument('--name', type=str, help='nome da thread', required=False)
-        sinks.add_argument('--namespace', type=str, help='Namespace', required=False)
-        sinks.add_argument('--configfile', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--name', type=str, help='nome da thread', required=False, default="")
+        sinks.add_argument('--namespace', type=str, help='Namespace', required=False, default="")
         sinks.add_argument('--config', type=str, help='other config connectos', required=False, default="")
+        sinks.add_argument('--configfile', type=str, help='other config connectos', required=False, default="")
         sinks.add_argument('--py', type=str, help='other config connectos', required=False, default="")
         sinks.add_argument('--classname', type=str, help='Nome da classe')
         sinks.add_argument('--inputs', type=str, help='other config connectos', required=False, default="")
         sinks.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
+        sinks.add_argument('--timeout', type=float,  help='num of threads', required=False, default=5.0)
 
         funcions = subparser.add_parser('functions')
         funcions.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
-        funcions.add_argument('--namespace', type=str, help='Namespace', required=True)
-        funcions.add_argument('--name', type=str, help='nome da thread', required=True)
+        funcions.add_argument('--name', type=str, help='nome da thread', required=False, default="")
+        funcions.add_argument('--namespace', type=str, help='Namespace', required=False, default="")
+        funcions.add_argument('--config', type=str, help='other config user', required=False, default="")
+        funcions.add_argument('--configfile', type=str, help='other file config user', required=False, default="")
         funcions.add_argument('--py', type=str, help='python script pathfile')
         funcions.add_argument('--classname', type=str, help='Nome da classe')
         funcions.add_argument('--inputs', type=str, help='queue input')
         funcions.add_argument('--output', type=str, help='queue output')
-        funcions.add_argument('--config', type=str, help='other config user', required=False, default="")
-        funcions.add_argument('--configfile', type=str, help='other file config user', required=False, default="")
         funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
+        funcions.add_argument('--timeout', type=float,  help='num of threads', required=True, default=5.0)
 
         args = parser.parse_args()
 
@@ -206,6 +209,7 @@ def main():
                          'classname':args.classname,
                          'output' : args.output,
                          'config': val,
+                         'timeout': args.timeout,
                          'parallelism': args.parallelism}
 
                 log.info(admin.source_create(param))
@@ -242,6 +246,7 @@ def main():
                          'classname':args.classname,
                          'inputs' : args.inputs.replace(' ','').split(','),
                          'config': val,
+                         'timeout': args.timeout,
                          'parallelism': args.parallelism}
 
                 log.info(admin.sink_create(param))
@@ -279,6 +284,7 @@ def main():
                          'inputs':args.inputs.replace(' ','').split(','),
                          'output':args.output,
                          'config': val,
+                         'timeout': args.timeout,
                          'parallelism': args.parallelism}
 
                 log.info(admin.function_create(param))

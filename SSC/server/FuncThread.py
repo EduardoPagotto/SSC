@@ -1,6 +1,6 @@
 '''
 Created on 20221102
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
@@ -24,27 +24,26 @@ from SSC.server import EstatData
 
 class FuncThread(threading.Thread):
     def __init__(self, sufix : str, index : int, params : Document, namespace : Namespace) -> None:
-
+        
         super().__init__(None, None, f'{sufix}_{index}_' + params['name'])
-        #super().__init__(sufix, index, params)
+
         self.map_producer : dict[str, QueueProducer] = {}
         self.esta = EstatData()
         self.sufix = sufix
         self.ns : Namespace = namespace
-        self.sleep_read : float = float(params['sleep_read']) if 'sleep_read' in params else 0.0 # 5 segundos default
+        self.timeout : float = float(params['timeout']) if 'timeout' in params else 5.0 # 5 segundos default
         self.params = params
         self.is_running = True
     
         self.log = logging.getLogger('SSC.EntThread')
 
         self.consumer : Optional[QueueConsumer] = None
-        if ('inputs' in params) and (params['inputs'] is not None):
+        if 'inputs' in params:
             self.consumer = QueueConsumer(namespace.queues_get('inputs', params))
 
-        if ('output' in params) and (params['output'] is not None):
-            q = QueueProducer(params['output'], namespace.queue_get(params['output']), params['name'])
-            self.map_producer[params['output']] = q
-            self.map_producer['default'] =  q
+        if 'output' in params:
+            out_val = params['output']
+            self.map_producer[out_val] = QueueProducer(out_val, namespace.queue_get(out_val), params['name'])
 
         self.function : Function = self.load(pathlib.Path(params['py']), params['classname'])
 
@@ -56,40 +55,22 @@ class FuncThread(threading.Thread):
         while (not self.esta.done):
 
             if self.is_paused():
-                if self.sleep_read == 0:
-                    time.sleep(5.0)
-                else:
-                    time.sleep(self.sleep_read)
-                    
+                time.sleep(self.timeout)    
                 continue
 
             try:
-                if self.consumer: # sink e function
+                content = self.consumer.receive(self.timeout) if self.consumer else \
+                    Message.create(seq_id = seq_id, payload = '', queue = '', properties = {}, producer = self.params['name'], key = '')
 
-                    content = self.consumer.receive(self.sleep_read) 
+                ret = self.function.process(content.data(), Context(content, self.map_producer, self.params, self.ns, self.log))
 
-                    ret = self.function.process(content.data(), Context(content, self.map_producer, self.params, self.ns, self.log))
-                    if ('default' in self.map_producer) and ret is not None:
-                        self.map_producer['default'].send(content=ret, properties=content.properties(), msg_key=content.partition_key(), sequence_id=content.seq_id())
-                        self.esta.tot_ok += 1
-
-                else: # exclusivo Source
-
-                    content = Message.create(seq_id = seq_id, payload = '', queue = '', properties = {}, producer = self.params['name'], key = '')
-    
-                    ret = self.function.process(content.data(), Context(content, self.map_producer, self.params, self.ns, self.log))
-
-                    if ret > 0:
-                        self.esta.tot_ok += ret
-                    else:
-                        if self.sleep_read > 0.0:
-                            time.sleep(self.sleep_read)
-                        else:
-                            time.sleep(5.0)
+                if ret > 0:
+                    self.esta.tot_ok += ret
+                else:
+                    time.sleep(self.timeout)
 
             except Empty:
-                if self.sleep_read == 0.0:
-                    time.sleep(5.0)    
+                pass
 
             except Exception as exp:   
                 self.esta.tot_err += 1

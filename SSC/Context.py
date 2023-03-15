@@ -1,6 +1,6 @@
 '''
 Created on 20221007
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
@@ -51,13 +51,13 @@ class Context(object):
         return self.params['useConfig'][key]
 
     def get_input_queues(self) -> List[str]:
-        return [self.params['inputs']] # FIXME: ajustar corretamente
+        return [self.params['inputs']]
 
     def get_output_queue(self) -> str:
         return self.params['output']
 
-    def get_producer(self, queue_full_name) -> QueueProducer:
-        return self.map_producer[queue_full_name]
+    def get_producer_size(self, queue_full_name) -> int:
+        return self.map_producer[queue_full_name].size()
 
     def publish(self, queue_name_full : str, data : str, properties : dict  = {}, msg_key : str = '' ,sequence_id : int = 0):
         

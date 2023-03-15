@@ -1,14 +1,16 @@
 '''
 Created on 20221114
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
-from datetime import datetime
-from pathlib import Path
 import csv
 import json
+
+from datetime import datetime
+from pathlib import Path
 from tinydb.table import Document
+
 from SSC.Function import Function
 from SSC.Context import Context
 
@@ -21,12 +23,12 @@ class SinkCSV(Function):
         self.ready = False
 
     def start(self, params : Document):
-        self.config = params['config']['configs']
+        self.config = params['config']
         self.field = self.config['field'] if 'field' in self.config else 'field'
         self.file_prefix =  params['storage'] + '/' + self.config['file_prefix'] if 'file_prefix' in self.config else 'file'
         self.ready = True
 
-    def process(self, input : str, context : Context) -> None:
+    def process(self, input : str, context : Context) -> int:
         
         if not self.ready:
             self.start(context.params)
@@ -67,3 +69,5 @@ class SinkCSV(Function):
                 w = csv.writer(f)
                 w.writerow(final.keys())
                 w.writerow(final.values()) 
+
+        return 1

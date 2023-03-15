@@ -1,6 +1,6 @@
 '''
 Created on 20221121
-Update on 20230314
+Update on 20230315
 @author: Eduardo Pagotto
 '''
 
@@ -8,7 +8,6 @@ import logging
 import pathlib
 from tinydb.table import Document
 
-from SSC.Message import Message
 from SSC.Function import Function
 from SSC.Context import Context
 
@@ -29,15 +28,15 @@ class SinkWriterFiles(Function):
 
         self.log.info(f'{params["name"]} start ')
 
-        self.config = params['config']['configs']
+        self.config = params['config']
 
-        self.output = pathlib.Path(params['storage'] + '/' + params['config']['configs']['output'])
+        self.output = pathlib.Path(params['storage'] + '/' + params['config']['output'])
         self.output.mkdir(parents=True, exist_ok=True)
 
-        self.erro = pathlib.Path(params['storage'] + '/' + params['config']['configs']['erro'])
+        self.erro = pathlib.Path(params['storage'] + '/' + params['config']['erro'])
         self.erro.mkdir(parents=True, exist_ok=True)
 
-        self.others = pathlib.Path(params['storage'] + '/' + params['config']['configs']['others'])
+        self.others = pathlib.Path(params['storage'] + '/' + params['config']['others'])
         self.others.mkdir(parents=True, exist_ok=True)
 
         self.watermark = self.config['watermark'] if 'watermark' in self.config else 2
@@ -46,8 +45,7 @@ class SinkWriterFiles(Function):
 
         self.ready = True
 
-    # def process(self, content : Message ) -> None:
-    def process(self, input : str, context : Context) -> None:
+    def process(self, input : str, context : Context) -> int:
 
         if not self.ready:
             self.start(context.params)
@@ -90,3 +88,5 @@ class SinkWriterFiles(Function):
                 self.log.warning(f'{context.get_function_name()} save fail {dst}')
             else:
                 self.log.error(f'{context.get_function_name()} registro invalido {prop["dst"]}')
+
+        return 1
