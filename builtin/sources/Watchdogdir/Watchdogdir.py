@@ -54,15 +54,11 @@ class Watchdogdir(Function):
         if 'watermark' in params['config']:
             self.watermark = params['config']['watermark']
 
-        if 'delay' in params['config']:
-            self.delay = params['config']['delay']
-
         self.input.mkdir(parents=True, exist_ok=True)
 
         self.log.info(f'input :{self.input.resolve()}') 
         self.log.info(f'pattern :{str(self.pattern)}')
         self.log.info(f'watermark :{str(self.watermark)}')
-        self.log.info(f'delay :{str(self.delay)}')
 
         self.ready = True
 
@@ -110,10 +106,10 @@ class Watchdogdir(Function):
             return 0
 
         lista_arquivos : List[pathlib.Path] = []
-        count = 0
+
         for x in self.input.iterdir():
 
-            if count < 2:
+            if len(lista_arquivos) < 2:
                 time.sleep(1)
 
             if x.is_file():

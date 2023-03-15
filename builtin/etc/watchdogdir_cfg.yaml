@@ -1,9 +1,8 @@
 input: opp/input
 output: opp/work
 erro: opp/erro
-delay: 5
 pattern:
 - txt
 - json
 - yaml
-watermark: 2
+watermark: 5

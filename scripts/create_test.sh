@@ -66,7 +66,7 @@
                 --namespace test/ns01 \
                 --classname Relay.Relay \
                 --py ./builtin/functions/Relay.py \
-                --timeout 10.0 \
+                --timeout 1.0 \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
 
