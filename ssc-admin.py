@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20220917
-Update on 20230313
+Update on 20230316
 @author: Eduardo Pagotto
 '''
 
@@ -65,30 +65,6 @@ class Admin(object):
     def queues_list(self, ns : str) -> List[str]:
         return self.__rpc().queues_list(ns)
 
-    def source_create(self, params) -> str:
-        return self.__rpc().source_create(params)
-
-    def source_delete(self, name : str) -> str:
-        return self.__rpc().source_delete(name)
-
-    def source_pause_resume(self, name : str, is_pause : bool) -> str:
-        return self.__rpc().source_pause_resume(name, is_pause)
-
-    def source_list(self, ns : str) -> List[str]:
-        return self.__rpc().source_list(ns)
-
-    def sink_create(self, params) -> str:
-        return self.__rpc().sink_create(params)
-
-    def sink_delete(self, name : str) -> str:
-        return self.__rpc().sink_delete(name)
-
-    def sink_pause_resume(self, name : str, is_pause : bool) -> str:
-        return self.__rpc().sink_pause_resume(name, is_pause)
-
-    def sink_list(self, ns : str) -> List[str]:
-        return self.__rpc().sink_list(ns)
-
     def function_create(self, params) -> str:
         return self.__rpc().function_create(params)
 
@@ -127,30 +103,6 @@ def main():
         queue.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
         queue.add_argument('name', type=str, help='nome da queue', default='')
 
-        sources = subparser.add_parser('sources')
-        sources.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
-        sources.add_argument('--name', type=str, help='nome da thread', required=False, default="")
-        sources.add_argument('--namespace', type=str, help='Namespace', required=False, default="")
-        sources.add_argument('--config', type=str, help='other config connectos', required=False, default="")
-        sources.add_argument('--configfile', type=str, help='other config connectos', required=False, default="")
-        sources.add_argument('--py', type=str, help='other config connectos', required=False, default="")
-        sources.add_argument('--classname', type=str, help='Nome da classe', required=False, default="")
-        sources.add_argument('--output', type=str, help='other config connectos', required=False, default="")
-        sources.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
-        sources.add_argument('--timeout', type=float,  help='num of threads', required=False, default=5.0)
-        
-        sinks = subparser.add_parser('sinks')
-        sinks.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
-        sinks.add_argument('--name', type=str, help='nome da thread', required=False, default="")
-        sinks.add_argument('--namespace', type=str, help='Namespace', required=False, default="")
-        sinks.add_argument('--config', type=str, help='other config connectos', required=False, default="")
-        sinks.add_argument('--configfile', type=str, help='other config connectos', required=False, default="")
-        sinks.add_argument('--py', type=str, help='other config connectos', required=False, default="")
-        sinks.add_argument('--classname', type=str, help='Nome da classe')
-        sinks.add_argument('--inputs', type=str, help='other config connectos', required=False, default="")
-        sinks.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
-        sinks.add_argument('--timeout', type=float,  help='num of threads', required=False, default=5.0)
-
         funcions = subparser.add_parser('functions')
         funcions.add_argument('opp', type=str, help='Comando tipo (create|delete|list)')
         funcions.add_argument('--name', type=str, help='nome da thread', required=False, default="")
@@ -159,8 +111,8 @@ def main():
         funcions.add_argument('--configfile', type=str, help='other file config user', required=False, default="")
         funcions.add_argument('--py', type=str, help='python script pathfile')
         funcions.add_argument('--classname', type=str, help='Nome da classe')
-        funcions.add_argument('--inputs', type=str, help='queue input')
-        funcions.add_argument('--output', type=str, help='queue output')
+        funcions.add_argument('--inputs', type=str, help='queue input', required=False, default="")
+        funcions.add_argument('--output', type=str, help='queue output', required=False, default="")
         funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
         funcions.add_argument('--timeout', type=float,  help='num of threads', required=True, default=5.0)
 
@@ -186,81 +138,6 @@ def main():
             else:
                 log.error(f'Opp invalida: {args.opp}')
 
-        elif args.command == 'sources':
-
-            if args.opp == 'create':
-
-                val : dict = {}
-                try:
-                    if len(args.config) > 0:
-                        # load cfg json string
-                        val = json.loads(args.config)
-                    elif len(args.configfile) > 0:
-                        # load cfg yaml file
-                        val = yaml.safe_load(Path(args.configfile).read_text())
-                except FileNotFoundError as err1:
-                    raise Exception(f'{err1.filename} fail: {err1.strerror}')
-                except Exception as exp:
-                    raise Exception(f'configfile or configfile is not a valid {str(exp.args[0])}')
-
-                param = {'name': args.name, 
-                         'namespace' : args.namespace,
-                         'py': args.py,
-                         'classname':args.classname,
-                         'output' : args.output,
-                         'config': val,
-                         'timeout': args.timeout,
-                         'parallelism': args.parallelism}
-
-                log.info(admin.source_create(param))
-
-            elif args.opp == 'delete':
-                log.info(admin.source_delete(args.namespace + '/' +args.name)) 
-            elif args.opp == 'pause':
-                log.info(admin.source_pause_resume(args.namespace + '/' + args.name, True)) 
-            elif args.opp == 'resume':
-                log.info(admin.source_pause_resume(args.namespace + '/' + args.name, False)) 
-            elif args.opp == 'list':
-                log.info(admin.source_list(args.namespace)) 
-
-        elif args.command == 'sinks':
-
-            if args.opp == 'create':
-
-                val : dict = {}
-                try:
-                    if len(args.config) > 0:
-                        # load cfg json string
-                        val = json.loads(args.config)
-                    elif len(args.configfile) > 0:
-                        # load cfg yaml file
-                        val = yaml.safe_load(Path(args.configfile).read_text())
-                except FileNotFoundError as err1:
-                    raise Exception(f'{err1.filename} fail: {err1.strerror}')
-                except Exception as exp:
-                    raise Exception(f'configfile or configfile is not a valid {str(exp.args[0])}')
-
-                param = {'name': args.name, 
-                         'namespace' : args.namespace,
-                         'py': args.py,
-                         'classname':args.classname,
-                         'inputs' : args.inputs.replace(' ','').split(','),
-                         'config': val,
-                         'timeout': args.timeout,
-                         'parallelism': args.parallelism}
-
-                log.info(admin.sink_create(param))
-
-            elif args.opp == 'delete':
-                log.info(admin.sink_delete(args.namespace + '/' +args.name)) 
-            elif args.opp == 'pause':
-                log.info(admin.sink_pause_resume(args.namespace + '/' + args.name, True)) 
-            elif args.opp == 'resume':
-                log.info(admin.sink_pause_resume(args.namespace + '/' + args.name, False)) 
-            elif args.opp == 'list':
-                log.info(admin.sink_list(args.namespace)) 
-
-
         elif args.command == 'functions':
             if args.opp == 'create':
 
@@ -281,11 +158,15 @@ def main():
                          'namespace' : args.namespace,
                          'py':args.py,
                          'classname':args.classname,
-                         'inputs':args.inputs.replace(' ','').split(','),
-                         'output':args.output,
                          'config': val,
                          'timeout': args.timeout,
                          'parallelism': args.parallelism}
+                
+                if len(args.inputs) > 0:
+                    param['inputs'] = args.inputs.replace(' ','').split(',')
+
+                if len(args.output) > 0:
+                    param['output'] = args.output
 
                 log.info(admin.function_create(param))
 

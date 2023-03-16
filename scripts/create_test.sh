@@ -10,7 +10,7 @@
 
 # -- Sources --
 # gera mensagens sequenciais para debug na queue test/ns01/queue01
-./ssc-admin.py sources create \
+./ssc-admin.py functions create \
                 --name dummy-teste \
                 --namespace test/ns01 \
                 --classname Dummy.Dummy \
@@ -19,7 +19,7 @@
                 --output test/ns01/queue01 
 
 # watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
-./ssc-admin.py sources create \
+./ssc-admin.py functions create \
                 --name watch1 \
                 --namespace test/ns01 \
                 --classname Watchdogdir.Watchdogdir \
@@ -28,8 +28,8 @@
                 --timeout 5.0 \
                 --output test/ns01/queue01 
 
-Relay da queue test/ns01/queue03 para o redis
-./ssc-admin.py sources create \
+# Relay da queue test/ns01/queue03 para o redis
+./ssc-admin.py functions create \
                 --name source_relay_redis01 \
                 --namespace test/ns01 \
                 --classname SourceRedisQueue.SourceRedisQueue \
@@ -40,11 +40,11 @@ Relay da queue test/ns01/queue03 para o redis
 
 
 # list 
-./ssc-admin.py sources list --namespace test/ns01
+./ssc-admin.py functions list --namespace test/ns01
 
 # -- Sinks --
 # pega os dados da test/ns01/queue02 e os envia para um json em arquivo pelo TinyDB
-./ssc-admin.py sinks create \
+./ssc-admin.py functions create \
                 --name tiny-teste \
                 --namespace test/ns01 \
                 --classname SinkTinydb.SinkTinydb \
@@ -54,7 +54,7 @@ Relay da queue test/ns01/queue03 para o redis
                 --inputs test/ns01/queue02 
 
 # pega os dados da test/ns01/queue02 e os envia para um csv em arquivo
-./ssc-admin.py sinks create \
+./ssc-admin.py functions create \
                 --name csv-teste \
                 --namespace test/ns01 \
                 --classname SinkCSV.SinkCSV \
@@ -64,7 +64,7 @@ Relay da queue test/ns01/queue03 para o redis
                 --inputs test/ns01/queue03 
 
 # sink de gravacao de arquivos em diretorio
-./ssc-admin.py sinks create \
+./ssc-admin.py functions create \
                 --name writer-test \
                 --namespace test/ns01 \
                 --classname SinkWriterFiles.SinkWriterFiles \
@@ -73,7 +73,7 @@ Relay da queue test/ns01/queue03 para o redis
                 --inputs test/ns01/queue04
 
 # sink para redis queue
-./ssc-admin.py sinks create \
+./ssc-admin.py functions create \
                 --name sink_redis_queue01 \
                 --namespace test/ns01 \
                 --classname SinkRedisQueue.SinkRedisQueue \

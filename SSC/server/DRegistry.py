@@ -30,8 +30,6 @@ class DRegistry(RPC_Responser):
         path_str = str(self.path.resolve())
 
         self.namespace : Namespace = Namespace(database, path_str)
-        self.source_crt : FunctionCrt = FunctionCrt('source', self.namespace)
-        self.sink_crt : FunctionCrt = FunctionCrt('sink', self.namespace)
         self.function_crt : FunctionCrt = FunctionCrt('function', self.namespace)
 
         self.done : bool = False
@@ -46,9 +44,7 @@ class DRegistry(RPC_Responser):
         return {'app':{'name':'SSC', 'version':VERSION ,'deploy':DEPLOY},
                 'tictac': self.ticktack,
                 'queues': self.namespace.summario(),
-                'functions' : self.function_crt.summario(),
-                'sources' : self.source_crt.summario(),
-                'sinks' : self.sink_crt.summario()}
+                'functions' : self.function_crt.summario()}
 
     def cleanner(self) ->None:
         """[Garbage collector of files]
@@ -60,9 +56,7 @@ class DRegistry(RPC_Responser):
         while self.done is False:
 
             f_ok, f_err = self.function_crt.execute()
-            s_ok, s_err = self.source_crt.execute()
-            i_ok, i_err = self.sink_crt.execute()
-            self.log.debug(f'on:{self.ticktack} fu:({f_ok}/{f_err}) so:({s_ok}/{s_err}) si:({i_ok}/{i_err})') 
+            self.log.debug(f'online:{self.ticktack} OK: {f_ok} ERR:{f_err}') 
 
             self.ticktack += 1
             time.sleep(5)
@@ -112,32 +106,6 @@ class DRegistry(RPC_Responser):
 
     def queues_list(self, ns : str) -> List[str]:
         return self.namespace.queue_list(ns)
-
-    # # -- Source Admin
-    def source_pause_resume(self, name : str, is_pause : bool) -> str:
-        return self.source_crt.pause_resume(name, is_pause)
-
-    def source_create(self, params: dict) -> str:
-        return self.source_crt.create(params)
-
-    def source_delete(self, name: str) -> str:
-        return self.source_crt.delete(name)
-
-    def source_list(self, ns : str) -> List[str]:
-        return self.source_crt.list_all(ns)
-
-    # -- Sinks Admin
-    def sink_pause_resume(self, name : str, is_pause : bool) -> str:
-        return self.sink_crt.pause_resume(name, is_pause)
-
-    def sink_create(self, params: dict) -> str:
-        return self.sink_crt.create(params)
-
-    def sink_delete(self, name: str) -> str:
-        return self.sink_crt.delete(name)
-
-    def sink_list(self, ns : str) -> List[str]:
-        return self.sink_crt.list_all(ns)
 
     # -- Functions Admin
     def function_pause_resume(self, name : str, is_pause : bool) -> str:

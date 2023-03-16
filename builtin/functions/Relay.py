@@ -13,8 +13,8 @@ class Relay(Function):
 
     def process(self, input : str, context : Context) -> int:
 
-        context.publish('test/ns01/queue03', input, context.get_message_properties(), context.get_message_key(), context.get_message_id())
-        context.publish('test/ns01/queue04', input, context.get_message_properties(), context.get_message_key(), context.get_message_id())
+        #context.publish('test/ns01/queue03', input, context.get_message_properties(), context.get_message_key(), context.get_message_id())
+        #context.publish('test/ns01/queue04', input, context.get_message_properties(), context.get_message_key(), context.get_message_id())
         context.publish(context.get_output_queue(), input, context.get_message_properties(), context.get_message_key(), context.get_message_id())
         return 1
     
