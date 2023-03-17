@@ -47,24 +47,24 @@ class SrcWatchdogdir(Function):
         
         self.log.info(f'Watchdogdir {params["name"]}') 
 
-        if 'input' in params['config']:
-            self.input = pathlib.Path(params['storage'] + '/' + params['config']['input'])
+        if 'input' in params['config']['capture']:
+            self.input = pathlib.Path(params['storage'] + '/' + params['config']['capture']['input'])
 
         if 'output' in params['config']:
-            self.output = pathlib.Path(params['storage'] + '/' + params['config']['output'])
+            self.output = pathlib.Path(params['storage'] + '/' + params['config']['capture']['output'])
             self.output.mkdir(parents=True, exist_ok=True)
             self.log.info(f'output :{self.output.resolve()}')
 
         if 'erro' in params['config']:
-            self.erro = pathlib.Path(params['storage'] + '/' + params['config']['erro'])
+            self.erro = pathlib.Path(params['storage'] + '/' + params['config']['capture']['erro'])
             self.erro.mkdir(parents=True, exist_ok=True)
             self.log.info(f'erro :{self.erro.resolve()}')
 
-        if 'pattern' in params['config']:
-            self.pattern = params['config']['pattern']
+        if 'pattern' in params['config']['capture']:
+            self.pattern = params['config']['capture']['pattern']
 
-        if 'watermark' in params['config']:
-            self.watermark = params['config']['watermark']
+        if 'watermark' in params['config']['capture']:
+            self.watermark = params['config']['capture']['watermark']
 
         self.input.mkdir(parents=True, exist_ok=True)
 
@@ -269,15 +269,15 @@ class DstWriterFiles(Function):
 
         self.log.info(f'{params["name"]} start ')
 
-        self.config = params['config']
+        self.config = params['config']['move']
 
-        self.output = pathlib.Path(params['storage'] + '/' + params['config']['output'])
+        self.output = pathlib.Path(params['storage'] + '/' + self.config['output'])
         self.output.mkdir(parents=True, exist_ok=True)
 
-        self.erro = pathlib.Path(params['storage'] + '/' + params['config']['erro'])
+        self.erro = pathlib.Path(params['storage'] + '/' + self.config['erro'])
         self.erro.mkdir(parents=True, exist_ok=True)
 
-        self.others = pathlib.Path(params['storage'] + '/' + params['config']['others'])
+        self.others = pathlib.Path(params['storage'] + '/' + self.config['others'])
         self.others.mkdir(parents=True, exist_ok=True)
 
         self.watermark = self.config['watermark'] if 'watermark' in self.config else 2
