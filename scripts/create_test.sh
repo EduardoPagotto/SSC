@@ -34,7 +34,7 @@
 
 # Relay da queue test/ns01/queue03 para o redis
 ./ssc-admin.py functions create \
-                --name source_relay_redis01 \
+                --name source_redis01 \
                 --namespace test/ns01 \
                 --classname SrcRedisQueue.SrcRedisQueue \
                 --py ./builtin/SrcRedisQueue.py \
@@ -42,7 +42,7 @@
                 --timeout 5.0 \
                 --output test/ns01/queue05
 
-./ssc-admin.py functions delete --name source_relay_redis01 --namespace test/ns01
+./ssc-admin.py functions delete --name source_redis01 --namespace test/ns01
 
 # list 
 ./ssc-admin.py functions list --namespace test/ns01
@@ -85,15 +85,14 @@
 
 # sink para redis queue
 ./ssc-admin.py functions create \
-                --name sink_redis_queue01 \
+                --name sink_redis01 \
                 --namespace test/ns01 \
-                --classname DstRedisQueue.DstRedisQueue \
-                --py ./builtin/DstRedisQueue.py \
+                --classname SrcRedisQueue.DstRedisQueue \
+                --py ./builtin/SrcRedisQueue.py \
                 --configfile ./builtin/etc/sink_redis_queue.yaml \
                 --inputs test/ns01/queue02
 
-/ssc-admin.py functions delete --name sink_redis_queue01 --namespace test/ns01
-
+./ssc-admin.py functions delete --name sink_redis01 --namespace test/ns01
 
 # -- Functions --
 # cria function para Relay da fila inputs test/ns01/queue01 para test/ns01/queue02

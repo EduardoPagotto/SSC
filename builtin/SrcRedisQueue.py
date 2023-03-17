@@ -5,8 +5,8 @@ Update on 20230315
 '''
 
 import logging
-
 import redis
+from queue import Empty
 
 from typing import Optional
 from tinydb.table import Document
@@ -15,10 +15,7 @@ from SSC.Function import Function
 from SSC.Context import Context
 
 from SSC.subsys.RedisQueue import RedisQueue
-# from SSC.subsys.RedisQueue import Empty as Empty_redis
-from queue import Empty
 from SSC.Message import Generate
-
 
 class SrcRedisQueue(Function):
     def __init__(self) -> None:
@@ -58,4 +55,27 @@ class SrcRedisQueue(Function):
                 raise Exception('Sem queue origem')
         
         return 0
+    
 
+class DstRedisQueue(Function):
+    def __init__(self) -> None:
+        super().__init__()
+        self.config : dict = {}
+        self.ready = False
+        self.queue : Optional[RedisQueue] = None
+
+    def start(self, params : Document):
+        self.config = params['config']
+        self.ready = True
+        self.queue = RedisQueue(redis.Redis.from_url(self.config['url']), self.config['queue_dst'])
+
+    def process(self, input : str, context : Context) -> int:
+        
+        if not self.ready:
+            self.start(context.params)
+
+        if self.queue:
+            self.queue.enqueue(input)
+            return 1        
+
+        raise Exception('Sem queue destino')
