@@ -1,13 +1,13 @@
 '''
 Created on 20220922
-Update on 20230315
+Update on 20230316
 @author: Eduardo Pagotto
 '''
 
 from SSC.Function import Function
 from SSC.Context import Context
 
-class Relay(Function):
+class FuncRelay(Function):
     def __init__(self) -> None:
         super().__init__()
 

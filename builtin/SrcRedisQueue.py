@@ -20,7 +20,7 @@ from queue import Empty
 from SSC.Message import Generate
 
 
-class SourceRedisQueue(Function):
+class SrcRedisQueue(Function):
     def __init__(self) -> None:
         super().__init__()
         self.config : dict = {}

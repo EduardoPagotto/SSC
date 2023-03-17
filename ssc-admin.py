@@ -114,7 +114,7 @@ def main():
         funcions.add_argument('--inputs', type=str, help='queue input', required=False, default="")
         funcions.add_argument('--output', type=str, help='queue output', required=False, default="")
         funcions.add_argument('--parallelism', type=int,  help='num of threads', required=False, default=1)
-        funcions.add_argument('--timeout', type=float,  help='num of threads', required=True, default=5.0)
+        funcions.add_argument('--timeout', type=float,  help='num of threads', required=False, default=5.0)
 
         args = parser.parse_args()
 
@@ -143,16 +143,16 @@ def main():
 
                 val : dict = {}
                 try:
-                    if len(args.configfile) > 0:
+                    if len(args.config) > 0:
                         # load cfg json string
                         val = json.loads(args.configfile)
                     elif len(args.configfile) > 0:
                         # load cfg yaml file
-                        val = yaml.safe_load(Path(args.configfilefile).read_text())
+                        val = yaml.safe_load(Path(args.configfile).read_text())
                 except FileNotFoundError as err1:
                     raise Exception(f'{err1.filename} fail: {err1.strerror}')
                 except Exception as exp:
-                    raise Exception(f'configfile or configfilefile is not a valid {str(exp.args[0])}')
+                    raise Exception(f'config or configfile is not a valid {str(exp.args[0])}')
 
                 param = {'name': args.name, 
                          'namespace' : args.namespace,

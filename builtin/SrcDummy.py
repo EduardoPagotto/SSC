@@ -10,7 +10,7 @@ from tinydb.table import Document
 from SSC.Function import Function
 from SSC.Context import Context
 
-class Dummy(Function):
+class SrcDummy(Function):
     def __init__(self) -> None:
         print('Dummy Constructor')
         self.document : Document = Document({}, 0)

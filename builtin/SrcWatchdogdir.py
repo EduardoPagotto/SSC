@@ -16,7 +16,7 @@ from tinydb.table import Document
 from SSC.Function import Function
 from SSC.Context import Context
 
-class Watchdogdir(Function):
+class SrcWatchdogdir(Function):
     def __init__(self) -> None:
         print('Watchdogdir Constructor')
         self.serial : int = 0
