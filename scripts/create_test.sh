@@ -24,8 +24,8 @@
 ./ssc-admin.py functions create \
                 --name watch1 \
                 --namespace test/ns01 \
-                --classname SrcWatchdogdir.SrcWatchdogdir \
-                --py ./builtin/SrcWatchdogdir.py \
+                --classname ProcFiles.SrcWatchdogdir \
+                --py ./builtin/ProcFiles.py \
                 --configfile ./builtin/etc/watchdogdir_cfg.yaml \
                 --timeout 5.0 \
                 --output test/ns01/queue01
@@ -52,9 +52,9 @@
 ./ssc-admin.py functions create \
                 --name tiny-teste \
                 --namespace test/ns01 \
-                --classname DstTinydb.DstTinydb \
-                --py ./builtin/DstTinydb.py \
-                --configfile ./builtin/etc/sink_tinydb.yaml \
+                --classname ProcFiles.DstTinydb \
+                --py ./builtin/ProcFiles.py \
+                --config "{\"file_prefix\": \"db_dados\", \"fullmsg\": true}" \
                 --timeout 5.0 \
                 --inputs test/ns01/queue02 
 
@@ -64,9 +64,9 @@
 ./ssc-admin.py functions create \
                 --name csv-teste \
                 --namespace test/ns01 \
-                --classname DstCSV.DstCSV \
-                --py ./builtin//DstCSV.py \
-                --configfile ./builtin/etc/sink_csv.yaml \
+                --classname ProcFiles.DstCSV \
+                --py ./builtin//ProcFiles.py \
+                --configfile "{\"file_prefix\": \"teste_dados\", \"field\": \"dados\", \"spliter_file\": \"tipoconsulta\"}" \
                 --timeout 5.0 \
                 --inputs test/ns01/queue03 
 
@@ -76,8 +76,8 @@
 ./ssc-admin.py functions create \
                 --name writer-test \
                 --namespace test/ns01 \
-                --classname DstWriterFiles.DstWriterFiles \
-                --py ./builtin/DstWriterFiles.py \
+                --classname ProcFiles.DstWriterFiles \
+                --py ./builtin/ProcFiles.py \
                 --configfile ./builtin/etc/sink_writerfiles.yaml \
                 --inputs test/ns01/queue04
 

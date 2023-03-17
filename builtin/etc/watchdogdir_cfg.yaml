@@ -1,8 +1,15 @@
-input: opp/input
-output: opp/work
-erro: opp/erro
-pattern:
-- txt
-- json
-- yaml
-watermark: 5
+capture:
+  input: opp/input
+  output: opp/work
+  erro: opp/erro
+  pattern:
+  - txt
+  - json
+  - yaml
+  watermark: 5
+move:
+  output: opp/output
+  erro: opp/erro
+  others: opp/pdf
+  watermark: 2
+  ssf_url: http://192.168.122.1:5151
