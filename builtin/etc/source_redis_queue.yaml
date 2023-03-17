@@ -1,3 +1,0 @@
-queue_src: rpa::queue_dst
-water_mark: 10
-url: 'redis://:AAABBBCCC@192.168.122.1:6379/0'

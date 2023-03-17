@@ -145,7 +145,7 @@ def main():
                 try:
                     if len(args.config) > 0:
                         # load cfg json string
-                        val = json.loads(args.configfile)
+                        val = json.loads(args.config)
                     elif len(args.configfile) > 0:
                         # load cfg yaml file
                         val = yaml.safe_load(Path(args.configfile).read_text())

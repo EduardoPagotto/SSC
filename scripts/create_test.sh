@@ -36,9 +36,9 @@
 ./ssc-admin.py functions create \
                 --name source_redis01 \
                 --namespace test/ns01 \
-                --classname SrcRedisQueue.SrcRedisQueue \
-                --py ./builtin/SrcRedisQueue.py \
-                --configfile ./builtin/etc/source_redis_queue.yaml \
+                --classname RedisQueues.SrcRedisQueue \
+                --py ./builtin/RedisQueues.py \
+                --config "{\"queue\": \"rpa::queue01\", \"url\": \"redis://:AAABBBCCC@192.168.122.1:6379/0\", \"water_mark\": 10}" \
                 --timeout 5.0 \
                 --output test/ns01/queue05
 
@@ -87,9 +87,9 @@
 ./ssc-admin.py functions create \
                 --name sink_redis01 \
                 --namespace test/ns01 \
-                --classname SrcRedisQueue.DstRedisQueue \
-                --py ./builtin/SrcRedisQueue.py \
-                --configfile ./builtin/etc/sink_redis_queue.yaml \
+                --classname RedisQueues.DstRedisQueue \
+                --py ./builtin/RedisQueues.py \
+                --config "{\"queue\": \"rpa::queue02\", \"url\": \"redis://:AAABBBCCC@192.168.122.1:6379/0\"}" \
                 --inputs test/ns01/queue02
 
 ./ssc-admin.py functions delete --name sink_redis01 --namespace test/ns01

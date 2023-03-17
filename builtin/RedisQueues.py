@@ -1,10 +1,9 @@
 '''
 Created on 20230315
-Update on 20230315
+Update on 20230317
 @author: Eduardo Pagotto
 '''
 
-import logging
 import redis
 from queue import Empty
 
@@ -22,7 +21,6 @@ class SrcRedisQueue(Function):
         super().__init__()
         self.config : dict = {}
         self.ready = False
-        #self.queue = RedisQueue(redis.Redis.from_url(url), queue_name)
         self.queue : Optional[RedisQueue] = None
         self.timeout : float = 5.0
 
@@ -30,7 +28,7 @@ class SrcRedisQueue(Function):
         self.config = params['config']
         self.timeout = params['timeout']
         self.ready = True
-        self.queue = RedisQueue(redis.Redis.from_url(self.config['url']), self.config['queue_src'])
+        self.queue = RedisQueue(redis.Redis.from_url(self.config['url']), self.config['queue'])
 
 
     def process(self, input : str, context : Context) -> int:
@@ -46,7 +44,7 @@ class SrcRedisQueue(Function):
                 if val:
                     payload = val[1].decode('utf8')
 
-                    context.publish(context.get_output_queue(), payload, {'queue_src' : self.config['queue_src']}, 'from_redis', Generate.get_id())
+                    context.publish(context.get_output_queue(), payload, {'queue_from' : self.config['queue']}, 'from_redis', Generate.get_id())
                     return 1
                 else:
                     raise Empty
@@ -67,7 +65,7 @@ class DstRedisQueue(Function):
     def start(self, params : Document):
         self.config = params['config']
         self.ready = True
-        self.queue = RedisQueue(redis.Redis.from_url(self.config['url']), self.config['queue_dst'])
+        self.queue = RedisQueue(redis.Redis.from_url(self.config['url']), self.config['queue'])
 
     def process(self, input : str, context : Context) -> int:
         
