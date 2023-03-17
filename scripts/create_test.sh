@@ -26,7 +26,7 @@
                 --namespace test/ns01 \
                 --classname ProcFiles.SrcWatchdogdir \
                 --py ./builtin/ProcFiles.py \
-                --configfile ./builtin/etc/watchdogdir_cfg.yaml \
+                --configfile ./builtin/etc/procfiles.yaml \
                 --timeout 5.0 \
                 --output test/ns01/queue01
 
@@ -78,7 +78,7 @@
                 --namespace test/ns01 \
                 --classname ProcFiles.DstWriterFiles \
                 --py ./builtin/ProcFiles.py \
-                --configfile ./builtin/etc/sink_writerfiles.yaml \
+                --configfile ./builtin/etc/procfiles.yaml \
                 --inputs test/ns01/queue04
 
 ./ssc-admin.py functions delete --name writer-test --namespace test/ns01
