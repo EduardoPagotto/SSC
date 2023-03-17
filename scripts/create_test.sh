@@ -13,8 +13,8 @@
 ./ssc-admin.py functions create \
                 --name SrcDummy \
                 --namespace test/ns01 \
-                --classname SrcDummy.SrcDummy \
-                --py ./builtin/SrcDummy.py \
+                --classname Simple.SrcDummy \
+                --py ./builtin/Simple.py \
                 --timeout 5.0 \
                 --output test/ns01/queue01 
 
@@ -99,8 +99,8 @@
 ./ssc-admin.py functions create \
                 --name FuncRelay01 \
                 --namespace test/ns01 \
-                --classname FuncRelay.FuncRelay \
-                --py ./builtin/FuncRelay.py \
+                --classname Simple.FuncRelay \
+                --py ./builtin/Simple.py \
                 --timeout 1.0 \
                 --inputs test/ns01/queue01 \
                 --output test/ns01/queue02
