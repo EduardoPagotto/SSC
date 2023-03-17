@@ -18,7 +18,7 @@
                 --timeout 5.0 \
                 --output test/ns01/queue01 
 
-#./ssc-admin.py functions delete --name SrcDummy --namespace test/ns01
+./ssc-admin.py functions delete --name SrcDummy --namespace test/ns01
 
 # watch dir pega arquivos estruturados em diretorios enviando para queue test/ns01/queue01
 ./ssc-admin.py functions create \
@@ -28,7 +28,9 @@
                 --py ./builtin/SrcWatchdogdir.py \
                 --configfile ./builtin/etc/watchdogdir_cfg.yaml \
                 --timeout 5.0 \
-                --output test/ns01/queue01 
+                --output test/ns01/queue01
+
+./ssc-admin.py functions delete --name watch1 --namespace test/ns01
 
 # Relay da queue test/ns01/queue03 para o redis
 ./ssc-admin.py functions create \
@@ -50,8 +52,8 @@
 ./ssc-admin.py functions create \
                 --name tiny-teste \
                 --namespace test/ns01 \
-                --classname SinkTinydb.SinkTinydb \
-                --py ./builtin/SinkTinydb.py \
+                --classname DstTinydb.DstTinydb \
+                --py ./builtin/DstTinydb.py \
                 --configfile ./builtin/etc/sink_tinydb.yaml \
                 --timeout 5.0 \
                 --inputs test/ns01/queue02 
@@ -62,31 +64,35 @@
 ./ssc-admin.py functions create \
                 --name csv-teste \
                 --namespace test/ns01 \
-                --classname SinkCSV.SinkCSV \
-                --py ./builtin//SinkCSV.py \
+                --classname DstCSV.DstCSV \
+                --py ./builtin//DstCSV.py \
                 --configfile ./builtin/etc/sink_csv.yaml \
                 --timeout 5.0 \
                 --inputs test/ns01/queue03 
+
+./ssc-admin.py functions delete --name csv-teste --namespace test/ns01
 
 # sink de gravacao de arquivos em diretorio
 ./ssc-admin.py functions create \
                 --name writer-test \
                 --namespace test/ns01 \
-                --classname SinkWriterFiles.SinkWriterFiles \
-                --py ./builtin/SinkWriterFiles.py \
+                --classname DstWriterFiles.DstWriterFiles \
+                --py ./builtin/DstWriterFiles.py \
                 --configfile ./builtin/etc/sink_writerfiles.yaml \
                 --inputs test/ns01/queue04
+
+./ssc-admin.py functions delete --name writer-test --namespace test/ns01
 
 # sink para redis queue
 ./ssc-admin.py functions create \
                 --name sink_redis_queue01 \
                 --namespace test/ns01 \
-                --classname SinkRedisQueue.SinkRedisQueue \
-                --py ./builtin/SinkRedisQueue.py \
+                --classname DstRedisQueue.DstRedisQueue \
+                --py ./builtin/DstRedisQueue.py \
                 --configfile ./builtin/etc/sink_redis_queue.yaml \
                 --inputs test/ns01/queue02
 
-/ssc-admin.py functions delete --name writer-test --namespace test/ns01
+/ssc-admin.py functions delete --name sink_redis_queue01 --namespace test/ns01
 
 
 # -- Functions --

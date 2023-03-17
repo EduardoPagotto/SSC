@@ -113,8 +113,8 @@
 					"sinks", "create",
 					"--name", "tiny-teste",
 					"--namespace", "test/ns01",
-					"--archive", "sinks/SinkTinydb/SinkTinydb.py",
-					"--classname", "SinkTinydb.SinkTinydb",
+					"--archive", "sinks/DstTinydb/DstTinydb.py",
+					"--classname", "DstTinydb.DstTinydb",
 					"--inputs", "test/ns01/queue02",
 					"--configfile", "./etc/sink_tinydb.yaml"
 				]

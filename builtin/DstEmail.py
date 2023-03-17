@@ -12,12 +12,12 @@ from SSC.Context import Context
 
 from SSC.subsys.SenderSMTP import SenderSMTP
 
-class SinkEmail(Function):
+class DstEmail(Function):
     def __init__(self) -> None:
         super().__init__()
         self.config : dict = {}
         self.ready : bool = False
-        self.log = logging.getLogger('SinkWriterFiles')
+        self.log = logging.getLogger('DstWriterFiles')
 
     def start(self, params : Document):
         self.config = params['config']

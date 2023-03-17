@@ -13,7 +13,7 @@ from SSC.Context import Context
 
 from SSF.ClientSSF import ClientSSF
 
-class SinkWriterFiles(Function):
+class DstWriterFiles(Function):
     def __init__(self) -> None:
         super().__init__()
         self.output = pathlib.Path('./output')
@@ -22,7 +22,7 @@ class SinkWriterFiles(Function):
         self.watermark = 5
         self.ssf : ClientSSF | None = None
         self.ready : bool = False
-        self.log = logging.getLogger('SinkWriterFiles')
+        self.log = logging.getLogger('DstWriterFiles')
 
     def start(self, params : Document):
 

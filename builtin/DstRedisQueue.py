@@ -16,7 +16,7 @@ from SSC.Context import Context
 
 from SSC.subsys.RedisQueue import RedisQueue
 
-class SinkRedisQueue(Function):
+class DstRedisQueue(Function):
     def __init__(self) -> None:
         super().__init__()
         self.config : dict = {}

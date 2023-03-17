@@ -14,7 +14,7 @@ from tinydb.table import Document
 from SSC.Function import Function
 from SSC.Context import Context
 
-class SinkCSV(Function):
+class DstCSV(Function):
     def __init__(self) -> None:
         super().__init__()
         self.config : dict = {}

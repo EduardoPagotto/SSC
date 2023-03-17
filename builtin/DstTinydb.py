@@ -12,7 +12,7 @@ from SSC.Context import Context
 from SSC.Function import Function
 from SSC.subsys.LockDB import LockDB
 
-class SinkTinydb(Function):
+class DstTinydb(Function):
     def __init__(self) -> None:
         super().__init__()
         self.config : dict = {}
